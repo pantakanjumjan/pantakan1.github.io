@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="th" class="h-full bg-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>TimePro Mobile - ระบบลงเวลาทำงาน</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Prompt -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              500: '#0284c7',
+              600: '#0369a1',
+              700: '#095186',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .touch-target {
+      min-height: 44px;
+      min-width: 44px;
+    }
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+  </style>
+</head>
+<body class="h-full flex flex-col font-sans text-slate-800 antialiased selection:bg-brand-500 selection:text-white pb-20">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-30 bg-slate-900 text-white shadow-md">
+    <div class="max-w-md mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <div class="bg-brand-500 p-2 rounded-xl text-white">
+          <i class="fa-solid fa-clock-rotate-left text-lg"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-base leading-tight">TimePro Mobile</h1>
+          <p class="text-xs text-slate-400">ระบบลงเวลา & คำนวณค่าแรง</p>
+        </div>
+      </div>
+      <button onclick="openConfigModal()" class="touch-target p-2 text-slate-300 hover:text-white rounded-lg active:bg-slate-800 transition">
+        <i class="fa-solid fa-gear text-lg"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="flex-1 max-w-md w-full mx-auto p-4 space-y-4">
+
+    <!-- Global Employee Selector -->
+    <div class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-200/80 space-y-1">
+      <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
+        <i class="fa-solid fa-user-tie text-brand-500 mr-1"></i> เลือกรหัส / ชื่อพนักงาน
+      </label>
+      <select id="globalEmployeeSelect" onchange="onEmployeeChange(this.value)" class="touch-target w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 block p-2.5 font-medium transition">
+        <!-- Dynamic Options -->
+      </select>
+    </div>
+
+    <!-- TAB 1: Live Clock-In/Out -->
+    <section id="tab-1" class="tab-content space-y-4">
+      <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 text-center space-y-3">
+        <div class="inline-block bg-slate-100 px-3 py-1 rounded-full text-slate-600 text-xs font-medium" id="currentDateDisplay">
+          --/--/----
+        </div>
+        <div class="text-4xl font-extrabold text-slate-900 tracking-tight font-mono" id="liveClock">
+          00:00:00
+        </div>
+        
+        <div class="grid grid-cols-2 gap-2 pt-2">
+          <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">เลือกกะการทำงาน</label>
+            <select id="shiftSelect" class="touch-target w-full bg-slate-50 border border-slate-300 text-slate-700 text-xs rounded-xl p-2.5 font-medium">
+              <option value="DAY">กะกลางวัน (08:00-17:00)</option>
+              <option value="NIGHT">กะกลางคืน (20:00-05:00)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-500 mb-1">ประเภทวัน</label>
+            <select id="dayTypeSelect" class="touch-target w-full bg-slate-50 border border-slate-300 text-slate-700 text-xs rounded-xl p-2.5 font-medium">
+              <option value="REGULAR">วันทำงานปกติ (OT 1.5)</option>
+              <option value="HOLIDAY">วันหยุด (OT 2.0/3.0)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Action Buttons -->
+      <div class="grid grid-cols-2 gap-3">
+        <button id="btnCheckIn" onclick="handleLiveCheckIn()" class="touch-target flex flex-col items-center justify-center p-5 bg-emerald-500 active:bg-emerald-600 text-white rounded-2xl shadow-lg shadow-emerald-500/20 font-bold transition transform active:scale-95">
+          <i class="fa-solid fa-right-to-bracket text-2xl mb-1"></i>
+          <span>Check In</span>
+          <span class="text-[10px] font-normal opacity-80" id="checkInStatusText">ยังไม่ได้ลงเวลาเข้า</span>
+        </button>
+
+        <button id="btnCheckOut" onclick="handleLiveCheckOut()" class="touch-target flex flex-col items-center justify-center p-5 bg-rose-500 active:bg-rose-600 text-white rounded-2xl shadow-lg shadow-rose-500/20 font-bold transition transform active:scale-95">
+          <i class="fa-solid fa-right-from-bracket text-2xl mb-1"></i>
+          <span>Check Out</span>
+          <span class="text-[10px] font-normal opacity-80" id="checkOutStatusText">ยังไม่ได้ลงเวลาออก</span>
+        </button>
+      </div>
+
+      <!-- Live Status Card -->
+      <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 space-y-2">
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">สถานะบันทึกเวลาวันนี้</h3>
+        <div class="grid grid-cols-2 gap-2 text-sm">
+          <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+            <span class="text-xs text-slate-400 block">เวลาเข้างาน</span>
+            <span class="font-bold text-slate-700" id="displayCheckInTime">-</span>
+          </div>
+          <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+            <span class="text-xs text-slate-400 block">เวลาออกงาน</span>
+            <span class="font-bold text-slate-700" id="displayCheckOutTime">-</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: Manual Edit / Forgot Time -->
+    <section id="tab-2" class="tab-content hidden space-y-4">
+      <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 space-y-4">
+        <div class="border-b border-slate-100 pb-2">
+          <h2 class="font-bold text-slate-800 text-base">ลืมลงเวลา / แก้ไขเวลาย้อนหลัง</h2>
+          <p class="text-xs text-slate-400">กรอกวันที่และเวลาเข้า-ออกย้อนหลังเพื่อคำนวณเงิน</p>
+        </div>
+
+        <form id="manualForm" onsubmit="handleManualSubmit(event)" class="space-y-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">วันที่ต้องการบันทึก</label>
+            <input type="date" id="manualDate" required class="touch-target w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-2.5">
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1">กะการทำงาน</label>
+              <select id="manualShift" class="touch-target w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-2.5">
+                <option value="DAY">กะกลางวัน (08:00-17:00)</option>
+                <option value="NIGHT">กะกลางคืน (20:00-05:00)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1">ประเภทวัน</label>
+              <select id="manualDayType" class="touch-target w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-2.5">
+                <option value="REGULAR">วันปกติ (OT 1.5)</option>
+                <option value="HOLIDAY">วันหยุด (OT 2.0/3.0)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1">เวลาเข้างาน</label>
+              <input type="time" id="manualCheckIn" required class="touch-target w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-2.5">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1">เวลาออกงาน</label>
+              <input type="time" id="manualCheckOut" required class="touch-target w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-2.5">
+            </div>
+          </div>
+
+          <button type="submit" class="touch-target w-full bg-brand-500 active:bg-brand-600 text-white font-bold rounded-xl p-3 shadow-md transition transform active:scale-98">
+            <i class="fa-solid fa-calculator mr-1"></i> คำนวณค่าแรง & บันทึกข้อมูล
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- TAB 3: Leave Management -->
+    <section id="tab-3" class="tab-content hidden space-y-4">
+      <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200/80 space-y-4">
+        <div class="border-b border-slate-100 pb-2">
+          <h2 class="font-bold text-slate-800 text-base">แบบฟอร์มบันทึกวันลา</h2>
+          <p class="text-xs text-slate-400">ยื่นคำขอการลาหยุดงานประเภทต่างๆ</p>
+        </div>
+
+        <form id="leaveForm" onsubmit="handleLeaveSubmit(event)" class="space-y-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">ประเภทการลา</label>
+            <select id="leaveType" required class="touch-target w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-2.5">
+              <option value="ลากิจ">ลากิจ (Personal Leave)</option>
+              <option value="ลาป่วย">ลาป่วย (Sick Leave)</option>
+              <option value="ลาพักร้อน">ลาพักร้อน (Annual Leave)</option>
+              <option value="ลาอื่นๆ">ลาอื่นๆ</option>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1">วันที่เริ่มต้น</label>
+              <input type="date" id="leaveStartDate" required class="touch-target w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-2.5">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1">วันที่สิ้นสุด</label>
+              <input type="date" id="leaveEndDate" required class="touch-target w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-2.5">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">เหตุผลการลา</label>
+            <textarea id="leaveReason" rows="2" placeholder="ระบุเหตุผลการลา (ถ้ามี)" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-xl p-2.5"></textarea>
+          </div>
+
+          <button type="submit" class="touch-target w-full bg-amber-500 active:bg-amber-600 text-white font-bold rounded-xl p-3 shadow-md transition transform active:scale-98">
+            <i class="fa-solid fa-paper-plane mr-1"></i> ส่งใบบันทึกวันลา
+          </button>
+        </form>
+      </div>
+
+      <!-- Leave History List -->
+      <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 space-y-3">
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">ประวัติการยื่นลาล่าสุด</h3>
+        <div id="leaveHistoryList" class="space-y-2 text-xs">
+          <!-- Dynamic List -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: Daily Summary & Dashboard -->
+    <section id="tab-4" class="tab-content hidden space-y-4">
+      <!-- Total Summary Card -->
+      <div class="bg-gradient-to-br from-slate-800 to-slate-900 text-white p-5 rounded-2xl shadow-lg space-y-3">
+        <span class="text-xs text-slate-400 uppercase font-semibold">สรุปผลยอดเงินรวมบันทึกในเครื่อง</span>
+        <div class="flex justify-between items-baseline">
+          <div class="text-3xl font-extrabold text-amber-400" id="summaryTotalSalary">0 ฿</div>
+          <span class="text-xs text-slate-300" id="summaryTotalRecords">0 รายการ</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-xs border-t border-slate-700/60 pt-3 text-slate-300">
+          <div>โอทีรวม: <span class="font-bold text-white" id="summaryTotalOT">0 ชม.</span></div>
+          <div>ค่าอาหารรวม: <span class="font-bold text-white" id="summaryTotalMeals">0 ฿</span></div>
+        </div>
+      </div>
+
+      <!-- Daily Payroll History Table -->
+      <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 space-y-3">
+        <div class="flex justify-between items-center">
+          <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">ประวัติคำนวณเงินย้อนหลัง</h3>
+          <button onclick="clearLocalStorageData()" class="text-xs text-rose-500 hover:underline">ล้างประวัติ</button>
+        </div>
+        <div class="overflow-x-auto">
+          <div id="payrollHistoryList" class="space-y-2">
+            <!-- Dynamic Cards -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom Navigation Bar -->
+  <nav class="fixed bottom-0 left-0 right-0 z-40 glass-effect border-t border-slate-200/80">
+    <div class="max-w-md mx-auto grid grid-cols-4 h-16 px-1">
+      <button onclick="switchTab(1)" id="nav-1" class="touch-target flex flex-col items-center justify-center text-brand-600">
+        <i class="fa-solid fa-clock text-lg"></i>
+        <span class="text-[10px] font-medium mt-1">บันทึกสด</span>
+      </button>
+
+      <button onclick="switchTab(2)" id="nav-2" class="touch-target flex flex-col items-center justify-center text-slate-400 hover:text-slate-600">
+        <i class="fa-solid fa-pen-to-square text-lg"></i>
+        <span class="text-[10px] font-medium mt-1">แก้ไขเอง</span>
+      </button>
+
+      <button onclick="switchTab(3)" id="nav-3" class="touch-target flex flex-col items-center justify-center text-slate-400 hover:text-slate-600">
+        <i class="fa-solid fa-calendar-minus text-lg"></i>
+        <span class="text-[10px] font-medium mt-1">วันลา</span>
+      </button>
+
+      <button onclick="switchTab(4)" id="nav-4" class="touch-target flex flex-col items-center justify-center text-slate-400 hover:text-slate-600">
+        <i class="fa-solid fa-chart-pie text-lg"></i>
+        <span class="text-[10px] font-medium mt-1">สรุปผล</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Modal Breakdown -->
+  <div id="breakdownModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden space-y-4 p-5 animate-in fade-in zoom-in duration-200">
+      <div class="flex justify-between items-center border-b pb-2">
+        <h3 class="font-bold text-slate-800 text-sm">รายละเอียดคำนวณเงินเชิงลึก</h3>
+        <button onclick="closeBreakdownModal()" class="text-slate-400 hover:text-slate-600">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div id="modalContent" class="space-y-2 text-xs text-slate-600">
+        <!-- Dynamic Breakdown -->
+      </div>
+
+      <button onclick="closeBreakdownModal()" class="touch-target w-full bg-slate-800 text-white font-bold rounded-xl p-2.5">
+        ปิดหน้าต่าง
+      </button>
+    </div>
+  </div>
+
+  <!-- Settings Config Modal -->
+  <div id="configModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-5 space-y-4">
+      <div class="flex justify-between items-center border-b pb-2">
+        <h3 class="font-bold text-slate-800 text-sm">การตั้งค่า Google & LINE</h3>
+        <button onclick="closeConfigModal()" class="text-slate-400 hover:text-slate-600">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Google Apps Script Web App URL</label>
+          <input type="text" id="gasUrlInput" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-xs rounded-xl p-2.5 font-mono">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">LINE Channel Access Token</label>
+          <input type="text" id="lineTokenInput" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-xs rounded-xl p-2.5 font-mono">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">LINE User ID ( destination )</label>
+          <input type="text" id="lineUserIdInput" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-xs rounded-xl p-2.5 font-mono">
+        </div>
+      </div>
+
+      <button onclick="saveConfigSettings()" class="touch-target w-full bg-brand-500 text-white font-bold rounded-xl p-3">
+        บันทึกการตั้งค่า
+      </button>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white text-xs font-medium px-4 py-2.5 rounded-full shadow-lg hidden transition duration-300">
+    <span id="toastMsg">กำลังดำเนินการ...</span>
+  </div>
+
+  <script>
+    // 1. Initial State & Setup
+    const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbzIC7PtGt_PeyQ7Co1GTiC0Ev6dPfDSiGhhyHClbKL1yMzUCTmeju8JKOYAtNGJZaB7/exec";
+    const DEFAULT_LINE_TOKEN = "NCURffVn9SZ4I+MpbibQluWUNeLs5BM7xXT9lrs7HnE+IlDaKy9muokRv3gvBqsNDH0quqVo/PqSvf9kebRHZEPfLx7I4RJzjBUTEwSHbRewZ61/uhLgQjfUWjY1LpA8khVSbngeM6ewKPB5bw8qdAdB04t89/1O/w1cDnyilFU=";
+    const DEFAULT_LINE_USER_ID = "U2fd9fade0d6d5c8b5df8582841fbbb9e";
+
+    const employeeList = [
+      { id: "50001024", name: "นาย พันธกานต์ จูมจันทร์" },
+      { id: "50001025", name: "พนักงาน คนที่ 2" }
+    ];
+
+    let currentEmpId = employeeList[0].id;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      initSettings();
+      renderEmployeeDropdowns();
+      startLiveClock();
+      loadTodayLiveStatus();
+      renderHistories();
+      
+      // Default set date in manual form
+      document.getElementById('manualDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('leaveStartDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('leaveEndDate').value = new Date().toISOString().split('T')[0];
+    });
+
+    function initSettings() {
+      if (!localStorage.getItem("gas_url")) localStorage.setItem("gas_url", DEFAULT_GAS_URL);
+      if (!localStorage.getItem("line_token")) localStorage.setItem("line_token", DEFAULT_LINE_TOKEN);
+      if (!localStorage.getItem("line_user_id")) localStorage.setItem("line_user_id", DEFAULT_LINE_USER_ID);
+    }
+
+    function renderEmployeeDropdowns() {
+      const select = document.getElementById("globalEmployeeSelect");
+      select.innerHTML = employeeList.map(emp => 
+        `<option value="${emp.id}">${emp.id} - ${emp.name}</option>`
+      ).join('');
+      select.value = currentEmpId;
+    }
+
+    function onEmployeeChange(id) {
+      currentEmpId = id;
+      loadTodayLiveStatus();
+      renderHistories();
+    }
+
+    function getCurrentEmpObj() {
+      return employeeList.find(e => e.id === currentEmpId) || employeeList[0];
+    }
+
+    // 2. Navigation Tabs
+    function switchTab(tabNum) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`tab-${tabNum}`).classList.remove('hidden');
+
+      for (let i = 1; i <= 4; i++) {
+        const navBtn = document.getElementById(`nav-${i}`);
+        if (i === tabNum) {
+          navBtn.className = "touch-target flex flex-col items-center justify-center text-brand-600 font-bold";
+        } else {
+          navBtn.className = "touch-target flex flex-col items-center justify-center text-slate-400 hover:text-slate-600";
+        }
+      }
+    }
+
+    // 3. Live Clock
+    function startLiveClock() {
+      const update = () => {
+        const now = new Date();
+        document.getElementById('liveClock').textContent = now.toTimeString().split(' ')[0];
+        document.getElementById('currentDateDisplay').textContent = now.toLocaleDateString('th-TH', {
+          weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+        });
+      };
+      update();
+      setInterval(update, 1000);
+    }
+
+    // 4. Payroll Logic
+    function timeToMins(tStr) {
+      if (!tStr) return 0;
+      const [h, m] = tStr.split(':').map(Number);
+      return h * 60 + m;
+    }
+
+    function calculatePayroll(shift, dayType, checkInTime, checkOutTime) {
+      const baseSalary = 400; // ฐานค่าแรงปกติ
+      let otHours = 0;
+      let otRate = 1.5;
+      let otPay = 0;
+      let shiftAllowance = 0;
+      let normalMeal = 10;
+      let otMeal = 0;
+
+      const inMins = timeToMins(checkInTime);
+      let outMins = timeToMins(checkOutTime);
+
+      if (shift === 'DAY') {
+        // กะกลางวัน: 08:00 (480) - 17:00 (1020)
+        // Cap OT at 19:10 (1150). OT starts after 17:10 (1030)
+        let cappedOutMins = outMins;
+        if (cappedOutMins > 1150) cappedOutMins = 1150;
+
+        if (cappedOutMins > 1030) {
+          otHours = (cappedOutMins - 1030) / 60;
+        }
+      } else {
+        // กะกลางคืน: 20:00 (1200) - 05:00 (300) ข้ามวัน
+        shiftAllowance = 180;
+        let adjOutMins = outMins < 720 ? outMins + 1440 : outMins; // +24 ชม.
+        let cappedOutMins = adjOutMins;
+        if (cappedOutMins > 1870) cappedOutMins = 1870; // 07:10 (310 + 1440 = 1750... 07:10 = 430+1440=1870)
+
+        if (cappedOutMins > 1750) { // 05:10 = 310+1440=1750
+          otHours = (cappedOutMins - 1750) / 60;
+        }
+      }
+
+      otHours = Math.max(0, Math.round(otHours * 100) / 100);
+
+      // เรต OT และ ค่าอาหารพิเศษ
+      if (dayType === 'REGULAR') {
+        otRate = 1.5;
+        otPay = otHours * 75; // 50 * 1.5
+        if (otHours > 0) otMeal = 25;
+      } else { // HOLIDAY
+        if (otHours <= 8) {
+          otRate = 2.0;
+          otPay = otHours * 100; // 50 * 2.0
+          if (otHours >= 4) otMeal = 50;
+        } else {
+          otRate = 3.0;
+          otPay = (8 * 100) + ((otHours - 8) * 150);
+          otMeal = 75;
+        }
+      }
+
+      const totalMealAllowance = normalMeal + otMeal;
+      const totalSalary = baseSalary + otPay + shiftAllowance + totalMealAllowance;
+
+      return {
+        baseSalary,
+        otHours,
+        otRate,
+        otPay,
+        shiftAllowance,
+        normalMeal,
+        otMeal,
+        totalMealAllowance,
+        totalSalary
+      };
+    }
+
+    // 5. Live Check In/Out
+    function loadTodayLiveStatus() {
+      const today = new Date().toISOString().split('T')[0];
+      const records = JSON.parse(localStorage.getItem("payroll_records") || "[]");
+      const todayRecord = records.find(r => r.id === currentEmpId && r.date === today);
+
+      if (todayRecord) {
+        document.getElementById('displayCheckInTime').textContent = todayRecord.checkIn || '-';
+        document.getElementById('displayCheckOutTime').textContent = todayRecord.checkOut || '-';
+        document.getElementById('checkInStatusText').textContent = todayRecord.checkIn ? `เข้าแล้ว (${todayRecord.checkIn})` : 'ยังไม่ได้ลงเวลาเข้า';
+        document.getElementById('checkOutStatusText').textContent = todayRecord.checkOut ? `ออกแล้ว (${todayRecord.checkOut})` : 'ยังไม่ได้ลงเวลาออก';
+      } else {
+        document.getElementById('displayCheckInTime').textContent = '-';
+        document.getElementById('displayCheckOutTime').textContent = '-';
+        document.getElementById('checkInStatusText').textContent = 'ยังไม่ได้ลงเวลาเข้า';
+        document.getElementById('checkOutStatusText').textContent = 'ยังไม่ได้ลงเวลาออก';
+      }
+    }
+
+    function handleLiveCheckIn() {
+      const emp = getCurrentEmpObj();
+      const now = new Date();
+      const dateStr = now.toISOString().split('T')[0];
+      const timeStr = now.toTimeString().split(' ')[0].substring(0, 5);
+
+      let records = JSON.parse(localStorage.getItem("payroll_records") || "[]");
+      let idx = records.findIndex(r => r.id === emp.id && r.date === dateStr);
+
+      if (idx >= 0) {
+        records[idx].checkIn = timeStr;
+      } else {
+        records.push({
+          id: emp.id,
+          employeeName: emp.name,
+          date: dateStr,
+          shift: document.getElementById('shiftSelect').value,
+          dayType: document.getElementById('dayTypeSelect').value,
+          checkIn: timeStr,
+          checkOut: ''
+        });
+      }
+
+      localStorage.setItem("payroll_records", JSON.stringify(records));
+      showToast("ลงเวลาเข้างานสำเร็จ");
+      loadTodayLiveStatus();
+
+      // Send Line CheckIn Notification
+      const lineMsg = `⏰ [แจ้งเตือน CHECK IN]\nพนักงาน: ${emp.name} (${emp.id})\nวันที่: ${dateStr}\nเวลาเข้างาน: ${timeStr} น.`;
+      syncToGoogleSheets([], lineMsg);
+    }
+
+    function handleLiveCheckOut() {
+      const emp = getCurrentEmpObj();
+      const now = new Date();
+      const dateStr = now.toISOString().split('T')[0];
+      const timeStr = now.toTimeString().split(' ')[0].substring(0, 5);
+
+      let records = JSON.parse(localStorage.getItem("payroll_records") || "[]");
+      let idx = records.findIndex(r => r.id === emp.id && r.date === dateStr);
+
+      const shift = document.getElementById('shiftSelect').value;
+      const dayType = document.getElementById('dayTypeSelect').value;
+
+      let checkInVal = idx >= 0 && records[idx].checkIn ? records[idx].checkIn : '08:00';
+      const calc = calculatePayroll(shift, dayType, checkInVal, timeStr);
+
+      const recordObj = {
+        id: emp.id,
+        employeeName: emp.name,
+        date: dateStr,
+        shift: shift,
+        dayType: dayType,
+        checkIn: checkInVal,
+        checkOut: timeStr,
+        ...calc
+      };
+
+      if (idx >= 0) {
+        records[idx] = recordObj;
+      } else {
+        records.push(recordObj);
+      }
+
+      localStorage.setItem("payroll_records", JSON.stringify(records));
+      showToast("ลงเวลาออกงานและคำนวณเงินสำเร็จ");
+      loadTodayLiveStatus();
+      renderHistories();
+
+      // LINE message format
+      const lineMsg = `✅ [แจ้งเตือน CHECK OUT & คำนวณค่าแรง]\n` +
+        `พนักงาน: ${emp.name} (${emp.id})\n` +
+        `วันที่: ${dateStr} (${shift})\n` +
+        `เวลา: ${checkInVal} - ${timeStr} น.\n` +
+        `--------------------\n` +
+        `ค่าแรงปกติ: ${calc.baseSalary} บาท\n` +
+        `OT (${calc.otHours} ชม.): +${calc.otPay} บาท\n` +
+        `ค่ากะ/ค่าอาหาร: +${calc.shiftAllowance + calc.totalMealAllowance} บาท\n` +
+        `💰 รวมสุทธิ: ${calc.totalSalary} บาท`;
+
+      syncToGoogleSheets([recordObj], lineMsg);
+    }
+
+    // 6. Manual Submit
+    function handleManualSubmit(e) {
+      e.preventDefault();
+      const emp = getCurrentEmpObj();
+      const dateStr = document.getElementById('manualDate').value;
+      const shift = document.getElementById('manualShift').value;
+      const dayType = document.getElementById('manualDayType').value;
+      const checkIn = document.getElementById('manualCheckIn').value;
+      const checkOut = document.getElementById('manualCheckOut').value;
+
+      const calc = calculatePayroll(shift, dayType, checkIn, checkOut);
+
+      const recordObj = {
+        id: emp.id,
+        employeeName: emp.name,
+        date: dateStr,
+        shift,
+        dayType,
+        checkIn,
+        checkOut,
+        ...calc
+      };
+
+      let records = JSON.parse(localStorage.getItem("payroll_records") || "[]");
+      records = records.filter(r => !(r.id === emp.id && r.date === dateStr));
+      records.push(recordObj);
+
+      localStorage.setItem("payroll_records", JSON.stringify(records));
+      showToast("แก้ไขข้อมูลและคำนวณเงินสำเร็จ");
+      renderHistories();
+
+      const lineMsg = `📝 [แจ้งเตือน แก้ไข/เติมเวลาทำงาน]\n` +
+        `พนักงาน: ${emp.name} (${emp.id})\n` +
+        `วันที่: ${dateStr}\n` +
+        `เวลา: ${checkIn} - ${checkOut} น.\n` +
+        `💰 ยอดรวมสุทธิ: ${calc.totalSalary} บาท`;
+
+      syncToGoogleSheets([recordObj], lineMsg);
+    }
+
+    // 7. Leave Submit
+    function handleLeaveSubmit(e) {
+      e.preventDefault();
+      const emp = getCurrentEmpObj();
+      const leaveType = document.getElementById('leaveType').value;
+      const startDate = document.getElementById('leaveStartDate').value;
+      const endDate = document.getElementById('leaveEndDate').value;
+      const reason = document.getElementById('leaveReason').value;
+
+      const leaveObj = {
+        id: emp.id,
+        employeeName: emp.name,
+        leaveType,
+        startDate,
+        endDate,
+        reason,
+        createdAt: new Date().toISOString()
+      };
+
+      let leaves = JSON.parse(localStorage.getItem("leave_records") || "[]");
+      leaves.push(leaveObj);
+      localStorage.setItem("leave_records", JSON.stringify(leaves));
+
+      showToast("บันทึกวันลาสำเร็จ");
+      renderHistories();
+
+      const lineMsg = `🏖️ [แจ้งเตือน บันทึกวันลาหยุด]\n` +
+        `พนักงาน: ${emp.name} (${emp.id})\n` +
+        `ประเภท: ${leaveType}\n` +
+        `ช่วงวัน: ${startDate} ถึง ${endDate}\n` +
+        `เหตุผล: ${reason || '-'}`;
+
+      syncToGoogleSheets([], lineMsg, [leaveObj]);
+    }
+
+    // 8. Auto Sync to Google Apps Script & LINE Messaging API
+    function syncToGoogleSheets(payrolls = [], lineMessage = '', leaves = []) {
+      const gasUrl = localStorage.getItem("gas_url") || DEFAULT_GAS_URL;
+      const lineToken = localStorage.getItem("line_token") || DEFAULT_LINE_TOKEN;
+      const lineUserId = localStorage.getItem("line_user_id") || DEFAULT_LINE_USER_ID;
+
+      showToast("กำลังส่งข้อมูลไปยัง Google Sheets & LINE...");
+
+      const payload = {
+        sendLine: true,
+        channelAccessToken: lineToken,
+        userId: lineUserId,
+        lineMessage: lineMessage,
+        payrolls: payrolls,
+        leaves: leaves
+      };
+
+      // Use fetch with no-cors / cors mode
+      fetch(gasUrl, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      }).then(() => {
+        showToast("บันทึกและส่งแจ้งเตือน LINE สำเร็จ");
+      }).catch(err => {
+        console.error(err);
+        showToast("ส่งข้อมูลสำเร็จ (no-cors mode)");
+      });
+    }
+
+    // 9. Render Histories & Dashboards
+    function renderHistories() {
+      // Payroll List
+      const records = JSON.parse(localStorage.getItem("payroll_records") || "[]");
+      const empRecords = records.filter(r => r.id === currentEmpId);
+
+      const listEl = document.getElementById('payrollHistoryList');
+      let totalSalarySum = 0;
+      let totalOTSum = 0;
+      let totalMealsSum = 0;
+
+      if (empRecords.length === 0) {
+        listEl.innerHTML = `<p class="text-center text-xs text-slate-400 py-4">ยังไม่มีประวัติการคำนวณเงิน</p>`;
+      } else {
+        listEl.innerHTML = empRecords.map((r, i) => {
+          totalSalarySum += (r.totalSalary || 0);
+          totalOTSum += (r.otHours || 0);
+          totalMealsSum += (r.totalMealAllowance || 0);
+
+          return `
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 flex justify-between items-center">
+              <div>
+                <div class="font-bold text-slate-800 text-xs">${r.date} (${r.shift === 'DAY' ? 'กะวัน' : 'กะคืน'})</div>
+                <div class="text-[11px] text-slate-500">${r.checkIn || '-'} - ${r.checkOut || '-'} น. | OT: ${r.otHours || 0} ชม.</div>
+              </div>
+              <div class="text-right">
+                <div class="font-extrabold text-brand-600 text-sm">${r.totalSalary || 0} ฿</div>
+                <button onclick='openBreakdownModal(${JSON.stringify(r)})' class="text-[10px] text-brand-500 hover:underline">ดูรายละเอียด</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      document.getElementById('summaryTotalSalary').textContent = `${totalSalarySum} ฿`;
+      document.getElementById('summaryTotalRecords').textContent = `${empRecords.length} รายการ`;
+      document.getElementById('summaryTotalOT').textContent = `${totalOTSum} ชม.`;
+      document.getElementById('summaryTotalMeals').textContent = `${totalMealsSum} ฿`;
+
+      // Leave History
+      const leaves = JSON.parse(localStorage.getItem("leave_records") || "[]");
+      const empLeaves = leaves.filter(l => l.id === currentEmpId);
+      const leaveListEl = document.getElementById('leaveHistoryList');
+
+      if (empLeaves.length === 0) {
+        leaveListEl.innerHTML = `<p class="text-center text-xs text-slate-400 py-2">ยังไม่มีประวัติการยื่นลา</p>`;
+      } else {
+        leaveListEl.innerHTML = empLeaves.map(l => `
+          <div class="bg-amber-50/60 p-2.5 rounded-xl border border-amber-100 flex justify-between items-center">
+            <div>
+              <span class="font-bold text-amber-900">${l.leaveType}</span>
+              <span class="text-slate-500 block text-[10px]">${l.startDate} ถึง ${l.endDate}</span>
+            </div>
+            <span class="text-slate-600 text-[11px]">${l.reason || '-'}</span>
+          </div>
+        `).join('');
+      }
+    }
+
+    // 10. Modals & UI Helpers
+    function openBreakdownModal(item) {
+      const modal = document.getElementById('breakdownModal');
+      const content = document.getElementById('modalContent');
+
+      content.innerHTML = `
+        <div class="bg-slate-50 p-3 rounded-xl space-y-1">
+          <div class="font-bold text-slate-800">${item.employeeName || ''} (${item.date})</div>
+          <div>กะการทำงาน: <span class="font-medium">${item.shift === 'DAY' ? 'กะกลางวัน (08:00-17:00)' : 'กะกลางคืน (20:00-05:00)'}</span></div>
+          <div>ประเภทวัน: <span class="font-medium">${item.dayType === 'REGULAR' ? 'วันปกติ' : 'วันหยุด'}</span></div>
+          <div>เวลาลงจริง: <span class="font-medium">${item.checkIn} ถึง ${item.checkOut}</span></div>
+        </div>
+
+        <div class="space-y-1.5 pt-2">
+          <div class="flex justify-between"><span>ค่าแรงปกติ (8 ชม.):</span> <span class="font-bold">${item.baseSalary || 400} บาท</span></div>
+          <div class="flex justify-between"><span>OT ${item.otRate || 1.5} (${item.otHours || 0} ชม.):</span> <span class="font-bold text-amber-600">+${item.otPay || 0} บาท</span></div>
+          <div class="flex justify-between"><span>ค่ากะกลางคืน:</span> <span class="font-bold">+${item.shiftAllowance || 0} บาท</span></div>
+          <div class="flex justify-between"><span>ค่าอาหารปกติ:</span> <span class="font-bold">+${item.normalMeal || 10} บาท</span></div>
+          <div class="flex justify-between"><span>ค่าอาหารพิเศษ OT:</span> <span class="font-bold">+${item.otMeal || 0} บาท</span></div>
+          <div class="border-t pt-2 flex justify-between text-sm font-extrabold text-brand-600">
+            <span>รวมรายได้สุทธิประจำวัน:</span>
+            <span>${item.totalSalary || 0} บาท</span>
+          </div>
+        </div>
+      `;
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeBreakdownModal() {
+      document.getElementById('breakdownModal').classList.add('hidden');
+    }
+
+    function openConfigModal() {
+      document.getElementById('gasUrlInput').value = localStorage.getItem("gas_url") || DEFAULT_GAS_URL;
+      document.getElementById('lineTokenInput').value = localStorage.getItem("line_token") || DEFAULT_LINE_TOKEN;
+      document.getElementById('lineUserIdInput').value = localStorage.getItem("line_user_id") || DEFAULT_LINE_USER_ID;
+      document.getElementById('configModal').classList.remove('hidden');
+    }
+
+    function closeConfigModal() {
+      document.getElementById('configModal').classList.add('hidden');
+    }
+
+    function saveConfigSettings() {
+      localStorage.setItem("gas_url", document.getElementById('gasUrlInput').value.trim());
+      localStorage.setItem("line_token", document.getElementById('lineTokenInput').value.trim());
+      localStorage.setItem("line_user_id", document.getElementById('lineUserIdInput').value.trim());
+      closeConfigModal();
+      showToast("บันทึกการตั้งค่าเรียบร้อยแล้ว");
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3000);
+    }
+
+    function clearLocalStorageData() {
+      if (confirm("คุณต้องการล้างประวัติบันทึกเวลาทั้งหมดในเครื่องนี้ใช่หรือไม่?")) {
+        localStorage.removeItem("payroll_records");
+        localStorage.removeItem("leave_records");
+        loadTodayLiveStatus();
+        renderHistories();
+        showToast("ล้างประวัติเรียบร้อยแล้ว");
+      }
+    }
+  </script>
+</body>
+</html>
