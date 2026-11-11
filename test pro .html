@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="th" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>PROWORLD // TACTILE WORKSTATION - TimePro</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Space Mono (LCD / Metrics) & Prompt (Thai) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'sans-serif'],
+            mono: ['Space Mono', 'monospace'],
+          },
+          colors: {
+            hardware: {
+              titanium: '#EAE6DF',
+              carbon: '#141413',
+              orange: '#FF4F00',
+              metal: '#D4CEC4',
+              darkPanel: '#1C1C1A',
+              lcdBg: '#1E2320',
+              lcdText: '#4ADE80',
+              lcdDarkText: '#38BDF8',
+            }
+          },
+          boxShadow: {
+            'tactile': '0 4px 0 0 #A8A29E, 0 8px 16px rgba(20,20,19,0.15)',
+            'tactile-pressed': '0 1px 0 0 #A8A29E, 0 2px 4px rgba(20,20,19,0.1)',
+            'tactile-orange': '0 4px 0 0 #B93900, 0 8px 16px rgba(255,79,0,0.25)',
+            'tactile-orange-pressed': '0 1px 0 0 #B93900, 0 2px 4px rgba(255,79,0,0.15)',
+            'lcd-glow': 'inset 0 2px 4px rgba(0,0,0,0.6), 0 0 15px rgba(74,222,128,0.15)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      user-select: none;
+      -webkit-font-smoothing: antialiased;
+      background-color: #EAE6DF;
+      color: #141413;
+    }
+    .dark body {
+      background-color: #111110;
+      color: #EAE6DF;
+    }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Custom Hardware Select */
+    .hardware-select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23FF4F00'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='M19 9l-7 7-7-7'%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.8rem center;
+      background-size: 1rem;
+    }
+
+    /* Print Specific Styles for Payslip */
+    @media print {
+      body { background: #fff !important; color: #000 !important; }
+      body * { visibility: hidden !important; }
+      #printablePayslipArea, #printablePayslipArea * { visibility: visible !important; }
+      #printablePayslipArea {
+        position: absolute !important; left: 0 !important; top: 0 !important;
+        width: 100% !important; padding: 0 !important;
+        box-shadow: none !important; background: #fff !important; color: #000 !important;
+      }
+      .no-print { display: none !important; }
+      .print-border { border-color: #000 !important; }
+    }
+  </style>
+</head>
+<body class="h-full flex flex-col pb-32 transition-colors duration-200">
+
+  <!-- Industrial Hardware Header -->
+  <header class="sticky top-0 z-30 bg-hardware-titanium dark:bg-hardware-darkPanel border-b-2 border-hardware-carbon dark:border-zinc-800 px-4 py-3 no-print transition-colors duration-200">
+    <div class="max-w-md mx-auto flex justify-between items-center">
+      <div class="flex items-center space-x-3">
+        <div class="w-9 h-9 bg-hardware-carbon dark:bg-hardware-orange text-white rounded-lg flex items-center justify-center font-mono font-bold text-sm shadow-sm border border-black/20">
+          PW
+        </div>
+        <div>
+          <h1 class="font-bold text-xs uppercase tracking-widest text-hardware-carbon dark:text-hardware-titanium">PROWORLD // TACTILE</h1>
+          <p class="font-mono text-[9px] text-zinc-500 dark:text-zinc-400">MODEL TP-2026 // SWISS HARDWARE</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-2">
+        <!-- Sound Toggle -->
+        <button onclick="toggleAudio()" id="audioToggleBtn" title="เปิด/ปิดเสียงคลิก" class="w-9 h-9 bg-hardware-metal dark:bg-zinc-800 border border-hardware-carbon/20 dark:border-zinc-700 rounded-lg flex items-center justify-center text-hardware-carbon dark:text-hardware-titanium active:translate-y-0.5 transition">
+          <i class="fa-solid fa-volume-high text-xs" id="audioIcon"></i>
+        </button>
+        <!-- Dark Mode Toggle -->
+        <button onclick="toggleDarkMode()" title="สลับโหมดจอ OLED" class="w-9 h-9 bg-hardware-carbon dark:bg-hardware-titanium text-hardware-titanium dark:text-hardware-carbon rounded-lg flex items-center justify-center active:translate-y-0.5 transition shadow-sm">
+          <i class="fa-solid fa-circle-half-stroke text-xs" id="themeIcon"></i>
+        </button>
+        <!-- Settings Gear -->
+        <button onclick="openConfigModal()" class="w-9 h-9 bg-hardware-metal dark:bg-zinc-800 border border-hardware-carbon/20 dark:border-zinc-700 rounded-lg flex items-center justify-center text-hardware-carbon dark:text-hardware-titanium active:translate-y-0.5 transition">
+          <i class="fa-solid fa-gear text-xs"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workstation Container -->
+  <main class="flex-1 max-w-md w-full mx-auto px-4 py-4 space-y-4 no-print">
+
+    <!-- Global Employee Selector Module -->
+    <div class="bg-hardware-metal dark:bg-zinc-900 border-2 border-hardware-carbon dark:border-zinc-800 p-2 rounded-xl shadow-sm">
+      <div class="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 flex justify-between items-center">
+        <span>OPERATOR ID</span>
+        <span class="text-hardware-orange font-mono">SECURE ACCESS</span>
+      </div>
+      <select id="globalEmployeeSelect" onchange="playClick(); onEmployeeChange(this.value)" class="hardware-select w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 dark:border-zinc-700 text-hardware-carbon dark:text-hardware-titanium text-xs font-mono font-bold p-3 rounded-lg outline-none cursor-pointer">
+        <!-- Dynamic Options -->
+      </select>
+    </div>
+
+    <!-- TAB 1: Live Punch Chronograph Workstation -->
+    <section id="tab-1" class="tab-content space-y-4">
+      
+      <!-- LCD Matrix Chronograph Screen -->
+      <div class="bg-hardware-lcdBg border-4 border-hardware-carbon dark:border-zinc-700 rounded-2xl p-5 shadow-lcd-glow relative overflow-hidden text-hardware-lcdText font-mono">
+        <!-- CRT Scanline Effect -->
+        <div class="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%)] bg-[length:100%_4px] pointer-events-none opacity-40"></div>
+        
+        <div class="relative z-10 flex flex-col justify-between space-y-3">
+          <div class="flex justify-between items-center text-[10px] tracking-widest uppercase border-b border-hardware-lcdText/20 pb-2">
+            <span id="currentDateDisplay" class="text-emerald-400 font-bold">--/--/----</span>
+            <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded text-[9px] border border-emerald-500/30 animate-pulse">CHRONO ACTIVE</span>
+          </div>
+
+          <!-- Main Live Clock Display -->
+          <div class="text-center py-2">
+            <div class="text-4xl font-extrabold tracking-tighter text-emerald-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.5)]" id="liveClock">
+              00:00:00.0
+            </div>
+            <div class="text-[9px] text-emerald-500/70 mt-1 uppercase tracking-widest">REALTIME TIME-RECORDER MODULE</div>
+          </div>
+
+          <!-- Shift Controls Inside LCD Console -->
+          <div class="grid grid-cols-2 gap-2 pt-2 border-t border-hardware-lcdText/20 text-[10px]">
+            <div>
+              <span class="block text-hardware-lcdText/60 text-[8px] uppercase">SHIFT CONFIG</span>
+              <select id="shiftSelect" onchange="playClick(); saveShiftPreference(); updateLiveEstimator();" class="w-full bg-black/60 border border-hardware-lcdText/30 text-emerald-300 text-[10px] font-mono rounded p-1.5 outline-none">
+                <option value="DAY">☀️ DAY (08:00-16:50)</option>
+                <option value="NIGHT">🌙 NIGHT (20:00-04:50)</option>
+              </select>
+            </div>
+            <div>
+              <span class="block text-hardware-lcdText/60 text-[8px] uppercase">DAY TYPE</span>
+              <select id="dayTypeSelect" onchange="playClick(); saveShiftPreference(); updateLiveEstimator();" class="w-full bg-black/60 border border-hardware-lcdText/30 text-emerald-300 text-[10px] font-mono rounded p-1.5 outline-none">
+                <option value="REGULAR">💼 REGULAR (OT 1.5)</option>
+                <option value="HOLIDAY">🎉 HOLIDAY (OT 2.0/3.0)</option>
+              </select>
+            </div>
+            <div class="col-span-2 mt-1">
+              <span class="block text-hardware-lcdText/60 text-[8px] uppercase">WORK STATUS</span>
+              <select id="workTypeSelect" onchange="playClick(); updateLiveEstimator();" class="w-full bg-black/60 border border-hardware-lcdText/30 text-emerald-300 text-[10px] font-mono rounded p-1.5 outline-none">
+                <option value="FULL">FULL TIME (8 HRS / 400 THB)</option>
+                <option value="HALF">HALF LEAVE (200 THB)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Earnings Estimator Bar -->
+      <div class="bg-hardware-metal dark:bg-zinc-900 border-2 border-hardware-carbon dark:border-zinc-800 p-4 rounded-xl shadow-sm space-y-2">
+        <div class="flex justify-between items-center text-[10px] font-mono font-bold uppercase text-zinc-500 dark:text-zinc-400">
+          <span class="flex items-center gap-1.5"><i class="fa-solid fa-calculator text-hardware-orange"></i> Live Earnings Estimator</span>
+          <span class="text-hardware-orange bg-hardware-orange/10 px-2 py-0.5 rounded border border-hardware-orange/20">ESTIMATED</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2 text-center font-mono">
+          <div class="bg-hardware-titanium dark:bg-black/50 p-2 rounded-lg border border-hardware-carbon/10 dark:border-zinc-800">
+            <span class="block text-[8px] text-zinc-400 uppercase">BASE PAY</span>
+            <span id="estBasePay" class="text-xs font-bold text-hardware-carbon dark:text-white">400 ฿</span>
+          </div>
+          <div class="bg-hardware-titanium dark:bg-black/50 p-2 rounded-lg border border-hardware-carbon/10 dark:border-zinc-800">
+            <span class="block text-[8px] text-zinc-400 uppercase">ALLOWANCE</span>
+            <span id="estAllowance" class="text-xs font-bold text-hardware-carbon dark:text-white">10 ฿</span>
+          </div>
+          <div class="bg-hardware-titanium dark:bg-black/50 p-2 rounded-lg border border-hardware-carbon/10 dark:border-zinc-800">
+            <span class="block text-[8px] text-zinc-400 uppercase">TOTAL EST.</span>
+            <span id="estTotal" class="text-xs font-bold text-hardware-orange">410 ฿</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Punch Status Indicators -->
+      <div class="grid grid-cols-2 gap-3 font-mono">
+        <div class="bg-hardware-metal dark:bg-zinc-900 p-3 rounded-xl border-2 border-hardware-carbon dark:border-zinc-800 shadow-sm">
+          <span class="text-[9px] text-zinc-500 dark:text-zinc-400 font-bold uppercase block">CHECK-IN TIME</span>
+          <span class="text-base font-bold text-hardware-carbon dark:text-hardware-titanium" id="displayCheckInTime">--:--</span>
+        </div>
+        <div class="bg-hardware-metal dark:bg-zinc-900 p-3 rounded-xl border-2 border-hardware-carbon dark:border-zinc-800 shadow-sm">
+          <span class="text-[9px] text-zinc-500 dark:text-zinc-400 font-bold uppercase block">CHECK-OUT TIME</span>
+          <span class="text-base font-bold text-hardware-carbon dark:text-hardware-titanium" id="displayCheckOutTime">--:--</span>
+        </div>
+      </div>
+
+      <!-- Mechanical Tactile Punch Action Buttons -->
+      <div class="grid grid-cols-2 gap-3 pt-1">
+        <button id="btnCheckIn" onclick="playClick(); handleLiveCheckIn()" class="group relative py-4 px-3 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white rounded-xl font-bold uppercase tracking-wider text-xs shadow-tactile active:shadow-tactile-pressed active:translate-y-1 transition-all border-2 border-emerald-900 flex flex-col items-center justify-center gap-1">
+          <div class="flex items-center space-x-1.5">
+            <i class="fa-solid fa-right-to-bracket"></i>
+            <span>CHECK IN</span>
+          </div>
+          <span class="text-[8px] font-mono opacity-80 normal-case" id="checkInStatusText">พร้อมบันทึกเข้างาน</span>
+        </button>
+
+        <button id="btnCheckOut" onclick="playClick(); handleLiveCheckOut()" class="group relative py-4 px-3 bg-hardware-orange hover:bg-[#E04400] active:bg-[#CC3D00] text-white rounded-xl font-bold uppercase tracking-wider text-xs shadow-tactile-orange active:shadow-tactile-orange-pressed active:translate-y-1 transition-all border-2 border-[#8A2B00] flex flex-col items-center justify-center gap-1">
+          <div class="flex items-center space-x-1.5">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>CHECK OUT</span>
+          </div>
+          <span class="text-[8px] font-mono opacity-90 normal-case" id="checkOutStatusText">พร้อมคำนวณออกงาน</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- TAB 2: Manual Edit & Retroactive Form -->
+    <section id="tab-2" class="tab-content hidden space-y-4">
+      <div class="bg-hardware-metal dark:bg-zinc-900 border-2 border-hardware-carbon dark:border-zinc-800 p-5 rounded-2xl shadow-sm space-y-4 font-mono">
+        <div class="border-b border-hardware-carbon/20 dark:border-zinc-800 pb-2 flex items-center space-x-2">
+          <div class="w-7 h-7 bg-hardware-orange text-white rounded flex items-center justify-center text-xs">
+            <i class="fa-solid fa-pen-to-square"></i>
+          </div>
+          <div>
+            <h2 class="font-bold text-xs uppercase text-hardware-carbon dark:text-hardware-titanium">MANUAL CHRONO EDIT</h2>
+            <p class="text-[9px] text-zinc-500">บันทึกเวลาย้อนหลัง / แก้ไขข้อมูล</p>
+          </div>
+        </div>
+
+        <form id="manualForm" onsubmit="playClick(); handleManualSubmit(event)" class="space-y-3 text-xs">
+          <div>
+            <label class="block text-[9px] uppercase font-bold text-zinc-500 dark:text-zinc-400 mb-1">วันที่ต้องการบันทึก</label>
+            <input type="date" id="manualDate" required class="w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 dark:border-zinc-700 text-hardware-carbon dark:text-hardware-titanium p-2.5 rounded-lg font-mono outline-none">
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[9px] uppercase font-bold text-zinc-500 dark:text-zinc-400 mb-1">กะการทำงาน</label>
+              <select id="manualShift" class="hardware-select w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 dark:border-zinc-700 text-hardware-carbon dark:text-hardware-titanium p-2.5 rounded-lg outline-none">
+                <option value="DAY">กลางวัน (08:00)</option>
+                <option value="NIGHT">กลางคืน (20:00)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[9px] uppercase font-bold text-zinc-500 dark:text-zinc-400 mb-1">ประเภทวัน</label>
+              <select id="manualDayType" class="hardware-select w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 dark:border-zinc-700 text-hardware-carbon dark:text-hardware-titanium p-2.5 rounded-lg outline-none">
+                <option value="REGULAR">วันปกติ (OT 1.5)</option>
+                <option value="HOLIDAY">วันหยุด (OT 2.0)</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[9px] uppercase font-bold text-zinc-500 dark:text-zinc-400 mb-1">สถานะการทำงาน</label>
+            <select id="manualWorkType" class="hardware-select w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 dark:border-zinc-700 text-hardware-carbon dark:text-hardware-titanium p-2.5 rounded-lg outline-none">
+              <option value="FULL">ทำงานเต็มวัน (8 ชม.)</option>
+              <option value="HALF">ลาครึ่งวัน (200฿)</option>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[9px] uppercase font-bold text-zinc-500 dark:text-zinc-400 mb-1">เวลาเข้า</label>
+              <input type="time" id="manualCheckIn" required class="w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 dark:border-zinc-700 text-hardware-carbon dark:text-hardware-titanium p-2.5 rounded-lg font-mono outline-none">
+            </div>
+            <div>
+              <label class="block text-[9px] uppercase font-bold text-zinc-500 dark:text-zinc-400 mb-1">เวลาออก</label>
+              <input type="time" id="manualCheckOut" required class="w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 dark:border-zinc-700 text-hardware-carbon dark:text-hardware-titanium p-2.5 rounded-lg font-mono outline-none">
+            </div>
+          </div>
+
+          <button type="submit" class="w-full py-3.5 bg-hardware-carbon dark:bg-hardware-orange text-white rounded-xl font-bold uppercase tracking-wider text-xs shadow-tactile active:translate-y-0.5 transition-all mt-2">
+            คำนวณ & บันทึกย้อนหลัง
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- TAB 3: Leave Form Module -->
+    <section id="tab-3" class="tab-content hidden space-y-4">
+      <div class="bg-hardware-metal dark:bg-zinc-900 border-2 border-hardware-carbon dark:border-zinc-800 p-5 rounded-2xl shadow-sm space-y-4 font-mono">
+        <div class="border-b border-hardware-carbon/20 dark:border-zinc-800 pb-2 flex items-center space-x-2">
+          <div class="w-7 h-7 bg-amber-600 text-white rounded flex items-center justify-center text-xs">
+            <i class="fa-solid fa-calendar-minus"></i>
+          </div>
+          <div>
+            <h2 class="font-bold text-xs uppercase text-hardware-carbon dark:text-hardware-titanium">LEAVE REQUEST FORM</h2>
+            <p class="text-[9px] text-zinc-500">ยื่นคำขอลาหยุดประเภทต่างๆ</p>
+          </div>
+        </div>
+
+        <form id="leaveForm" onsubmit="playClick(); handleLeaveSubmit(event)" class="space-y-3 text-xs">
+          <div>
+            <label class="block text-[9px] uppercase font-bold text-zinc-500 dark:text-zinc-400 mb-1">ประเภทการลา</label>
+            <select id="leaveType" required class="hardware-select w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 dark:border-zinc-700 text-hardware-carbon dark:text-hardware-titanium p-2.5 rounded-lg outline-none">
+              <option value="ลากิจ">ลากิจ (Personal Leave)</option>
+              <option value="ลาป่วย">ลาป่วย (Sick Leave)</option>
+              <option value="ลาพักร้อน">ลาพักร้อน (Annual Leave)</option>
+              <option value="ลาอื่นๆ">ลาอื่นๆ</option>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[9px] uppercase font-bold text-zinc-500 dark:text-zinc-400 mb-1">ตั้งแต่วันที่</label>
+              <input type="date" id="leaveStartDate" required class="w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 dark:border-zinc-700 text-hardware-carbon dark:text-hardware-titanium p-2.5 rounded-lg font-mono outline-none">
+            </div>
+            <div>
+              <label class="block text-[9px] uppercase font-bold text-zinc-500 dark:text-zinc-400 mb-1">ถึงวันที่</label>
+              <input type="date" id="leaveEndDate" required class="w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 dark:border-zinc-700 text-hardware-carbon dark:text-hardware-titanium p-2.5 rounded-lg font-mono outline-none">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[9px] uppercase font-bold text-zinc-500 dark:text-zinc-400 mb-1">เหตุผลการลา</label>
+            <textarea id="leaveReason" rows="2" placeholder="ระบุเหตุผล..." class="w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 dark:border-zinc-700 text-hardware-carbon dark:text-hardware-titanium p-2.5 rounded-lg outline-none resize-none"></textarea>
+          </div>
+
+          <button type="submit" class="w-full py-3.5 bg-amber-600 hover:bg-amber-500 text-white rounded-xl font-bold uppercase tracking-wider text-xs shadow-tactile active:translate-y-0.5 transition-all mt-2">
+            ส่งใบลางาน
+          </button>
+        </form>
+      </div>
+
+      <div class="space-y-2">
+        <h3 class="text-[10px] font-mono font-bold text-zinc-500 uppercase px-1">ประวัติการลาล่าสุด</h3>
+        <div id="leaveHistoryList" class="space-y-2"></div>
+      </div>
+    </section>
+
+    <!-- TAB 4: Dashboard, Payroll & Payslip Export -->
+    <section id="tab-4" class="tab-content hidden space-y-4">
+      
+      <!-- Bi-Monthly Cutoff Selector & Actions -->
+      <div class="bg-hardware-metal dark:bg-zinc-900 border-2 border-hardware-carbon dark:border-zinc-800 p-3 rounded-2xl shadow-sm space-y-2 font-mono">
+        <div class="flex justify-between items-center">
+          <label class="text-[9px] font-bold uppercase text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5">
+            <i class="fa-solid fa-filter text-hardware-orange"></i> รอบตัดยอดคำนวณเงิน
+          </label>
+          <div class="flex gap-1.5">
+            <button onclick="playClick(); exportCSV()" title="Export CSV" class="bg-hardware-carbon dark:bg-zinc-800 text-hardware-titanium px-2.5 py-1.5 rounded-lg text-[10px] font-bold active:translate-y-0.5 transition flex items-center gap-1 shadow-sm">
+              <i class="fa-solid fa-file-csv text-hardware-orange"></i> CSV
+            </button>
+            <button onclick="playClick(); openPayslipModal()" class="bg-hardware-orange text-white px-3 py-1.5 rounded-lg text-[10px] font-bold active:translate-y-0.5 transition flex items-center gap-1 shadow-sm">
+              <i class="fa-solid fa-file-invoice-dollar"></i> ออกสลิปเงินเดือน
+            </button>
+          </div>
+        </div>
+        <select id="cutoffPeriodSelect" onchange="renderHistories()" class="hardware-select w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 dark:border-zinc-700 text-hardware-carbon dark:text-hardware-titanium text-xs font-bold p-2.5 rounded-lg outline-none">
+          <!-- Dynamic Cutoff Periods -->
+        </select>
+      </div>
+
+      <!-- KPI Summary Cards -->
+      <div class="grid grid-cols-2 gap-3 font-mono">
+        <div class="col-span-2 bg-hardware-carbon dark:bg-zinc-900 border-2 border-black dark:border-zinc-700 text-white p-5 rounded-2xl shadow-lg relative overflow-hidden flex flex-col justify-between">
+          <div class="absolute top-0 right-0 w-32 h-32 bg-hardware-orange opacity-10 rounded-full blur-2xl"></div>
+          <span class="text-[10px] text-zinc-400 uppercase tracking-widest">ยอดรวมเงินสุทธิในรอบนี้</span>
+          <div class="flex justify-between items-baseline mt-2">
+            <div class="text-3xl font-extrabold text-hardware-orange" id="summaryTotalSalary">0.00 ฿</div>
+            <span class="text-[10px] bg-white/10 px-2.5 py-1 rounded-full text-zinc-300" id="summaryTotalRecords">0 รายการ</span>
+          </div>
+        </div>
+
+        <div class="bg-hardware-metal dark:bg-zinc-900 border-2 border-hardware-carbon dark:border-zinc-800 p-3.5 rounded-xl shadow-sm">
+          <span class="text-[9px] text-zinc-500 uppercase block font-bold">ชั่วโมง OT รวม</span>
+          <span class="text-lg font-bold text-hardware-carbon dark:text-hardware-titanium" id="summaryTotalOT">0.0 ชม.</span>
+        </div>
+
+        <div class="bg-hardware-metal dark:bg-zinc-900 border-2 border-hardware-carbon dark:border-zinc-800 p-3.5 rounded-xl shadow-sm">
+          <span class="text-[9px] text-zinc-500 uppercase block font-bold">ค่าอาหารรวม</span>
+          <span class="text-lg font-bold text-hardware-carbon dark:text-hardware-titanium" id="summaryTotalMeals">0.00 ฿</span>
+        </div>
+      </div>
+
+      <!-- Payroll Records History List -->
+      <div class="bg-hardware-metal dark:bg-zinc-900 border-2 border-hardware-carbon dark:border-zinc-800 p-4 rounded-2xl shadow-sm space-y-3 font-mono">
+        <div class="flex justify-between items-center">
+          <h3 class="text-[10px] font-bold text-zinc-500 uppercase">ประวัติบันทึกเวลาในรอบตัดยอด</h3>
+          <button onclick="clearLocalStorageData()" class="text-[9px] text-rose-600 hover:underline font-bold">ล้างประวัติ</button>
+        </div>
+        <div id="payrollHistoryList" class="space-y-2">
+          <!-- Dynamic Cards -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Swiss Industrial Floating Capsule Bottom Navigation -->
+  <nav class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-sm z-40 no-print">
+    <div class="bg-hardware-carbon dark:bg-zinc-900 border-2 border-zinc-700/80 rounded-2xl p-1.5 flex justify-between shadow-2xl backdrop-blur-md">
+      <button onclick="playClick(); switchTab(1)" id="nav-1" class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl text-white bg-hardware-orange font-bold transition-all shadow-sm">
+        <i class="fa-solid fa-clock text-xs"></i>
+        <span class="text-[9px] mt-0.5 uppercase tracking-wider">บันทึกสด</span>
+      </button>
+      <button onclick="playClick(); switchTab(2)" id="nav-2" class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl text-zinc-400 hover:text-white transition-all">
+        <i class="fa-solid fa-pen-to-square text-xs"></i>
+        <span class="text-[9px] mt-0.5 uppercase tracking-wider">ย้อนหลัง</span>
+      </button>
+      <button onclick="playClick(); switchTab(3)" id="nav-3" class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl text-zinc-400 hover:text-white transition-all">
+        <i class="fa-solid fa-calendar-minus text-xs"></i>
+        <span class="text-[9px] mt-0.5 uppercase tracking-wider">วันลา</span>
+      </button>
+      <button onclick="playClick(); switchTab(4)" id="nav-4" class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl text-zinc-400 hover:text-white transition-all">
+        <i class="fa-solid fa-chart-pie text-xs"></i>
+        <span class="text-[9px] mt-0.5 uppercase tracking-wider">สรุปผล</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Breakdown Modal -->
+  <div id="breakdownModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4 no-print">
+    <div class="bg-hardware-titanium dark:bg-hardware-darkPanel border-2 border-hardware-carbon dark:border-zinc-700 w-full max-w-xs rounded-2xl shadow-2xl p-5 space-y-3 font-mono">
+      <div class="flex justify-between items-center border-b border-hardware-carbon/20 dark:border-zinc-800 pb-2">
+        <h3 class="font-bold text-xs uppercase text-hardware-carbon dark:text-hardware-titanium">รายละเอียดคำนวณเชิงลึก</h3>
+        <button onclick="closeBreakdownModal()" class="text-zinc-500 hover:text-hardware-orange p-1"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="modalContent" class="space-y-1.5 text-xs text-zinc-700 dark:text-zinc-300"></div>
+      <button onclick="closeBreakdownModal()" class="w-full bg-hardware-carbon text-white font-bold rounded-xl py-2.5 text-xs uppercase">ปิดหน้าต่าง</button>
+    </div>
+  </div>
+
+  <!-- Official Payslip Printable Modal (บริษัท โพรเวิลด์ เพาเวอร์เอ้าท์ซอร์สซิ่ง จำกัด) -->
+  <div id="payslipModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-2 overflow-y-auto font-sans">
+    <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl space-y-3 p-6 my-auto relative text-slate-900 text-xs" id="printablePayslipArea">
+      
+      <!-- Action Bar (Screen Only) -->
+      <div class="flex justify-between items-center border-b border-slate-200 pb-3 no-print">
+        <span class="font-bold text-sm text-indigo-900 flex items-center gap-1.5">
+          <i class="fa-solid fa-file-invoice-dollar text-hardware-orange"></i> ใบจ่ายเงินเดือน (Payslip Official Preview)
+        </span>
+        <div class="flex items-center space-x-2">
+          <button onclick="window.print()" class="bg-hardware-orange text-white text-xs font-bold px-3.5 py-1.5 rounded-lg transition shadow flex items-center gap-1">
+            <i class="fa-solid fa-print"></i> พิมพ์ / บันทึก PDF
+          </button>
+          <button onclick="closePayslipModal()" class="text-slate-400 hover:text-slate-600 p-1"><i class="fa-solid fa-xmark text-base"></i></button>
+        </div>
+      </div>
+
+      <!-- Company Header -->
+      <div class="text-center space-y-0.5">
+        <h2 class="font-bold text-base tracking-wide">ใบจ่ายเงินเดือน</h2>
+        <h3 class="font-extrabold text-lg tracking-wider text-slate-900">บริษัท โพรเวิลด์ เพาเวอร์เอ้าท์ซอร์สซิ่ง จำกัด</h3>
+      </div>
+
+      <!-- Header Info Line -->
+      <div class="flex flex-wrap justify-between items-center text-[11px] border-b-2 border-slate-900 pb-2 font-medium space-y-1 sm:space-y-0" id="payslipHeaderInfo"></div>
+
+      <!-- 3-Column Official Grid Layout Table -->
+      <div class="grid grid-cols-12 gap-0.5 border-2 border-slate-900 text-[10px] leading-tight">
+        
+        <!-- Left & Center Columns: Earnings & Deductions -->
+        <div class="col-span-9 grid grid-cols-9 border-r-2 border-slate-900">
+          
+          <!-- Earnings Section (Left) -->
+          <div class="col-span-6 border-r-2 border-slate-900 flex flex-col justify-between">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b-2 border-slate-900 bg-slate-100">
+                  <th class="p-1 font-bold">รายได้</th>
+                  <th class="p-1 font-bold text-center">จำนวน</th>
+                  <th class="p-1 font-bold text-right">จำนวนเงิน</th>
+                </tr>
+              </thead>
+              <tbody id="payslipEarningsBody" class="font-normal"></tbody>
+            </table>
+            <div class="flex justify-between font-bold border-t-2 border-slate-900 p-1 bg-slate-100">
+              <span>รวมเงินได้</span>
+              <span id="payslipTotalEarnings" class="font-mono">0.00</span>
+            </div>
+          </div>
+
+          <!-- Deductions Section (Center) -->
+          <div class="col-span-3 flex flex-col justify-between">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b-2 border-slate-900 bg-slate-100">
+                  <th class="p-1 font-bold">รายการหัก</th>
+                  <th class="p-1 font-bold text-right">จำนวนเงิน</th>
+                </tr>
+              </thead>
+              <tbody id="payslipDeductionsBody" class="font-normal"></tbody>
+            </table>
+            <div class="flex justify-between font-bold border-t-2 border-slate-900 p-1 bg-slate-100">
+              <span>รวมรายการหัก</span>
+              <span id="payslipTotalDeductions" class="font-mono">0.00</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column: YTD Cumulative Summary & Net Pay -->
+        <div class="col-span-3 flex flex-col justify-between text-[10px] bg-slate-50">
+          <div class="space-y-1.5 p-1.5 font-mono">
+            <div class="border-b border-slate-900 pb-1 text-center font-sans">
+              <span class="block font-bold">วันที่จ่าย</span>
+              <span id="payslipPayDate" class="font-bold text-indigo-900">--/--/----</span>
+            </div>
+            <div class="border-b border-slate-300 pb-1 text-center"><span class="block font-bold font-sans">เงินได้สะสมต่อปี</span><span id="payslipYTDEarnings">36,475.00</span></div>
+            <div class="border-b border-slate-300 pb-1 text-center"><span class="block font-bold font-sans">ภาษีสะสมต่อปี</span><span id="payslipYTDTax">0.00</span></div>
+            <div class="border-b border-slate-300 pb-1 text-center"><span class="block font-bold font-sans">เงินสะสมกองทุนต่อปี</span><span id="payslipYTDFund">0.00</span></div>
+            <div class="border-b border-slate-300 pb-1 text-center"><span class="block font-bold font-sans">ค่าลดหย่อนอื่นๆ</span><span id="payslipOtherDeductions">0.00</span></div>
+            <div class="text-center"><span class="block font-bold font-sans">เงินประกันสังคมต่อปี</span><span id="payslipYTDSocial">1,000.00</span></div>
+          </div>
+
+          <!-- Net Salary Box -->
+          <div class="border-t-2 border-slate-900 p-2 text-center bg-slate-200">
+            <span class="block font-extrabold text-[11px] uppercase tracking-wide font-sans">เงินรับสุทธิ</span>
+            <span id="payslipNetPay" class="font-extrabold text-base font-mono text-indigo-950">0.00</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Payslip Footer -->
+      <div class="pt-2 text-[9px] flex justify-between items-end font-mono">
+        <div class="text-slate-500" id="payslipRefID">E_PaySlip ID: 202610211555{PROWORLD-HARDWARE}</div>
+        <div class="text-right font-sans font-bold text-slate-800">
+          ลงชื่อพนักงาน ___________________________________
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Settings Config Modal -->
+  <div id="configModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4 no-print">
+    <div class="bg-hardware-titanium dark:bg-hardware-darkPanel border-2 border-hardware-carbon dark:border-zinc-700 w-full max-w-xs rounded-2xl shadow-2xl p-5 space-y-3 font-mono">
+      <div class="flex justify-between items-center border-b border-hardware-carbon/20 dark:border-zinc-800 pb-2">
+        <h3 class="font-bold text-xs uppercase text-hardware-carbon dark:text-hardware-titanium">CONFIG & WEBHOOK</h3>
+        <button onclick="closeConfigModal()" class="text-zinc-500 hover:text-hardware-orange p-1"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <div>
+          <label class="block text-[9px] uppercase font-bold text-zinc-500 mb-1">Google Apps Script URL</label>
+          <input type="text" id="gasUrlInput" class="w-full bg-hardware-metal dark:bg-black border border-hardware-carbon/30 dark:border-zinc-700 text-hardware-carbon dark:text-hardware-titanium p-2 rounded text-[10px] font-mono outline-none">
+        </div>
+        <div>
+          <label class="block text-[9px] uppercase font-bold text-zinc-500 mb-1">LINE Channel Token</label>
+          <input type="text" id="lineTokenInput" class="w-full bg-hardware-metal dark:bg-black border border-hardware-carbon/30 dark:border-zinc-700 text-hardware-carbon dark:text-hardware-titanium p-2 rounded text-[10px] font-mono outline-none">
+        </div>
+        <div>
+          <label class="block text-[9px] uppercase font-bold text-zinc-500 mb-1">LINE User ID</label>
+          <input type="text" id="lineUserIdInput" class="w-full bg-hardware-metal dark:bg-black border border-hardware-carbon/30 dark:border-zinc-700 text-hardware-carbon dark:text-hardware-titanium p-2 rounded text-[10px] font-mono outline-none">
+        </div>
+      </div>
+
+      <button onclick="saveConfigSettings()" class="w-full bg-hardware-orange text-white font-bold rounded-xl py-2.5 text-xs uppercase shadow-sm">
+        บันทึกการตั้งค่า
+      </button>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-hardware-carbon dark:bg-hardware-titanium text-hardware-titanium dark:text-hardware-carbon text-xs font-mono font-bold px-4 py-2.5 rounded-xl shadow-2xl hidden transition-all border border-hardware-orange/40">
+    <span id="toastMsg">แจ้งเตือนระบบ...</span>
+  </div>
+
+  <!-- Audio Synthesizer for Mechanical Clicks -->
+  <script>
+    let soundEnabled = true;
+    function toggleAudio() {
+      soundEnabled = !soundEnabled;
+      const icon = document.getElementById('audioIcon');
+      icon.className = soundEnabled ? "fa-solid fa-volume-high text-xs" : "fa-solid fa-volume-xmark text-xs";
+      showToast(soundEnabled ? "เปิดเสียงคลิกกลไกแล้ว" : "ปิดเสียงคลิกแล้ว");
+    }
+
+    function playClick() {
+      if (!soundEnabled) return;
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(120, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.04);
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.04);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.04);
+      } catch (e) {}
+    }
+
+    function toggleDarkMode() {
+      playClick();
+      const html = document.documentElement;
+      html.classList.toggle('dark');
+      const isDark = html.classList.contains('dark');
+      localStorage.setItem('theme_mode', isDark ? 'dark' : 'light');
+      showToast(isDark ? "OLED Dark Mode เปิดใช้งาน" : "Warm Titanium Mode เปิดใช้งาน");
+    }
+
+    // Load theme preference
+    if (localStorage.getItem('theme_mode') === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+  </script>
+
+  <!-- Core Application Logic -->
+  <script>
+    const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbzIC7PtGt_PeyQ7Co1GTiC0Ev6dPfDSiGhhyHClbKL1yMzUCTmeju8JKOYAtNGJZaB7/exec";
+    const DEFAULT_LINE_TOKEN = "NCURffVn9SZ4I+MpbibQluWUNeLs5BM7xXT9lrs7HnE+IlDaKy9muokRv3gvBqsNDH0quqVo/PqSvf9kebRHZEPfLx7I4RJzjBUTEwSHbRewZ61/uhLgQjfUWjY1LpA8khVSbngeM6ewKPB5bw8qdAdB04t89/1O/w1cDnyilFU=";
+    const DEFAULT_LINE_USER_ID = "U2fd9fade0d6d5c8b5df8582841fbbb9e";
+
+    const employeeList = [
+      { id: "50001024", name: "นาย พันธกานต์ จูมจันทร์", dept: "MAT", startDate: "2026-08-03", bankAcc: "5052911817" },
+      { id: "TEST SYSTEM", name: "TEST SYSTEM", dept: "TEST", startDate: "2026-01-01", bankAcc: "0000000000" }
+    ];
+
+    let currentEmpId = employeeList[0].id;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      initSettings();
+      renderEmployeeDropdowns();
+      startLiveChronograph();
+      loadShiftPreference();
+      loadTodayLiveStatus();
+      buildCutoffOptions();
+      renderHistories();
+      updateLiveEstimator();
+
+      const todayStr = new Date().toISOString().split('T')[0];
+      if (document.getElementById('manualDate')) document.getElementById('manualDate').value = todayStr;
+      if (document.getElementById('leaveStartDate')) document.getElementById('leaveStartDate').value = todayStr;
+      if (document.getElementById('leaveEndDate')) document.getElementById('leaveEndDate').value = todayStr;
+    });
+
+    function initSettings() {
+      if (!localStorage.getItem("gas_url")) localStorage.setItem("gas_url", DEFAULT_GAS_URL);
+      if (!localStorage.getItem("line_token")) localStorage.setItem("line_token", DEFAULT_LINE_TOKEN);
+      if (!localStorage.getItem("line_user_id")) localStorage.setItem("line_user_id", DEFAULT_LINE_USER_ID);
+    }
+
+    function renderEmployeeDropdowns() {
+      const select = document.getElementById("globalEmployeeSelect");
+      if (!select) return;
+      select.innerHTML = employeeList.map(emp => `<option value="${emp.id}">${emp.id} - ${emp.name}</option>`).join('');
+      select.value = currentEmpId;
+    }
+
+    function onEmployeeChange(id) {
+      currentEmpId = id;
+      loadShiftPreference();
+      loadTodayLiveStatus();
+      renderHistories();
+      updateLiveEstimator();
+    }
+
+    function getCurrentEmpObj() {
+      return employeeList.find(e => e.id === currentEmpId) || employeeList[0];
+    }
+
+    function switchTab(tabNum) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      const target = document.getElementById(`tab-${tabNum}`);
+      if (target) target.classList.remove('hidden');
+
+      for (let i = 1; i <= 4; i++) {
+        const navBtn = document.getElementById(`nav-${i}`);
+        if (!navBtn) continue;
+        if (i === tabNum) {
+          navBtn.className = "flex-1 flex flex-col items-center justify-center py-2 rounded-xl text-white bg-hardware-orange font-bold transition-all shadow-sm";
+        } else {
+          navBtn.className = "flex-1 flex flex-col items-center justify-center py-2 rounded-xl text-zinc-400 hover:text-white transition-all";
+        }
+      }
+    }
+
+    function startLiveChronograph() {
+      const update = () => {
+        const now = new Date();
+        const clockEl = document.getElementById('liveClock');
+        const dateEl = document.getElementById('currentDateDisplay');
+
+        if (clockEl) {
+          const timeStr = now.toTimeString().split(' ')[0];
+          const ms = Math.floor(now.getMilliseconds() / 100);
+          clockEl.textContent = `${timeStr}.${ms}`;
+        }
+        if (dateEl) {
+          dateEl.textContent = now.toLocaleDateString('th-TH', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+        }
+      };
+      update();
+      setInterval(update, 100);
+    }
+
+    function saveShiftPreference() {
+      const shift = document.getElementById('shiftSelect').value;
+      const dayType = document.getElementById('dayTypeSelect').value;
+      localStorage.setItem(`pref_shift_${currentEmpId}`, shift);
+      localStorage.setItem(`pref_daytype_${currentEmpId}`, dayType);
+    }
+
+    function loadShiftPreference() {
+      const savedShift = localStorage.getItem(`pref_shift_${currentEmpId}`);
+      const savedDayType = localStorage.getItem(`pref_daytype_${currentEmpId}`);
+      if (savedShift && document.getElementById('shiftSelect')) document.getElementById('shiftSelect').value = savedShift;
+      if (savedDayType && document.getElementById('dayTypeSelect')) document.getElementById('dayTypeSelect').value = savedDayType;
+    }
+
+    function timeToMins(tStr) {
+      if (!tStr) return 0;
+      const [h, m] = tStr.split(':').map(Number);
+      return h * 60 + m;
+    }
+
+    function calculatePayroll(shift, dayType, checkInTime, checkOutTime, workType = 'FULL') {
+      let otHours = 0, otRate = 1.5, otPay = 0, shiftAllowance = 0;
+      let normalMeal = 10, otMeal = 0;
+
+      const inMins = timeToMins(checkInTime);
+      let outMins = timeToMins(checkOutTime);
+      let totalWorkedMinutes = 0;
+
+      if (shift === 'DAY') {
+        let rawDuration = Math.max(0, outMins - inMins);
+        totalWorkedMinutes = Math.max(0, rawDuration - 70);
+        let cappedOutMins = outMins > 1150 ? 1150 : outMins;
+        if (cappedOutMins > 1030) otHours = (cappedOutMins - 1030) / 60;
+      } else {
+        shiftAllowance = 180;
+        let adjOutMins = outMins < 720 ? outMins + 1440 : outMins;
+        let rawDuration = Math.max(0, adjOutMins - inMins);
+        totalWorkedMinutes = Math.max(0, rawDuration - 70);
+        let cappedOutMins = adjOutMins > 1870 ? 1870 : adjOutMins;
+        if (cappedOutMins > 1750) otHours = (cappedOutMins - 1750) / 60;
+      }
+
+      const workedHours = Math.round((totalWorkedMinutes / 60) * 100) / 100;
+      otHours = Math.max(0, Math.round(otHours * 100) / 100);
+
+      let baseSalary = 400;
+      let salaryNote = "";
+
+      if (workType === 'HALF') {
+        baseSalary = 200;
+        salaryNote = "ลาครึ่งวัน (200฿)";
+      } else if (dayType === 'REGULAR' && workedHours < 8) {
+        baseSalary = 0;
+        salaryNote = "ทำงานไม่ถึง 8 ชม. (0฿)";
+      } else {
+        baseSalary = 400;
+        salaryNote = "เต็มวัน (400฿)";
+      }
+
+      if (dayType === 'REGULAR') {
+        otRate = 1.5;
+        otPay = otHours * 75;
+        if (otHours > 0) otMeal = 25;
+      } else {
+        if (otHours <= 8) {
+          otRate = 2.0;
+          otPay = otHours * 100;
+          if (otHours >= 4) otMeal = 50;
+        } else {
+          otRate = 3.0;
+          otPay = (8 * 100) + ((otHours - 8) * 150);
+          otMeal = 75;
+        }
+      }
+
+      const totalMealAllowance = normalMeal + otMeal;
+      const totalSalary = baseSalary + otPay + shiftAllowance + totalMealAllowance;
+
+      return { baseSalary, salaryNote, workedHours, otHours, otRate, otPay, shiftAllowance, normalMeal, otMeal, totalMealAllowance, totalSalary };
+    }
+
+    function updateLiveEstimator() {
+      const shift = document.getElementById('shiftSelect').value;
+      const dayType = document.getElementById('dayTypeSelect').value;
+      const workType = document.getElementById('workTypeSelect').value;
+      
+      // Simulate dummy standard hours for estimation preview
+      const dummyIn = shift === 'DAY' ? '08:00' : '20:00';
+      const dummyOut = shift === 'DAY' ? '17:00' : '05:00';
+      const calc = calculatePayroll(shift, dayType, dummyIn, dummyOut, workType);
+
+      document.getElementById('estBasePay').textContent = `${calc.baseSalary} ฿`;
+      document.getElementById('estAllowance').textContent = `${calc.shiftAllowance + calc.totalMealAllowance} ฿`;
+      document.getElementById('estTotal').textContent = `${calc.totalSalary} ฿`;
+    }
+
+    function loadTodayLiveStatus() {
+      const today = new Date().toISOString().split('T')[0];
+      const records = JSON.parse(localStorage.getItem("payroll_records") || "[]");
+      const activeCheckins = JSON.parse(localStorage.getItem("active_checkins") || "{}");
+      
+      const todayRecord = records.find(r => r.id === currentEmpId && r.date === today);
+      const activeIn = activeCheckins[currentEmpId];
+
+      const inEl = document.getElementById('displayCheckInTime');
+      const outEl = document.getElementById('displayCheckOutTime');
+      const inText = document.getElementById('checkInStatusText');
+      const outText = document.getElementById('checkOutStatusText');
+
+      if (todayRecord) {
+        if (inEl) inEl.textContent = todayRecord.checkIn || '-';
+        if (outEl) outEl.textContent = todayRecord.checkOut || '-';
+        if (inText) inText.textContent = `เข้า (${todayRecord.checkIn})`;
+        if (outText) outText.textContent = `ออก (${todayRecord.checkOut})`;
+      } else if (activeIn) {
+        if (inEl) inEl.textContent = activeIn.time;
+        if (outEl) outEl.textContent = '-';
+        if (inText) inText.textContent = `กำลังทำงาน (${activeIn.time})`;
+        if (outText) outText.textContent = 'รอลงเวลาออก';
+      } else {
+        if (inEl) inEl.textContent = '--:--';
+        if (outEl) inEl.textContent = '--:--';
+        if (inText) inText.textContent = 'พร้อมลงเวลาเข้า';
+        if (outText) inText.textContent = 'พร้อมคำนวณออก';
+      }
+    }
+
+    function handleLiveCheckIn() {
+      const emp = getCurrentEmpObj();
+      const now = new Date();
+      const dateStr = now.toISOString().split('T')[0];
+      const timeStr = now.toTimeString().split(' ')[0].substring(0, 5);
+
+      let activeCheckins = JSON.parse(localStorage.getItem("active_checkins") || "{}");
+      if (activeCheckins[emp.id]) {
+        showToast("พนักงานท่านนี้ลงเวลาเข้าค้างไว้แล้ว");
+        return;
+      }
+
+      activeCheckins[emp.id] = {
+        date: dateStr,
+        time: timeStr,
+        shift: document.getElementById('shiftSelect').value,
+        dayType: document.getElementById('dayTypeSelect').value,
+        workType: document.getElementById('workTypeSelect').value
+      };
+
+      localStorage.setItem("active_checkins", JSON.stringify(activeCheckins));
+      showToast("บันทึกเวลาเข้างานสำเร็จ");
+      loadTodayLiveStatus();
+
+      const lineMsg = `⏰ [CHECK IN]\nพนักงาน: ${emp.name} (${emp.id})\nวันที่: ${dateStr}\nเวลา: ${timeStr} น.`;
+      syncToGoogleSheets([], lineMsg);
+    }
+
+    function handleLiveCheckOut() {
+      const emp = getCurrentEmpObj();
+      let activeCheckins = JSON.parse(localStorage.getItem("active_checkins") || "{}");
+      const activeIn = activeCheckins[emp.id];
+
+      if (!activeIn) {
+        showToast("ยังไม่มีประวัติ Check In ค้างไว้");
+        return;
+      }
+
+      const now = new Date();
+      const dateStr = activeIn.date || now.toISOString().split('T')[0];
+      const timeStr = now.toTimeString().split(' ')[0].substring(0, 5);
+
+      const calc = calculatePayroll(activeIn.shift, activeIn.dayType, activeIn.time, timeStr, activeIn.workType);
+
+      const recordObj = {
+        id: emp.id,
+        employeeName: emp.name,
+        date: dateStr,
+        shift: activeIn.shift,
+        dayType: activeIn.dayType,
+        workType: activeIn.workType,
+        checkIn: activeIn.time,
+        checkOut: timeStr,
+        ...calc
+      };
+
+      let records = JSON.parse(localStorage.getItem("payroll_records") || "[]");
+      records = records.filter(r => !(r.id === emp.id && r.date === dateStr));
+      records.push(recordObj);
+      localStorage.setItem("payroll_records", JSON.stringify(records));
+
+      delete activeCheckins[emp.id];
+      localStorage.setItem("active_checkins", JSON.stringify(activeCheckins));
+
+      showToast("ลงเวลาออก & คำนวณเงินสำเร็จ");
+      loadTodayLiveStatus();
+      renderHistories();
+
+      const lineMsg = `✅ [CHECK OUT & PAYROLL]\nพนักงาน: ${emp.name} (${emp.id})\nวันที่: ${dateStr} (${activeIn.shift})\nเวลา: ${activeIn.time} - ${timeStr} (${calc.workedHours} ชม.)\n💰 สุทธิ: ${calc.totalSalary} บาท`;
+      syncToGoogleSheets([recordObj], lineMsg);
+    }
+
+    function handleManualSubmit(e) {
+      e.preventDefault();
+      const emp = getCurrentEmpObj();
+      const dateStr = document.getElementById('manualDate').value;
+      const shift = document.getElementById('manualShift').value;
+      const dayType = document.getElementById('manualDayType').value;
+      const workType = document.getElementById('manualWorkType').value;
+      const checkIn = document.getElementById('manualCheckIn').value;
+      const checkOut = document.getElementById('manualCheckOut').value;
+
+      const calc = calculatePayroll(shift, dayType, checkIn, checkOut, workType);
+      const recordObj = { id: emp.id, employeeName: emp.name, date: dateStr, shift, dayType, workType, checkIn, checkOut, ...calc };
+
+      let records = JSON.parse(localStorage.getItem("payroll_records") || "[]");
+      records = records.filter(r => !(r.id === emp.id && r.date === dateStr));
+      records.push(recordObj);
+      localStorage.setItem("payroll_records", JSON.stringify(records));
+
+      showToast("บันทึกเวลาย้อนหลังสำเร็จ");
+      renderHistories();
+
+      const lineMsg = `📝 [MANUAL EDIT]\nพนักงาน: ${emp.name} (${emp.id})\nวันที่: ${dateStr}\nเวลา: ${checkIn} - ${checkOut} (${calc.workedHours} ชม.)\n💰 สุทธิ: ${calc.totalSalary} บาท`;
+      syncToGoogleSheets([recordObj], lineMsg);
+    }
+
+    function handleLeaveSubmit(e) {
+      e.preventDefault();
+      const emp = getCurrentEmpObj();
+      const leaveObj = {
+        id: emp.id,
+        employeeName: emp.name,
+        leaveType: document.getElementById('leaveType').value,
+        startDate: document.getElementById('leaveStartDate').value,
+        endDate: document.getElementById('leaveEndDate').value,
+        reason: document.getElementById('leaveReason').value,
+        createdAt: new Date().toISOString()
+      };
+
+      let leaves = JSON.parse(localStorage.getItem("leave_records") || "[]");
+      leaves.push(leaveObj);
+      localStorage.setItem("leave_records", JSON.stringify(leaves));
+
+      showToast("ยื่นใบลางานสำเร็จ");
+      renderHistories();
+
+      const lineMsg = `🏖️ [LEAVE REQUEST]\nพนักงาน: ${emp.name} (${emp.id})\nประเภท: ${leaveObj.leaveType}\nช่วงวัน: ${leaveObj.startDate} ถึง ${leaveObj.endDate}\nเหตุผล: ${leaveObj.reason || '-'}`;
+      syncToGoogleSheets([], lineMsg, [leaveObj]);
+    }
+
+    function deleteRecord(empId, recordDate) {
+      playClick();
+      if (!confirm(`ยืนยันการลบข้อมูลวันที่ ${recordDate} ใช่หรือไม่?`)) return;
+
+      let records = JSON.parse(localStorage.getItem("payroll_records") || "[]");
+      records = records.filter(r => !(r.id === empId && r.date === recordDate));
+      localStorage.setItem("payroll_records", JSON.stringify(records));
+
+      showToast("ลบข้อมูลสำเร็จ");
+      renderHistories();
+
+      const payload = {
+        action: "deletePayroll",
+        id: empId,
+        date: recordDate,
+        sendLine: true,
+        channelAccessToken: localStorage.getItem("line_token") || DEFAULT_LINE_TOKEN,
+        userId: localStorage.getItem("line_user_id") || DEFAULT_LINE_USER_ID,
+        lineMessage: `🗑️ [DELETE RECORD]\nพนักงาน ID: ${empId}\nวันที่ลบ: ${recordDate}`
+      };
+
+      fetch(localStorage.getItem("gas_url") || DEFAULT_GAS_URL, {
+        method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload)
+      }).catch(err => console.error(err));
+    }
+
+    function syncToGoogleSheets(payrolls = [], lineMessage = '', leaves = []) {
+      const gasUrl = localStorage.getItem("gas_url") || DEFAULT_GAS_URL;
+      const lineToken = localStorage.getItem("line_token") || DEFAULT_LINE_TOKEN;
+      const lineUserId = localStorage.getItem("line_user_id") || DEFAULT_LINE_USER_ID;
+
+      showToast("กำลังซิงค์ข้อมูล Google Sheets & LINE...");
+
+      const payload = { sendLine: true, channelAccessToken: lineToken, userId: lineUserId, lineMessage, payrolls, leaves };
+
+      fetch(gasUrl, {
+        method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload)
+      }).then(() => {
+        showToast("ซิงค์ข้อมูลเรียบร้อย");
+      }).catch(err => {
+        console.error(err);
+        showToast("ส่งคำขอสำเร็จ (no-cors)");
+      });
+    }
+
+    function buildCutoffOptions() {
+      const select = document.getElementById('cutoffPeriodSelect');
+      if (!select) return;
+      const now = new Date();
+      const options = [];
+
+      for (let i = 0; i < 6; i++) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const y = d.getFullYear(), m = d.getMonth();
+        const monthName = d.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
+        const lastDay = new Date(y, m + 1, 0).getDate();
+
+        options.push({ label: `งวด 16 - ${lastDay} ${monthName}`, start: `${y}-${String(m + 1).padStart(2, '0')}-16`, end: `${y}-${String(m + 1).padStart(2, '0')}-${lastDay}` });
+        options.push({ label: `งวด 1 - 15 ${monthName}`, start: `${y}-${String(m + 1).padStart(2, '0')}-01`, end: `${y}-${String(m + 1).padStart(2, '0')}-15` });
+      }
+
+      options.unshift({ label: '🌐 แสดงทั้งหมด (All Records)', start: '2000-01-01', end: '2099-12-31' });
+      select.innerHTML = options.map(o => `<option value="${o.start}|${o.end}">${o.label}</option>`).join('');
+      select.selectedIndex = now.getDate() <= 15 ? 2 : 1;
+    }
+
+    function renderHistories() {
+      const records = JSON.parse(localStorage.getItem("payroll_records") || "[]");
+      let empRecords = records.filter(r => r.id === currentEmpId);
+
+      const cutoffSelect = document.getElementById('cutoffPeriodSelect');
+      if (cutoffSelect && cutoffSelect.value) {
+        const [start, end] = cutoffSelect.value.split('|');
+        empRecords = empRecords.filter(r => r.date >= start && r.date <= end);
+      }
+
+      empRecords.sort((a, b) => b.date.localeCompare(a.date));
+
+      const listEl = document.getElementById('payrollHistoryList');
+      let totalSalarySum = 0, totalOTSum = 0, totalMealsSum = 0;
+
+      if (listEl) {
+        if (empRecords.length === 0) {
+          listEl.innerHTML = `<p class="text-center text-[10px] text-zinc-500 py-6">ไม่พบประวัติในรอบตัดยอดนี้</p>`;
+        } else {
+          listEl.innerHTML = empRecords.map((r) => {
+            totalSalarySum += (r.totalSalary || 0);
+            totalOTSum += (r.otHours || 0);
+            totalMealsSum += (r.totalMealAllowance || 0);
+
+            return `
+              <div class="bg-hardware-titanium dark:bg-black/40 p-3 rounded-xl border border-hardware-carbon/20 dark:border-zinc-800 flex justify-between items-center text-xs">
+                <div onclick='openBreakdownModal(${JSON.stringify(r)})' class="cursor-pointer flex-1">
+                  <div class="font-bold text-hardware-carbon dark:text-hardware-titanium text-xs flex items-center gap-1.5">
+                    <span>${r.date.split('-').reverse().join('/')}</span>
+                    <span class="text-[9px] px-1.5 py-0.2 rounded font-mono ${r.shift === 'DAY' ? 'bg-amber-200 text-amber-900' : 'bg-indigo-200 text-indigo-900'}">
+                      ${r.shift === 'DAY' ? 'DAY' : 'NIGHT'}
+                    </span>
+                  </div>
+                  <div class="text-[10px] text-zinc-500 font-mono mt-0.5">${r.checkIn || '-'} - ${r.checkOut || '-'} | OT: ${r.otHours || 0}h</div>
+                </div>
+                <div class="text-right flex items-center gap-3">
+                  <div onclick='openBreakdownModal(${JSON.stringify(r)})' class="cursor-pointer text-right">
+                    <div class="font-bold text-hardware-orange text-sm font-mono">${(r.totalSalary || 0).toLocaleString('th-TH', {minimumFractionDigits:2})} ฿</div>
+                    <span class="text-[9px] text-zinc-400">คลิกดูรายละเอียด</span>
+                  </div>
+                  <button onclick="deleteRecord('${r.id}', '${r.date}')" class="text-zinc-400 hover:text-rose-600 p-2 transition"><i class="fa-solid fa-trash-can"></i></button>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      if (document.getElementById('summaryTotalSalary')) document.getElementById('summaryTotalSalary').textContent = `${totalSalarySum.toLocaleString('th-TH', {minimumFractionDigits:2})} ฿`;
+      if (document.getElementById('summaryTotalRecords')) document.getElementById('summaryTotalRecords').textContent = `${empRecords.length} รายการ`;
+      if (document.getElementById('summaryTotalOT')) document.getElementById('summaryTotalOT').textContent = `${totalOTSum.toFixed(1)} ชม.`;
+      if (document.getElementById('summaryTotalMeals')) document.getElementById('summaryTotalMeals').textContent = `${totalMealsSum.toLocaleString('th-TH', {minimumFractionDigits:2})} ฿`;
+
+      const leaves = JSON.parse(localStorage.getItem("leave_records") || "[]").filter(l => l.id === currentEmpId);
+      const leaveListEl = document.getElementById('leaveHistoryList');
+      if (leaveListEl) {
+        leaveListEl.innerHTML = leaves.length ? leaves.map(l => `
+          <div class="bg-hardware-titanium dark:bg-black/40 p-3 rounded-xl border border-hardware-carbon/20 dark:border-zinc-800 text-xs font-mono">
+            <div class="flex justify-between font-bold text-hardware-carbon dark:text-hardware-titanium">
+              <span>${l.leaveType}</span>
+              <span class="text-amber-600">${l.startDate}</span>
+            </div>
+            <div class="text-[10px] text-zinc-500 mt-1">เหตุผล: ${l.reason || '-'}</div>
+          </div>
+        `).join('') : `<p class="text-center text-[10px] text-zinc-500 py-3">ยังไม่มีประวัติการลา</p>`;
+      }
+    }
+
+    function exportCSV() {
+      const records = JSON.parse(localStorage.getItem("payroll_records") || "[]").filter(r => r.id === currentEmpId);
+      if (records.length === 0) { showToast("ไม่มีข้อมูลสำหรับ Export CSV"); return; }
+
+      let csv = "\uFEFFID,EmployeeName,Date,Shift,DayType,CheckIn,CheckOut,BaseSalary,OTHours,OTRate,OTPay,ShiftAllowance,MealAllowance,TotalSalary\n";
+      records.forEach(r => {
+        csv += `"${r.id}","${r.employeeName}","${r.date}","${r.shift}","${r.dayType}","${r.checkIn}","${r.checkOut}",${r.baseSalary},${r.otHours},${r.otRate},${r.otPay},${r.shiftAllowance},${r.totalMealAllowance},${r.totalSalary}\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `TimePro_Payroll_${currentEmpId}_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast("ดาวน์โหลดไฟล์ CSV สำเร็จ");
+    }
+
+    function openBreakdownModal(item) {
+      playClick();
+      const modal = document.getElementById('breakdownModal');
+      const content = document.getElementById('modalContent');
+      if (!content) return;
+
+      content.innerHTML = `
+        <div class="bg-hardware-metal dark:bg-black/60 p-3 rounded-xl space-y-1 border border-hardware-carbon/10">
+          <div class="font-bold">${item.employeeName} (${item.date})</div>
+          <div>กะการทำงาน: <span class="font-bold">${item.shift === 'DAY' ? 'กลางวัน' : 'กลางคืน'}</span></div>
+          <div>ประเภทวัน: <span class="font-bold">${item.dayType === 'REGULAR' ? 'วันปกติ' : 'วันหยุด'}</span></div>
+          <div>เวลาจริง: <span class="font-mono font-bold">${item.checkIn} - ${item.checkOut} (${item.workedHours} ชม.)</span></div>
+        </div>
+        <div class="space-y-1.5 pt-1">
+          <div class="flex justify-between"><span>ค่าแรงปกติ:</span> <span class="font-bold font-mono">${(item.baseSalary || 0).toFixed(2)} ฿</span></div>
+          <div class="flex justify-between"><span>OT Pay (${item.otHours} ชม.):</span> <span class="font-bold font-mono text-hardware-orange">+${(item.otPay || 0).toFixed(2)} ฿</span></div>
+          <div class="flex justify-between"><span>ค่ากะกลางคืน:</span> <span class="font-bold font-mono">+${(item.shiftAllowance || 0).toFixed(2)} ฿</span></div>
+          <div class="flex justify-between"><span>ค่าอาหารรวม:</span> <span class="font-bold font-mono">+${(item.totalMealAllowance || 0).toFixed(2)} ฿</span></div>
+          <div class="border-t border-hardware-carbon/20 pt-2 flex justify-between font-extrabold text-sm text-hardware-orange">
+            <span>รวมรายได้สุทธิ:</span> <span class="font-mono">${(item.totalSalary || 0).toLocaleString('th-TH', {minimumFractionDigits:2})} ฿</span>
+          </div>
+        </div>
+      `;
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeBreakdownModal() { document.getElementById('breakdownModal').classList.add('hidden'); }
+
+    function openPayslipModal() {
+      playClick();
+      const emp = getCurrentEmpObj();
+      const records = JSON.parse(localStorage.getItem("payroll_records") || "[]").filter(r => r.id === currentEmpId);
+      const cutoffSelect = document.getElementById('cutoffPeriodSelect');
+      let endDateStr = new Date().toISOString().split('T')[0];
+
+      let empRecords = records;
+      if (cutoffSelect && cutoffSelect.value) {
+        const [start, end] = cutoffSelect.value.split('|');
+        empRecords = records.filter(r => r.date >= start && r.date <= end);
+        endDateStr = end;
+      }
+
+      let workDaysCount = empRecords.length;
+      let sumBase = 0, sumOT15 = 0, sumOT20 = 0, sumOT30 = 0, sumShift = 0, sumMeal = 0, sumOTMeal = 0;
+
+      empRecords.forEach(r => {
+        sumBase += (r.baseSalary || 0);
+        sumShift += (r.shiftAllowance || 0);
+        sumMeal += (r.normalMeal || 10);
+        sumOTMeal += (r.otMeal || 0);
+        if (r.otRate === 1.5) sumOT15 += (r.otPay || 0);
+        else if (r.otRate === 2.0) sumOT20 += (r.otPay || 0);
+        else if (r.otRate === 3.0) sumOT30 += (r.otPay || 0);
+      });
+
+      const totalEarnings = sumBase + sumOT15 + sumOT20 + sumOT30 + sumShift + sumMeal + sumOTMeal;
+      const socSec = totalEarnings > 0 ? Math.min(totalEarnings * 0.05, 375.00) : 0.00;
+      const netPay = totalEarnings - socSec;
+
+      document.getElementById('payslipHeaderInfo').innerHTML = `
+        <div>รหัส: <span class="font-bold">${emp.id}</span></div>
+        <div>ชื่อสกุล: <span class="font-bold">${emp.name}</span></div>
+        <div>แผนก: <span class="font-bold">${emp.dept}</span></div>
+        <div>วันเริ่มงาน: <span class="font-bold">${emp.startDate}</span></div>
+        <div>บัญชี: <span class="font-bold font-mono">${emp.bankAcc}</span></div>
+      `;
+
+      const genRow = (title, qty, amt) => `<tr><td class="p-1 border-r border-slate-900">${title}</td><td class="p-1 text-center border-r border-slate-900 font-mono">${qty}</td><td class="p-1 text-right font-mono">${amt}</td></tr>`;
+      const genDed = (title, amt) => `<tr><td class="p-1 border-r border-slate-900">${title}</td><td class="p-1 text-right font-mono">${amt}</td></tr>`;
+
+      document.getElementById('payslipEarningsBody').innerHTML = 
+        genRow('เงินเดือน/ค่าจ้าง', `${workDaysCount}.00`, sumBase.toFixed(2)) +
+        genRow('ค่าล่วงเวลา 1.5 เท่า', '-', sumOT15.toFixed(2)) +
+        genRow('ค่าล่วงเวลา 2 เท่า', '-', sumOT20.toFixed(2)) +
+        genRow('ค่าล่วงเวลา 3 เท่า', '-', sumOT30.toFixed(2)) +
+        genRow('ค่ากะ', '-', sumShift.toFixed(2)) +
+        genRow('ค่าอาหาร OT', '-', sumOTMeal.toFixed(2)) +
+        genRow('ค่าอาหารปกติ', '-', sumMeal.toFixed(2));
+
+      document.getElementById('payslipDeductionsBody').innerHTML = 
+        genDed('ประกันสังคม', socSec.toFixed(2)) +
+        genDed('หักอื่นๆ', '0.00');
+
+      document.getElementById('payslipTotalEarnings').textContent = totalEarnings.toLocaleString('th-TH', {minimumFractionDigits: 2});
+      document.getElementById('payslipTotalDeductions').textContent = socSec.toLocaleString('th-TH', {minimumFractionDigits: 2});
+      document.getElementById('payslipPayDate').textContent = endDateStr.split('-').reverse().join('/');
+      document.getElementById('payslipNetPay').textContent = netPay.toLocaleString('th-TH', {minimumFractionDigits: 2});
+
+      document.getElementById('payslipModal').classList.remove('hidden');
+    }
+
+    function closePayslipModal() { document.getElementById('payslipModal').classList.add('hidden'); }
+
+    function openConfigModal() {
+      playClick();
+      document.getElementById('gasUrlInput').value = localStorage.getItem("gas_url") || DEFAULT_GAS_URL;
+      document.getElementById('lineTokenInput').value = localStorage.getItem("line_token") || DEFAULT_LINE_TOKEN;
+      document.getElementById('lineUserIdInput').value = localStorage.getItem("line_user_id") || DEFAULT_LINE_USER_ID;
+      document.getElementById('configModal').classList.remove('hidden');
+    }
+
+    function closeConfigModal() { document.getElementById('configModal').classList.add('hidden'); }
+
+    function saveConfigSettings() {
+      playClick();
+      localStorage.setItem("gas_url", document.getElementById('gasUrlInput').value.trim());
+      localStorage.setItem("line_token", document.getElementById('lineTokenInput').value.trim());
+      localStorage.setItem("line_user_id", document.getElementById('lineUserIdInput').value.trim());
+      closeConfigModal();
+      showToast("บันทึกการตั้งค่าเรียบร้อย");
+    }
+
+    let toastTimeout;
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMsg');
+      if (!toast) return;
+      clearTimeout(toastTimeout);
+      toastMsg.textContent = msg;
+      toast.classList.remove('hidden');
+      toastTimeout = setTimeout(() => toast.classList.add('hidden'), 2500);
+    }
+
+    function clearLocalStorageData() {
+      playClick();
+      if (confirm("คุณต้องการล้างประวัติบันทึกเวลาทั้งหมดในอุปกรณ์นี้ใช่หรือไม่?")) {
+        localStorage.removeItem("payroll_records");
+        localStorage.removeItem("leave_records");
+        localStorage.removeItem("active_checkins");
+        loadTodayLiveStatus();
+        renderHistories();
+        showToast("ล้างข้อมูลเรียบร้อย");
+      }
+    }
+  </script>
+</body>
+</html>
