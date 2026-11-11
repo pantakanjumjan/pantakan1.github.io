@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="th" class="h-full">
+<html lang="th">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -9,7 +9,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Google Fonts: Space Mono (LCD / Metrics) & Prompt (Thai) -->
+  <!-- Google Fonts: Space Mono & Prompt -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
@@ -32,7 +32,6 @@
               darkPanel: '#1C1C1A',
               lcdBg: '#1E2320',
               lcdText: '#4ADE80',
-              lcdDarkText: '#38BDF8',
             }
           },
           boxShadow: {
@@ -48,9 +47,7 @@
   </script>
 
   <style>
-    * {
-      -webkit-tap-highlight-color: transparent;
-    }
+    * { -webkit-tap-highlight-color: transparent; }
     body {
       user-select: none;
       -webkit-font-smoothing: antialiased;
@@ -61,10 +58,6 @@
       background-color: #111110;
       color: #EAE6DF;
     }
-    .hide-scrollbar::-webkit-scrollbar { display: none; }
-    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-    /* Custom Hardware Select */
     .hardware-select {
       appearance: none;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23FF4F00'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2.5' d='M19 9l-7 7-7-7'%3E%3C/svg%3E");
@@ -72,8 +65,6 @@
       background-position: right 0.8rem center;
       background-size: 1rem;
     }
-
-    /* Print Specific Styles for Payslip */
     @media print {
       body { background: #fff !important; color: #000 !important; }
       body * { visibility: hidden !important; }
@@ -84,11 +75,10 @@
         box-shadow: none !important; background: #fff !important; color: #000 !important;
       }
       .no-print { display: none !important; }
-      .print-border { border-color: #000 !important; }
     }
   </style>
 </head>
-<body class="h-full flex flex-col pb-32 transition-colors duration-200">
+<body class="min-h-screen flex flex-col transition-colors duration-200">
 
   <!-- Industrial Hardware Header -->
   <header class="sticky top-0 z-30 bg-hardware-titanium dark:bg-hardware-darkPanel border-b-2 border-hardware-carbon dark:border-zinc-800 px-4 py-3 no-print transition-colors duration-200">
@@ -103,15 +93,12 @@
         </div>
       </div>
       <div class="flex items-center space-x-2">
-        <!-- Sound Toggle -->
-        <button onclick="toggleAudio()" id="audioToggleBtn" title="เปิด/ปิดเสียงคลิก" class="w-9 h-9 bg-hardware-metal dark:bg-zinc-800 border border-hardware-carbon/20 dark:border-zinc-700 rounded-lg flex items-center justify-center text-hardware-carbon dark:text-hardware-titanium active:translate-y-0.5 transition">
+        <button onclick="toggleAudio()" id="audioToggleBtn" class="w-9 h-9 bg-hardware-metal dark:bg-zinc-800 border border-hardware-carbon/20 dark:border-zinc-700 rounded-lg flex items-center justify-center text-hardware-carbon dark:text-hardware-titanium active:translate-y-0.5 transition">
           <i class="fa-solid fa-volume-high text-xs" id="audioIcon"></i>
         </button>
-        <!-- Dark Mode Toggle -->
-        <button onclick="toggleDarkMode()" title="สลับโหมดจอ OLED" class="w-9 h-9 bg-hardware-carbon dark:bg-hardware-titanium text-hardware-titanium dark:text-hardware-carbon rounded-lg flex items-center justify-center active:translate-y-0.5 transition shadow-sm">
-          <i class="fa-solid fa-circle-half-stroke text-xs" id="themeIcon"></i>
+        <button onclick="toggleDarkMode()" class="w-9 h-9 bg-hardware-carbon dark:bg-hardware-titanium text-hardware-titanium dark:text-hardware-carbon rounded-lg flex items-center justify-center active:translate-y-0.5 transition shadow-sm">
+          <i class="fa-solid fa-circle-half-stroke text-xs"></i>
         </button>
-        <!-- Settings Gear -->
         <button onclick="openConfigModal()" class="w-9 h-9 bg-hardware-metal dark:bg-zinc-800 border border-hardware-carbon/20 dark:border-zinc-700 rounded-lg flex items-center justify-center text-hardware-carbon dark:text-hardware-titanium active:translate-y-0.5 transition">
           <i class="fa-solid fa-gear text-xs"></i>
         </button>
@@ -119,8 +106,8 @@
     </div>
   </header>
 
-  <!-- Main Workstation Container -->
-  <main class="flex-1 max-w-md w-full mx-auto px-4 py-4 space-y-4 no-print">
+  <!-- Main Workstation Container: Added pb-32 (Safe Area for Bottom Nav) -->
+  <main class="flex-1 max-w-md w-full mx-auto px-4 py-4 space-y-4 pb-32 no-print">
 
     <!-- Global Employee Selector Module -->
     <div class="bg-hardware-metal dark:bg-zinc-900 border-2 border-hardware-carbon dark:border-zinc-800 p-2 rounded-xl shadow-sm">
@@ -129,16 +116,13 @@
         <span class="text-hardware-orange font-mono">SECURE ACCESS</span>
       </div>
       <select id="globalEmployeeSelect" onchange="playClick(); onEmployeeChange(this.value)" class="hardware-select w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 dark:border-zinc-700 text-hardware-carbon dark:text-hardware-titanium text-xs font-mono font-bold p-3 rounded-lg outline-none cursor-pointer">
-        <!-- Dynamic Options -->
       </select>
     </div>
 
-    <!-- TAB 1: Live Punch Chronograph Workstation -->
+    <!-- TAB 1: Live Punch Chronograph -->
     <section id="tab-1" class="tab-content space-y-4">
       
-      <!-- LCD Matrix Chronograph Screen -->
       <div class="bg-hardware-lcdBg border-4 border-hardware-carbon dark:border-zinc-700 rounded-2xl p-5 shadow-lcd-glow relative overflow-hidden text-hardware-lcdText font-mono">
-        <!-- CRT Scanline Effect -->
         <div class="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%)] bg-[length:100%_4px] pointer-events-none opacity-40"></div>
         
         <div class="relative z-10 flex flex-col justify-between space-y-3">
@@ -147,7 +131,6 @@
             <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded text-[9px] border border-emerald-500/30 animate-pulse">CHRONO ACTIVE</span>
           </div>
 
-          <!-- Main Live Clock Display -->
           <div class="text-center py-2">
             <div class="text-4xl font-extrabold tracking-tighter text-emerald-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.5)]" id="liveClock">
               00:00:00.0
@@ -155,7 +138,6 @@
             <div class="text-[9px] text-emerald-500/70 mt-1 uppercase tracking-widest">REALTIME TIME-RECORDER MODULE</div>
           </div>
 
-          <!-- Shift Controls Inside LCD Console -->
           <div class="grid grid-cols-2 gap-2 pt-2 border-t border-hardware-lcdText/20 text-[10px]">
             <div>
               <span class="block text-hardware-lcdText/60 text-[8px] uppercase">SHIFT CONFIG</span>
@@ -204,7 +186,6 @@
         </div>
       </div>
 
-      <!-- Live Punch Status Indicators -->
       <div class="grid grid-cols-2 gap-3 font-mono">
         <div class="bg-hardware-metal dark:bg-zinc-900 p-3 rounded-xl border-2 border-hardware-carbon dark:border-zinc-800 shadow-sm">
           <span class="text-[9px] text-zinc-500 dark:text-zinc-400 font-bold uppercase block">CHECK-IN TIME</span>
@@ -216,8 +197,8 @@
         </div>
       </div>
 
-      <!-- Mechanical Tactile Punch Action Buttons -->
-      <div class="grid grid-cols-2 gap-3 pt-1">
+      <!-- Action Buttons -->
+      <div class="grid grid-cols-2 gap-3">
         <button id="btnCheckIn" onclick="playClick(); handleLiveCheckIn()" class="group relative py-4 px-3 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white rounded-xl font-bold uppercase tracking-wider text-xs shadow-tactile active:shadow-tactile-pressed active:translate-y-1 transition-all border-2 border-emerald-900 flex flex-col items-center justify-center gap-1">
           <div class="flex items-center space-x-1.5">
             <i class="fa-solid fa-right-to-bracket"></i>
@@ -236,7 +217,7 @@
       </div>
     </section>
 
-    <!-- TAB 2: Manual Edit & Retroactive Form -->
+    <!-- TAB 2: Manual Edit -->
     <section id="tab-2" class="tab-content hidden space-y-4">
       <div class="bg-hardware-metal dark:bg-zinc-900 border-2 border-hardware-carbon dark:border-zinc-800 p-5 rounded-2xl shadow-sm space-y-4 font-mono">
         <div class="border-b border-hardware-carbon/20 dark:border-zinc-800 pb-2 flex items-center space-x-2">
@@ -251,57 +232,53 @@
 
         <form id="manualForm" onsubmit="playClick(); handleManualSubmit(event)" class="space-y-3 text-xs">
           <div>
-            <label class="block text-[9px] uppercase font-bold text-zinc-500 dark:text-zinc-400 mb-1">วันที่ต้องการบันทึก</label>
-            <input type="date" id="manualDate" required class="w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 dark:border-zinc-700 text-hardware-carbon dark:text-hardware-titanium p-2.5 rounded-lg font-mono outline-none">
+            <label class="block text-[9px] uppercase font-bold text-zinc-500 mb-1">วันที่ต้องการบันทึก</label>
+            <input type="date" id="manualDate" required class="w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 text-hardware-carbon dark:text-hardware-titanium p-2.5 rounded-lg font-mono outline-none">
           </div>
-
           <div class="grid grid-cols-2 gap-2">
             <div>
-              <label class="block text-[9px] uppercase font-bold text-zinc-500 dark:text-zinc-400 mb-1">กะการทำงาน</label>
-              <select id="manualShift" class="hardware-select w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 dark:border-zinc-700 text-hardware-carbon dark:text-hardware-titanium p-2.5 rounded-lg outline-none">
+              <label class="block text-[9px] uppercase font-bold text-zinc-500 mb-1">กะการทำงาน</label>
+              <select id="manualShift" class="hardware-select w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 text-hardware-carbon dark:text-hardware-titanium p-2.5 rounded-lg outline-none">
                 <option value="DAY">กลางวัน (08:00)</option>
                 <option value="NIGHT">กลางคืน (20:00)</option>
               </select>
             </div>
             <div>
-              <label class="block text-[9px] uppercase font-bold text-zinc-500 dark:text-zinc-400 mb-1">ประเภทวัน</label>
-              <select id="manualDayType" class="hardware-select w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 dark:border-zinc-700 text-hardware-carbon dark:text-hardware-titanium p-2.5 rounded-lg outline-none">
+              <label class="block text-[9px] uppercase font-bold text-zinc-500 mb-1">ประเภทวัน</label>
+              <select id="manualDayType" class="hardware-select w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 text-hardware-carbon dark:text-hardware-titanium p-2.5 rounded-lg outline-none">
                 <option value="REGULAR">วันปกติ (OT 1.5)</option>
                 <option value="HOLIDAY">วันหยุด (OT 2.0)</option>
               </select>
             </div>
           </div>
-
           <div>
-            <label class="block text-[9px] uppercase font-bold text-zinc-500 dark:text-zinc-400 mb-1">สถานะการทำงาน</label>
-            <select id="manualWorkType" class="hardware-select w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 dark:border-zinc-700 text-hardware-carbon dark:text-hardware-titanium p-2.5 rounded-lg outline-none">
+            <label class="block text-[9px] uppercase font-bold text-zinc-500 mb-1">สถานะการทำงาน</label>
+            <select id="manualWorkType" class="hardware-select w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 text-hardware-carbon dark:text-hardware-titanium p-2.5 rounded-lg outline-none">
               <option value="FULL">ทำงานเต็มวัน (8 ชม.)</option>
               <option value="HALF">ลาครึ่งวัน (200฿)</option>
             </select>
           </div>
-
           <div class="grid grid-cols-2 gap-2">
             <div>
-              <label class="block text-[9px] uppercase font-bold text-zinc-500 dark:text-zinc-400 mb-1">เวลาเข้า</label>
-              <input type="time" id="manualCheckIn" required class="w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 dark:border-zinc-700 text-hardware-carbon dark:text-hardware-titanium p-2.5 rounded-lg font-mono outline-none">
+              <label class="block text-[9px] uppercase font-bold text-zinc-500 mb-1">เวลาเข้า</label>
+              <input type="time" id="manualCheckIn" required class="w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 text-hardware-carbon dark:text-hardware-titanium p-2.5 rounded-lg font-mono outline-none">
             </div>
             <div>
-              <label class="block text-[9px] uppercase font-bold text-zinc-500 dark:text-zinc-400 mb-1">เวลาออก</label>
-              <input type="time" id="manualCheckOut" required class="w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 dark:border-zinc-700 text-hardware-carbon dark:text-hardware-titanium p-2.5 rounded-lg font-mono outline-none">
+              <label class="block text-[9px] uppercase font-bold text-zinc-500 mb-1">เวลาออก</label>
+              <input type="time" id="manualCheckOut" required class="w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 text-hardware-carbon dark:text-hardware-titanium p-2.5 rounded-lg font-mono outline-none">
             </div>
           </div>
-
-          <button type="submit" class="w-full py-3.5 bg-hardware-carbon dark:bg-hardware-orange text-white rounded-xl font-bold uppercase tracking-wider text-xs shadow-tactile active:translate-y-0.5 transition-all mt-2">
+          <button type="submit" class="w-full py-3.5 bg-hardware-carbon dark:bg-hardware-orange text-white rounded-xl font-bold uppercase tracking-wider text-xs shadow-tactile transition-all mt-2">
             คำนวณ & บันทึกย้อนหลัง
           </button>
         </form>
       </div>
     </section>
 
-    <!-- TAB 3: Leave Form Module -->
+    <!-- TAB 3: Leave Form -->
     <section id="tab-3" class="tab-content hidden space-y-4">
       <div class="bg-hardware-metal dark:bg-zinc-900 border-2 border-hardware-carbon dark:border-zinc-800 p-5 rounded-2xl shadow-sm space-y-4 font-mono">
-        <div class="border-b border-hardware-carbon/20 dark:border-zinc-800 pb-2 flex items-center space-x-2">
+        <div class="border-b border-hardware-carbon/20 pb-2 flex items-center space-x-2">
           <div class="w-7 h-7 bg-amber-600 text-white rounded flex items-center justify-center text-xs">
             <i class="fa-solid fa-calendar-minus"></i>
           </div>
@@ -313,97 +290,83 @@
 
         <form id="leaveForm" onsubmit="playClick(); handleLeaveSubmit(event)" class="space-y-3 text-xs">
           <div>
-            <label class="block text-[9px] uppercase font-bold text-zinc-500 dark:text-zinc-400 mb-1">ประเภทการลา</label>
-            <select id="leaveType" required class="hardware-select w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 dark:border-zinc-700 text-hardware-carbon dark:text-hardware-titanium p-2.5 rounded-lg outline-none">
+            <label class="block text-[9px] uppercase font-bold text-zinc-500 mb-1">ประเภทการลา</label>
+            <select id="leaveType" required class="hardware-select w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 text-hardware-carbon dark:text-hardware-titanium p-2.5 rounded-lg outline-none">
               <option value="ลากิจ">ลากิจ (Personal Leave)</option>
               <option value="ลาป่วย">ลาป่วย (Sick Leave)</option>
               <option value="ลาพักร้อน">ลาพักร้อน (Annual Leave)</option>
               <option value="ลาอื่นๆ">ลาอื่นๆ</option>
             </select>
           </div>
-
           <div class="grid grid-cols-2 gap-2">
             <div>
-              <label class="block text-[9px] uppercase font-bold text-zinc-500 dark:text-zinc-400 mb-1">ตั้งแต่วันที่</label>
-              <input type="date" id="leaveStartDate" required class="w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 dark:border-zinc-700 text-hardware-carbon dark:text-hardware-titanium p-2.5 rounded-lg font-mono outline-none">
+              <label class="block text-[9px] uppercase font-bold text-zinc-500 mb-1">ตั้งแต่วันที่</label>
+              <input type="date" id="leaveStartDate" required class="w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 text-hardware-carbon dark:text-hardware-titanium p-2.5 rounded-lg font-mono outline-none">
             </div>
             <div>
-              <label class="block text-[9px] uppercase font-bold text-zinc-500 dark:text-zinc-400 mb-1">ถึงวันที่</label>
-              <input type="date" id="leaveEndDate" required class="w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 dark:border-zinc-700 text-hardware-carbon dark:text-hardware-titanium p-2.5 rounded-lg font-mono outline-none">
+              <label class="block text-[9px] uppercase font-bold text-zinc-500 mb-1">ถึงวันที่</label>
+              <input type="date" id="leaveEndDate" required class="w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 text-hardware-carbon dark:text-hardware-titanium p-2.5 rounded-lg font-mono outline-none">
             </div>
           </div>
-
           <div>
-            <label class="block text-[9px] uppercase font-bold text-zinc-500 dark:text-zinc-400 mb-1">เหตุผลการลา</label>
-            <textarea id="leaveReason" rows="2" placeholder="ระบุเหตุผล..." class="w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 dark:border-zinc-700 text-hardware-carbon dark:text-hardware-titanium p-2.5 rounded-lg outline-none resize-none"></textarea>
+            <label class="block text-[9px] uppercase font-bold text-zinc-500 mb-1">เหตุผลการลา</label>
+            <textarea id="leaveReason" rows="2" placeholder="ระบุเหตุผล..." class="w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 text-hardware-carbon dark:text-hardware-titanium p-2.5 rounded-lg outline-none resize-none"></textarea>
           </div>
-
-          <button type="submit" class="w-full py-3.5 bg-amber-600 hover:bg-amber-500 text-white rounded-xl font-bold uppercase tracking-wider text-xs shadow-tactile active:translate-y-0.5 transition-all mt-2">
+          <button type="submit" class="w-full py-3.5 bg-amber-600 hover:bg-amber-500 text-white rounded-xl font-bold uppercase tracking-wider text-xs shadow-tactile transition-all mt-2">
             ส่งใบลางาน
           </button>
         </form>
       </div>
-
       <div class="space-y-2">
         <h3 class="text-[10px] font-mono font-bold text-zinc-500 uppercase px-1">ประวัติการลาล่าสุด</h3>
         <div id="leaveHistoryList" class="space-y-2"></div>
       </div>
     </section>
 
-    <!-- TAB 4: Dashboard, Payroll & Payslip Export -->
+    <!-- TAB 4: Dashboard & Summary -->
     <section id="tab-4" class="tab-content hidden space-y-4">
-      
-      <!-- Bi-Monthly Cutoff Selector & Actions -->
       <div class="bg-hardware-metal dark:bg-zinc-900 border-2 border-hardware-carbon dark:border-zinc-800 p-3 rounded-2xl shadow-sm space-y-2 font-mono">
         <div class="flex justify-between items-center">
-          <label class="text-[9px] font-bold uppercase text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5">
+          <label class="text-[9px] font-bold uppercase text-zinc-500 flex items-center gap-1.5">
             <i class="fa-solid fa-filter text-hardware-orange"></i> รอบตัดยอดคำนวณเงิน
           </label>
           <div class="flex gap-1.5">
-            <button onclick="playClick(); exportCSV()" title="Export CSV" class="bg-hardware-carbon dark:bg-zinc-800 text-hardware-titanium px-2.5 py-1.5 rounded-lg text-[10px] font-bold active:translate-y-0.5 transition flex items-center gap-1 shadow-sm">
+            <button onclick="playClick(); exportCSV()" class="bg-hardware-carbon text-hardware-titanium px-2.5 py-1.5 rounded-lg text-[10px] font-bold flex items-center gap-1">
               <i class="fa-solid fa-file-csv text-hardware-orange"></i> CSV
             </button>
-            <button onclick="playClick(); openPayslipModal()" class="bg-hardware-orange text-white px-3 py-1.5 rounded-lg text-[10px] font-bold active:translate-y-0.5 transition flex items-center gap-1 shadow-sm">
-              <i class="fa-solid fa-file-invoice-dollar"></i> ออกสลิปเงินเดือน
+            <button onclick="playClick(); openPayslipModal()" class="bg-hardware-orange text-white px-3 py-1.5 rounded-lg text-[10px] font-bold flex items-center gap-1">
+              <i class="fa-solid fa-file-invoice-dollar"></i> ออกสลิป
             </button>
           </div>
         </div>
-        <select id="cutoffPeriodSelect" onchange="renderHistories()" class="hardware-select w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 dark:border-zinc-700 text-hardware-carbon dark:text-hardware-titanium text-xs font-bold p-2.5 rounded-lg outline-none">
-          <!-- Dynamic Cutoff Periods -->
+        <select id="cutoffPeriodSelect" onchange="renderHistories()" class="hardware-select w-full bg-hardware-titanium dark:bg-black border border-hardware-carbon/30 text-hardware-carbon dark:text-hardware-titanium text-xs font-bold p-2.5 rounded-lg outline-none">
         </select>
       </div>
 
-      <!-- KPI Summary Cards -->
       <div class="grid grid-cols-2 gap-3 font-mono">
-        <div class="col-span-2 bg-hardware-carbon dark:bg-zinc-900 border-2 border-black dark:border-zinc-700 text-white p-5 rounded-2xl shadow-lg relative overflow-hidden flex flex-col justify-between">
-          <div class="absolute top-0 right-0 w-32 h-32 bg-hardware-orange opacity-10 rounded-full blur-2xl"></div>
+        <div class="col-span-2 bg-hardware-carbon text-white p-5 rounded-2xl shadow-lg relative overflow-hidden flex flex-col justify-between">
           <span class="text-[10px] text-zinc-400 uppercase tracking-widest">ยอดรวมเงินสุทธิในรอบนี้</span>
           <div class="flex justify-between items-baseline mt-2">
             <div class="text-3xl font-extrabold text-hardware-orange" id="summaryTotalSalary">0.00 ฿</div>
             <span class="text-[10px] bg-white/10 px-2.5 py-1 rounded-full text-zinc-300" id="summaryTotalRecords">0 รายการ</span>
           </div>
         </div>
-
-        <div class="bg-hardware-metal dark:bg-zinc-900 border-2 border-hardware-carbon dark:border-zinc-800 p-3.5 rounded-xl shadow-sm">
+        <div class="bg-hardware-metal dark:bg-zinc-900 p-3.5 rounded-xl border-2 border-hardware-carbon dark:border-zinc-800 shadow-sm">
           <span class="text-[9px] text-zinc-500 uppercase block font-bold">ชั่วโมง OT รวม</span>
           <span class="text-lg font-bold text-hardware-carbon dark:text-hardware-titanium" id="summaryTotalOT">0.0 ชม.</span>
         </div>
-
-        <div class="bg-hardware-metal dark:bg-zinc-900 border-2 border-hardware-carbon dark:border-zinc-800 p-3.5 rounded-xl shadow-sm">
+        <div class="bg-hardware-metal dark:bg-zinc-900 p-3.5 rounded-xl border-2 border-hardware-carbon dark:border-zinc-800 shadow-sm">
           <span class="text-[9px] text-zinc-500 uppercase block font-bold">ค่าอาหารรวม</span>
           <span class="text-lg font-bold text-hardware-carbon dark:text-hardware-titanium" id="summaryTotalMeals">0.00 ฿</span>
         </div>
       </div>
 
-      <!-- Payroll Records History List -->
       <div class="bg-hardware-metal dark:bg-zinc-900 border-2 border-hardware-carbon dark:border-zinc-800 p-4 rounded-2xl shadow-sm space-y-3 font-mono">
         <div class="flex justify-between items-center">
-          <h3 class="text-[10px] font-bold text-zinc-500 uppercase">ประวัติบันทึกเวลาในรอบตัดยอด</h3>
+          <h3 class="text-[10px] font-bold text-zinc-500 uppercase">ประวัติบันทึกเวลา</h3>
           <button onclick="clearLocalStorageData()" class="text-[9px] text-rose-600 hover:underline font-bold">ล้างประวัติ</button>
         </div>
-        <div id="payrollHistoryList" class="space-y-2">
-          <!-- Dynamic Cards -->
-        </div>
+        <div id="payrollHistoryList" class="space-y-2"></div>
       </div>
     </section>
 
@@ -434,7 +397,7 @@
   <!-- Breakdown Modal -->
   <div id="breakdownModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4 no-print">
     <div class="bg-hardware-titanium dark:bg-hardware-darkPanel border-2 border-hardware-carbon dark:border-zinc-700 w-full max-w-xs rounded-2xl shadow-2xl p-5 space-y-3 font-mono">
-      <div class="flex justify-between items-center border-b border-hardware-carbon/20 dark:border-zinc-800 pb-2">
+      <div class="flex justify-between items-center border-b border-hardware-carbon/20 pb-2">
         <h3 class="font-bold text-xs uppercase text-hardware-carbon dark:text-hardware-titanium">รายละเอียดคำนวณเชิงลึก</h3>
         <button onclick="closeBreakdownModal()" class="text-zinc-500 hover:text-hardware-orange p-1"><i class="fa-solid fa-xmark"></i></button>
       </div>
@@ -443,11 +406,9 @@
     </div>
   </div>
 
-  <!-- Official Payslip Printable Modal (บริษัท โพรเวิลด์ เพาเวอร์เอ้าท์ซอร์สซิ่ง จำกัด) -->
+  <!-- Official Payslip Printable Modal -->
   <div id="payslipModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-2 overflow-y-auto font-sans">
     <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl space-y-3 p-6 my-auto relative text-slate-900 text-xs" id="printablePayslipArea">
-      
-      <!-- Action Bar (Screen Only) -->
       <div class="flex justify-between items-center border-b border-slate-200 pb-3 no-print">
         <span class="font-bold text-sm text-indigo-900 flex items-center gap-1.5">
           <i class="fa-solid fa-file-invoice-dollar text-hardware-orange"></i> ใบจ่ายเงินเดือน (Payslip Official Preview)
@@ -459,23 +420,13 @@
           <button onclick="closePayslipModal()" class="text-slate-400 hover:text-slate-600 p-1"><i class="fa-solid fa-xmark text-base"></i></button>
         </div>
       </div>
-
-      <!-- Company Header -->
       <div class="text-center space-y-0.5">
         <h2 class="font-bold text-base tracking-wide">ใบจ่ายเงินเดือน</h2>
         <h3 class="font-extrabold text-lg tracking-wider text-slate-900">บริษัท โพรเวิลด์ เพาเวอร์เอ้าท์ซอร์สซิ่ง จำกัด</h3>
       </div>
-
-      <!-- Header Info Line -->
       <div class="flex flex-wrap justify-between items-center text-[11px] border-b-2 border-slate-900 pb-2 font-medium space-y-1 sm:space-y-0" id="payslipHeaderInfo"></div>
-
-      <!-- 3-Column Official Grid Layout Table -->
       <div class="grid grid-cols-12 gap-0.5 border-2 border-slate-900 text-[10px] leading-tight">
-        
-        <!-- Left & Center Columns: Earnings & Deductions -->
         <div class="col-span-9 grid grid-cols-9 border-r-2 border-slate-900">
-          
-          <!-- Earnings Section (Left) -->
           <div class="col-span-6 border-r-2 border-slate-900 flex flex-col justify-between">
             <table class="w-full text-left border-collapse">
               <thead>
@@ -488,12 +439,9 @@
               <tbody id="payslipEarningsBody" class="font-normal"></tbody>
             </table>
             <div class="flex justify-between font-bold border-t-2 border-slate-900 p-1 bg-slate-100">
-              <span>รวมเงินได้</span>
-              <span id="payslipTotalEarnings" class="font-mono">0.00</span>
+              <span>รวมเงินได้</span><span id="payslipTotalEarnings" class="font-mono">0.00</span>
             </div>
           </div>
-
-          <!-- Deductions Section (Center) -->
           <div class="col-span-3 flex flex-col justify-between">
             <table class="w-full text-left border-collapse">
               <thead>
@@ -505,14 +453,10 @@
               <tbody id="payslipDeductionsBody" class="font-normal"></tbody>
             </table>
             <div class="flex justify-between font-bold border-t-2 border-slate-900 p-1 bg-slate-100">
-              <span>รวมรายการหัก</span>
-              <span id="payslipTotalDeductions" class="font-mono">0.00</span>
+              <span>รวมรายการหัก</span><span id="payslipTotalDeductions" class="font-mono">0.00</span>
             </div>
           </div>
-
         </div>
-
-        <!-- Right Column: YTD Cumulative Summary & Net Pay -->
         <div class="col-span-3 flex flex-col justify-between text-[10px] bg-slate-50">
           <div class="space-y-1.5 p-1.5 font-mono">
             <div class="border-b border-slate-900 pb-1 text-center font-sans">
@@ -525,50 +469,40 @@
             <div class="border-b border-slate-300 pb-1 text-center"><span class="block font-bold font-sans">ค่าลดหย่อนอื่นๆ</span><span id="payslipOtherDeductions">0.00</span></div>
             <div class="text-center"><span class="block font-bold font-sans">เงินประกันสังคมต่อปี</span><span id="payslipYTDSocial">1,000.00</span></div>
           </div>
-
-          <!-- Net Salary Box -->
           <div class="border-t-2 border-slate-900 p-2 text-center bg-slate-200">
             <span class="block font-extrabold text-[11px] uppercase tracking-wide font-sans">เงินรับสุทธิ</span>
             <span id="payslipNetPay" class="font-extrabold text-base font-mono text-indigo-950">0.00</span>
           </div>
         </div>
-
       </div>
-
-      <!-- Payslip Footer -->
       <div class="pt-2 text-[9px] flex justify-between items-end font-mono">
         <div class="text-slate-500" id="payslipRefID">E_PaySlip ID: 202610211555{PROWORLD-HARDWARE}</div>
-        <div class="text-right font-sans font-bold text-slate-800">
-          ลงชื่อพนักงาน ___________________________________
-        </div>
+        <div class="text-right font-sans font-bold text-slate-800">ลงชื่อพนักงาน ___________________________________</div>
       </div>
-
     </div>
   </div>
 
   <!-- Settings Config Modal -->
   <div id="configModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4 no-print">
     <div class="bg-hardware-titanium dark:bg-hardware-darkPanel border-2 border-hardware-carbon dark:border-zinc-700 w-full max-w-xs rounded-2xl shadow-2xl p-5 space-y-3 font-mono">
-      <div class="flex justify-between items-center border-b border-hardware-carbon/20 dark:border-zinc-800 pb-2">
+      <div class="flex justify-between items-center border-b border-hardware-carbon/20 pb-2">
         <h3 class="font-bold text-xs uppercase text-hardware-carbon dark:text-hardware-titanium">CONFIG & WEBHOOK</h3>
         <button onclick="closeConfigModal()" class="text-zinc-500 hover:text-hardware-orange p-1"><i class="fa-solid fa-xmark"></i></button>
       </div>
-
       <div class="space-y-2 text-xs">
         <div>
           <label class="block text-[9px] uppercase font-bold text-zinc-500 mb-1">Google Apps Script URL</label>
-          <input type="text" id="gasUrlInput" class="w-full bg-hardware-metal dark:bg-black border border-hardware-carbon/30 dark:border-zinc-700 text-hardware-carbon dark:text-hardware-titanium p-2 rounded text-[10px] font-mono outline-none">
+          <input type="text" id="gasUrlInput" class="w-full bg-hardware-metal dark:bg-black border border-hardware-carbon/30 text-hardware-carbon dark:text-hardware-titanium p-2 rounded text-[10px] font-mono outline-none">
         </div>
         <div>
           <label class="block text-[9px] uppercase font-bold text-zinc-500 mb-1">LINE Channel Token</label>
-          <input type="text" id="lineTokenInput" class="w-full bg-hardware-metal dark:bg-black border border-hardware-carbon/30 dark:border-zinc-700 text-hardware-carbon dark:text-hardware-titanium p-2 rounded text-[10px] font-mono outline-none">
+          <input type="text" id="lineTokenInput" class="w-full bg-hardware-metal dark:bg-black border border-hardware-carbon/30 text-hardware-carbon dark:text-hardware-titanium p-2 rounded text-[10px] font-mono outline-none">
         </div>
         <div>
           <label class="block text-[9px] uppercase font-bold text-zinc-500 mb-1">LINE User ID</label>
-          <input type="text" id="lineUserIdInput" class="w-full bg-hardware-metal dark:bg-black border border-hardware-carbon/30 dark:border-zinc-700 text-hardware-carbon dark:text-hardware-titanium p-2 rounded text-[10px] font-mono outline-none">
+          <input type="text" id="lineUserIdInput" class="w-full bg-hardware-metal dark:bg-black border border-hardware-carbon/30 text-hardware-carbon dark:text-hardware-titanium p-2 rounded text-[10px] font-mono outline-none">
         </div>
       </div>
-
       <button onclick="saveConfigSettings()" class="w-full bg-hardware-orange text-white font-bold rounded-xl py-2.5 text-xs uppercase shadow-sm">
         บันทึกการตั้งค่า
       </button>
@@ -580,7 +514,7 @@
     <span id="toastMsg">แจ้งเตือนระบบ...</span>
   </div>
 
-  <!-- Audio Synthesizer for Mechanical Clicks -->
+  <!-- Scripts -->
   <script>
     let soundEnabled = true;
     function toggleAudio() {
@@ -617,13 +551,11 @@
       showToast(isDark ? "OLED Dark Mode เปิดใช้งาน" : "Warm Titanium Mode เปิดใช้งาน");
     }
 
-    // Load theme preference
     if (localStorage.getItem('theme_mode') === 'dark') {
       document.documentElement.classList.add('dark');
     }
   </script>
 
-  <!-- Core Application Logic -->
   <script>
     const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbzIC7PtGt_PeyQ7Co1GTiC0Ev6dPfDSiGhhyHClbKL1yMzUCTmeju8JKOYAtNGJZaB7/exec";
     const DEFAULT_LINE_TOKEN = "NCURffVn9SZ4I+MpbibQluWUNeLs5BM7xXT9lrs7HnE+IlDaKy9muokRv3gvBqsNDH0quqVo/PqSvf9kebRHZEPfLx7I4RJzjBUTEwSHbRewZ61/uhLgQjfUWjY1LpA8khVSbngeM6ewKPB5bw8qdAdB04t89/1O/w1cDnyilFU=";
@@ -797,8 +729,6 @@
       const shift = document.getElementById('shiftSelect').value;
       const dayType = document.getElementById('dayTypeSelect').value;
       const workType = document.getElementById('workTypeSelect').value;
-      
-      // Simulate dummy standard hours for estimation preview
       const dummyIn = shift === 'DAY' ? '08:00' : '20:00';
       const dummyOut = shift === 'DAY' ? '17:00' : '05:00';
       const calc = calculatePayroll(shift, dayType, dummyIn, dummyOut, workType);
@@ -833,7 +763,7 @@
         if (outText) outText.textContent = 'รอลงเวลาออก';
       } else {
         if (inEl) inEl.textContent = '--:--';
-        if (outEl) inEl.textContent = '--:--';
+        if (outEl) outEl.textContent = '--:--';
         if (inText) inText.textContent = 'พร้อมลงเวลาเข้า';
         if (outText) inText.textContent = 'พร้อมคำนวณออก';
       }
@@ -846,14 +776,10 @@
       const timeStr = now.toTimeString().split(' ')[0].substring(0, 5);
 
       let activeCheckins = JSON.parse(localStorage.getItem("active_checkins") || "{}");
-      if (activeCheckins[emp.id]) {
-        showToast("พนักงานท่านนี้ลงเวลาเข้าค้างไว้แล้ว");
-        return;
-      }
+      if (activeCheckins[emp.id]) { showToast("พนักงานท่านนี้ลงเวลาเข้าค้างไว้แล้ว"); return; }
 
       activeCheckins[emp.id] = {
-        date: dateStr,
-        time: timeStr,
+        date: dateStr, time: timeStr,
         shift: document.getElementById('shiftSelect').value,
         dayType: document.getElementById('dayTypeSelect').value,
         workType: document.getElementById('workTypeSelect').value
@@ -872,28 +798,14 @@
       let activeCheckins = JSON.parse(localStorage.getItem("active_checkins") || "{}");
       const activeIn = activeCheckins[emp.id];
 
-      if (!activeIn) {
-        showToast("ยังไม่มีประวัติ Check In ค้างไว้");
-        return;
-      }
+      if (!activeIn) { showToast("ยังไม่มีประวัติ Check In ค้างไว้"); return; }
 
       const now = new Date();
       const dateStr = activeIn.date || now.toISOString().split('T')[0];
       const timeStr = now.toTimeString().split(' ')[0].substring(0, 5);
 
       const calc = calculatePayroll(activeIn.shift, activeIn.dayType, activeIn.time, timeStr, activeIn.workType);
-
-      const recordObj = {
-        id: emp.id,
-        employeeName: emp.name,
-        date: dateStr,
-        shift: activeIn.shift,
-        dayType: activeIn.dayType,
-        workType: activeIn.workType,
-        checkIn: activeIn.time,
-        checkOut: timeStr,
-        ...calc
-      };
+      const recordObj = { id: emp.id, employeeName: emp.name, date: dateStr, shift: activeIn.shift, dayType: activeIn.dayType, workType: activeIn.workType, checkIn: activeIn.time, checkOut: timeStr, ...calc };
 
       let records = JSON.parse(localStorage.getItem("payroll_records") || "[]");
       records = records.filter(r => !(r.id === emp.id && r.date === dateStr));
@@ -940,8 +852,7 @@
       e.preventDefault();
       const emp = getCurrentEmpObj();
       const leaveObj = {
-        id: emp.id,
-        employeeName: emp.name,
+        id: emp.id, employeeName: emp.name,
         leaveType: document.getElementById('leaveType').value,
         startDate: document.getElementById('leaveStartDate').value,
         endDate: document.getElementById('leaveEndDate').value,
@@ -972,9 +883,7 @@
       renderHistories();
 
       const payload = {
-        action: "deletePayroll",
-        id: empId,
-        date: recordDate,
+        action: "deletePayroll", id: empId, date: recordDate,
         sendLine: true,
         channelAccessToken: localStorage.getItem("line_token") || DEFAULT_LINE_TOKEN,
         userId: localStorage.getItem("line_user_id") || DEFAULT_LINE_USER_ID,
@@ -992,17 +901,13 @@
       const lineUserId = localStorage.getItem("line_user_id") || DEFAULT_LINE_USER_ID;
 
       showToast("กำลังซิงค์ข้อมูล Google Sheets & LINE...");
-
       const payload = { sendLine: true, channelAccessToken: lineToken, userId: lineUserId, lineMessage, payrolls, leaves };
 
       fetch(gasUrl, {
         method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload)
       }).then(() => {
         showToast("ซิงค์ข้อมูลเรียบร้อย");
-      }).catch(err => {
-        console.error(err);
-        showToast("ส่งคำขอสำเร็จ (no-cors)");
-      });
+      }).catch(err => { console.error(err); showToast("ส่งคำขอสำเร็จ (no-cors)"); });
     }
 
     function buildCutoffOptions() {
@@ -1055,9 +960,7 @@
                 <div onclick='openBreakdownModal(${JSON.stringify(r)})' class="cursor-pointer flex-1">
                   <div class="font-bold text-hardware-carbon dark:text-hardware-titanium text-xs flex items-center gap-1.5">
                     <span>${r.date.split('-').reverse().join('/')}</span>
-                    <span class="text-[9px] px-1.5 py-0.2 rounded font-mono ${r.shift === 'DAY' ? 'bg-amber-200 text-amber-900' : 'bg-indigo-200 text-indigo-900'}">
-                      ${r.shift === 'DAY' ? 'DAY' : 'NIGHT'}
-                    </span>
+                    <span class="text-[9px] px-1.5 py-0.2 rounded font-mono ${r.shift === 'DAY' ? 'bg-amber-200 text-amber-900' : 'bg-indigo-200 text-indigo-900'}">${r.shift === 'DAY' ? 'DAY' : 'NIGHT'}</span>
                   </div>
                   <div class="text-[10px] text-zinc-500 font-mono mt-0.5">${r.checkIn || '-'} - ${r.checkOut || '-'} | OT: ${r.otHours || 0}h</div>
                 </div>
