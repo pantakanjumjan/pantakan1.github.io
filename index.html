@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Provide Power // Atelier Chronograph</title>
+  <title>Provide Power // MECHA-TOURBILLON HUD</title>
 
   <!-- iOS Web App Fullscreen & Native Feel Meta Tags -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="ProvidePower">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#09090B">
+  <meta name="theme-color" content="#050608">
   <link id="appleTouchIconLink" rel="apple-touch-icon" sizes="180x180" href="">
   <link id="faviconLink" rel="icon" type="image/png" href="">
   <link id="pwaManifestLink" rel="manifest" href="">
@@ -20,145 +20,69 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,500;0,600;0,700;1,600;1,700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700;800&family=Sarabun:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,500;0,600;0,700;1,600;1,700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700;800&family=Orbitron:wght@600;700;800;900&family=Sarabun:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet">
 
-  <!-- Exact Untouched User Logo Extraction & High-Res App Icon Generator -->
   <script>
-    // Raw Source Logo Data (Untouched Geometry & Proportions)
-    const RAW_USER_LOGO_SRC = "GEM_PHOTO_CEDFD3BF-AB6F-4C40-8178-6F0E9A571B4A_L0_001_recent_photo_14C60923-746F-4405-A6C3-DBE80BA9E180.jpg";
+    const EXACT_USER_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 225" fill="none">
+      <path fill="#FF1212" d="M68 18 H192 L222 70 H112 L94 101 H54 L36 70 Z"/>
+      <path fill="#FF1212" d="M29 82 L47 51 L65 82 L41 124 L23 93 Z"/>
+      <path fill="#FF1212" d="M77 82 H115 L74 153 L55 120 Z"/>
+      <path fill="#FF1212" d="M128 82 H229 L246 112 H111 L82 162 L101 195 H159 L174 169 H126 L142 141 H231 L182 225 H82 L42 156 L84 82 Z"/>
+    </svg>`;
 
-    // Build Clean Transparent PNG of the Exact User Logo Without Altering a Single Shape
-    function extractExactTransparentLogo(callback) {
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      img.onload = function () {
-        try {
-          const w = img.naturalWidth || 350;
-          const h = img.naturalHeight || 144;
-          const c = document.createElement('canvas');
-          c.width = w;
-          c.height = h;
-          const ctx = c.getContext('2d');
-          ctx.drawImage(img, 0, 0, w, h);
+    const EMBEDDED_LOGO_DATA_URI = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(EXACT_USER_LOGO_SVG);
 
-          const imgData = ctx.getImageData(0, 0, w, h);
-          const data = imgData.data;
-          let minX = w, minY = h, maxX = 0, maxY = 0;
-
-          // Remove pure white background cleanly while preserving exact red pixels
-          for (let i = 0; i < data.length; i += 4) {
-            const r = data[i];
-            const g = data[i + 1];
-            const b = data[i + 2];
-            // White background pixels have high R, G, B simultaneously
-            const whiteness = Math.min(r, g, b);
-            if (whiteness > 215) {
-              data[i + 3] = 0;
-            } else if (whiteness > 165) {
-              // Smooth anti-aliased edge transition
-              const alpha = Math.round(((215 - whiteness) / 50) * 255);
-              data[i + 3] = Math.min(data[i + 3], alpha);
-            }
-
-            if (data[i + 3] > 20) {
-              const px = (i / 4) % w;
-              const py = Math.floor((i / 4) / w);
-              if (px < minX) minX = px;
-              if (px > maxX) maxX = px;
-              if (py < minY) minY = py;
-              if (py > maxY) maxY = py;
-            }
-          }
-          ctx.putImageData(imgData, 0, 0);
-
-          // Tight crop around the exact untouched logo bounds
-          if (maxX > minX && maxY > minY) {
-            const pad = 4;
-            const cx = Math.max(0, minX - pad);
-            const cy = Math.max(0, minY - pad);
-            const cw = Math.min(w - cx, (maxX - minX) + pad * 2);
-            const ch = Math.min(h - cy, (maxY - minY) + pad * 2);
-
-            const cropped = document.createElement('canvas');
-            cropped.width = cw;
-            cropped.height = ch;
-            cropped.getContext('2d').drawImage(c, cx, cy, cw, ch, 0, 0, cw, ch);
-            callback(cropped.toDataURL('image/png'), cropped);
-          } else {
-            callback(c.toDataURL('image/png'), c);
-          }
-        } catch (err) {
-          callback(RAW_USER_LOGO_SRC, img);
-        }
-      };
-      img.onerror = function () {
-        callback(RAW_USER_LOGO_SRC, null);
-      };
-      img.src = RAW_USER_LOGO_SRC;
+    function applyEmbeddedLogoToAllSlots() {
+      document.querySelectorAll('.exact-user-logo').forEach(img => {
+        img.src = EMBEDDED_LOGO_DATA_URI;
+      });
     }
 
     (function initBespokeAppIconAndBranding() {
-      extractExactTransparentLogo((cleanLogoDataUrl, logoCanvasOrImg) => {
-        // Inject exact untouched logo into all brand slots in DOM
-        window.__CLEAN_USER_LOGO_URL__ = cleanLogoDataUrl;
-        document.querySelectorAll('.exact-user-logo').forEach(el => {
-          el.src = cleanLogoDataUrl;
-        });
+      window.addEventListener('DOMContentLoaded', applyEmbeddedLogoToAllSlots);
 
+      const img = new Image();
+      img.onload = function () {
         try {
           const canvas = document.createElement('canvas');
           canvas.width = 512;
           canvas.height = 512;
           const ctx = canvas.getContext('2d');
 
-          // Deep Forged Obsidian Metal App Icon Base
           const bgGrad = ctx.createLinearGradient(0, 0, 512, 512);
-          bgGrad.addColorStop(0, '#1C1D22');
-          bgGrad.addColorStop(0.5, '#0E0F13');
-          bgGrad.addColorStop(1, '#060709');
+          bgGrad.addColorStop(0, '#181A20');
+          bgGrad.addColorStop(0.5, '#090A0D');
+          bgGrad.addColorStop(1, '#040507');
           ctx.fillStyle = bgGrad;
           ctx.fillRect(0, 0, 512, 512);
 
-          // Micro-machined Diagonal Brushed Texture
-          ctx.strokeStyle = 'rgba(255, 255, 255, 0.035)';
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
           ctx.lineWidth = 2;
-          for (let i = -512; i < 1024; i += 20) {
+          for (let i = -512; i < 1024; i += 18) {
             ctx.beginPath();
             ctx.moveTo(i, 0);
             ctx.lineTo(i + 512, 512);
             ctx.stroke();
           }
 
-          // Subtle Crimson Backlight Halo Behind Untouched Logo
-          const halo = ctx.createRadialGradient(256, 238, 15, 256, 238, 225);
-          halo.addColorStop(0, 'rgba(255, 20, 20, 0.30)');
-          halo.addColorStop(0.65, 'rgba(220, 38, 38, 0.08)');
+          const halo = ctx.createRadialGradient(256, 234, 18, 256, 234, 230);
+          halo.addColorStop(0, 'rgba(255, 20, 20, 0.42)');
+          halo.addColorStop(0.65, 'rgba(220, 38, 38, 0.12)');
           halo.addColorStop(1, 'rgba(0, 0, 0, 0)');
           ctx.fillStyle = halo;
           ctx.fillRect(0, 0, 512, 512);
 
-          // Thin Titanium Rim Frame
-          ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
+          ctx.strokeStyle = 'rgba(239, 35, 60, 0.45)';
           ctx.lineWidth = 3;
-          ctx.strokeRect(26, 26, 460, 460);
+          ctx.strokeRect(24, 24, 464, 464);
 
-          // Draw Exact Untouched Logo Centered in App Icon
-          if (logoCanvasOrImg) {
-            const srcW = logoCanvasOrImg.width || logoCanvasOrImg.naturalWidth || 200;
-            const srcH = logoCanvasOrImg.height || logoCanvasOrImg.naturalHeight || 200;
-            const maxDim = 290;
-            const scale = Math.min(maxDim / srcW, maxDim / srcH);
-            const drawW = srcW * scale;
-            const drawH = srcH * scale;
-            ctx.shadowColor = 'rgba(255, 0, 0, 0.45)';
-            ctx.shadowBlur = 22;
-            ctx.drawImage(logoCanvasOrImg, (512 - drawW) / 2, (476 - drawH) / 2, drawW, drawH);
-            ctx.shadowBlur = 0;
-          }
+          ctx.shadowColor = 'rgba(255, 0, 0, 0.65)';
+          ctx.shadowBlur = 28;
+          ctx.drawImage(img, 106, 96, 300, 260);
+          ctx.shadowBlur = 0;
 
-          // Clean Atelier Typography Strip
-          ctx.fillStyle = '#D4D4D8';
-          ctx.font = '700 28px sans-serif';
+          ctx.fillStyle = '#F4F4F5';
+          ctx.font = '800 26px sans-serif';
           ctx.textAlign = 'center';
           ctx.fillText('PROVIDE POWER', 256, 454);
 
@@ -167,13 +91,13 @@
           document.getElementById('faviconLink').href = iconDataUrl;
 
           const manifestObj = {
-            name: "Provide Power Workforce & Payroll",
+            name: "Provide Power Mecha-Tourbillon HUD",
             short_name: "ProvidePower",
             start_url: window.location.href.split('#')[0],
             display: "standalone",
             orientation: "portrait",
-            background_color: "#09090B",
-            theme_color: "#09090B",
+            background_color: "#050608",
+            theme_color: "#050608",
             icons: [
               { src: iconDataUrl, sizes: "192x192", type: "image/png" },
               { src: iconDataUrl, sizes: "512x512", type: "image/png", purpose: "any maskable" }
@@ -181,10 +105,9 @@
           };
           const manifestBlob = new Blob([JSON.stringify(manifestObj)], { type: 'application/manifest+json' });
           document.getElementById('pwaManifestLink').href = URL.createObjectURL(manifestBlob);
-        } catch (e) {
-          console.warn("PWA icon setup fallback:", e);
-        }
-      });
+        } catch (e) {}
+      };
+      img.src = EMBEDDED_LOGO_DATA_URI;
     })();
   </script>
 
@@ -196,20 +119,18 @@
           fontFamily: {
             sans: ['IBM Plex Sans Thai', 'sans-serif'],
             display: ['Chakra Petch', 'IBM Plex Sans Thai', 'sans-serif'],
+            hud: ['Orbitron', 'Chakra Petch', 'sans-serif'],
             mono: ['JetBrains Mono', 'monospace'],
             slip: ['Sarabun', 'IBM Plex Sans Thai', 'sans-serif'],
           },
           colors: {
             brand: {
-              bg: '#E6E4DE',
+              bg: '#E2E0D8',
               card: '#F7F6F2',
-              subtle: '#DCD9D0',
-              ink: '#111215',
-              crimson: '#E11D48',
-              darkBg: '#07080A',
-              darkCard: '#101116',
-              darkSubtle: '#171920',
-              emerald: '#10B981'
+              ink: '#0F1014',
+              crimson: '#FF1E38',
+              darkBg: '#050608',
+              darkCard: '#0C0E13'
             }
           }
         }
@@ -244,12 +165,16 @@
 
     @media screen and (max-width: 768px) {
       input[type="text"],
+      input[type="password"],
       input[type="number"],
       input[type="date"],
       input[type="time"],
       textarea,
       select {
         font-size: 16px !important;
+      }
+      #globalEmployeeSelect {
+        font-size: 14px !important;
       }
     }
 
@@ -270,9 +195,6 @@
       min-width: 0;
     }
 
-    /* =====================================================================
-       BESPOKE HAUTE HOROLOGY & FORGED CARBON ENVIRONMENT
-       ===================================================================== */
     .atelier-stage {
       position: fixed;
       inset: 0;
@@ -281,25 +203,35 @@
       overflow: hidden;
     }
 
-    /* Brushed Titanium & Forged Carbon Weave */
     .forged-metal-layer {
       position: absolute;
       inset: 0;
-      background-color: #E5E3DC;
+      background-color: #DFDDD5;
       background-image:
-        repeating-linear-gradient(125deg, rgba(0, 0, 0, 0.025) 0px, rgba(0, 0, 0, 0.025) 1px, transparent 1px, transparent 4px),
-        repeating-linear-gradient(35deg, rgba(255, 255, 255, 0.25) 0px, rgba(255, 255, 255, 0.25) 1px, transparent 1px, transparent 8px),
-        radial-gradient(circle at 82% 8%, rgba(225, 29, 72, 0.14) 0%, transparent 46%),
-        radial-gradient(circle at 14% 90%, rgba(17, 18, 21, 0.09) 0%, transparent 50%);
+        linear-gradient(27deg, rgba(0,0,0,0.04) 5px, transparent 5px),
+        linear-gradient(207deg, rgba(0,0,0,0.04) 5px, transparent 5px),
+        linear-gradient(27deg, rgba(255,255,255,0.28) 5px, transparent 5px),
+        linear-gradient(207deg, rgba(255,255,255,0.28) 5px, transparent 5px),
+        radial-gradient(circle at 82% 8%, rgba(255, 30, 56, 0.16) 0%, transparent 48%),
+        radial-gradient(circle at 12% 90%, rgba(15, 16, 20, 0.12) 0%, transparent 50%);
+      background-size: 20px 20px, 20px 20px, 20px 20px, 20px 20px, 100% 100%, 100% 100%;
+      background-position: 0 5px, 10px 0, 0 10px, 10px 5px, 0 0, 0 0;
       transition: background-color 0.35s ease;
     }
+
     html.dark .forged-metal-layer {
-      background-color: #060709;
+      background-color: #050608;
       background-image:
-        repeating-linear-gradient(125deg, rgba(255, 255, 255, 0.02) 0px, rgba(255, 255, 255, 0.02) 1px, transparent 1px, transparent 4px),
-        repeating-linear-gradient(35deg, rgba(255, 255, 255, 0.012) 0px, rgba(255, 255, 255, 0.012) 1px, transparent 1px, transparent 9px),
-        radial-gradient(circle at 84% 8%, rgba(239, 35, 60, 0.24) 0%, transparent 48%),
-        radial-gradient(circle at 10% 88%, rgba(220, 38, 38, 0.12) 0%, transparent 45%);
+        linear-gradient(27deg, #0b0d12 5px, transparent 5px),
+        linear-gradient(207deg, #0b0d12 5px, transparent 5px),
+        linear-gradient(27deg, #11141c 5px, transparent 5px),
+        linear-gradient(207deg, #11141c 5px, transparent 5px),
+        linear-gradient(90deg, #08090d 10px, transparent 10px),
+        linear-gradient(#090b10 25%, #07080b 25%, #07080b 50%, transparent 50%, transparent 75%, #0a0c11 75%, #0a0c11),
+        radial-gradient(circle at 84% 6%, rgba(255, 24, 48, 0.25) 0%, transparent 46%),
+        radial-gradient(circle at 10% 92%, rgba(220, 38, 38, 0.14) 0%, transparent 48%);
+      background-size: 20px 20px, 20px 20px, 20px 20px, 20px 20px, 20px 20px, 20px 20px, 100% 100%, 100% 100%;
+      background-position: 0 5px, 10px 0, 0 10px, 10px 5px, 0 0, 0 0, 0 0, 0 0;
     }
 
     @keyframes gear-rotate-cw {
@@ -310,477 +242,391 @@
       from { transform: rotate(360deg); }
       to { transform: rotate(0deg); }
     }
-    .gear-cw {
-      animation: gear-rotate-cw 60s linear infinite;
+    @keyframes hud-scanline {
+      0% { transform: translateY(-100%); opacity: 0; }
+      30% { opacity: 0.35; }
+      70% { opacity: 0.35; }
+      100% { transform: translateY(340px); opacity: 0; }
     }
-    .gear-ccw {
-      animation: gear-rotate-ccw 45s linear infinite;
+    @keyframes status-ping {
+      75%, 100% { transform: scale(2); opacity: 0; }
     }
-    .gear-fast-cw {
-      animation: gear-rotate-cw 24s linear infinite;
+    .gear-cw { animation: gear-rotate-cw 55s linear infinite; }
+    .gear-ccw { animation: gear-rotate-ccw 38s linear infinite; }
+    .hud-scanner { animation: hud-scanline 4.8s ease-in-out infinite; }
+    .status-pulse { animation: status-ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite; }
+
+    .bezel-shell {
+      position: relative;
+      padding: 1.25px;
+      background: linear-gradient(135deg, rgba(255, 30, 56, 0.65) 0%, rgba(161, 161, 170, 0.38) 42%, rgba(24, 24, 27, 0.35) 72%, rgba(255, 30, 56, 0.45) 100%);
+      clip-path: polygon(
+        14px 0%, calc(100% - 14px) 0%,
+        100% 14px, 100% calc(100% - 14px),
+        calc(100% - 14px) 100%, 14px 100%,
+        0% calc(100% - 14px), 0% 14px
+      );
+      box-shadow: 0 14px 34px -10px rgba(0, 0, 0, 0.28);
+    }
+    html.dark .bezel-shell {
+      box-shadow: 0 18px 42px -12px rgba(0, 0, 0, 0.92), 0 0 18px -4px rgba(255, 30, 56, 0.14);
     }
 
-    /* =====================================================================
-       OCTAGONAL MILLED TITANIUM BEZEL ARCHITECTURE (Signature Non-AI Look)
-       ===================================================================== */
-    .bezel-shell {
-      padding: 1px;
-      background: linear-gradient(140deg, rgba(239, 35, 60, 0.48) 0%, rgba(161, 161, 170, 0.35) 45%, rgba(24, 24, 27, 0.3) 75%, rgba(239, 35, 60, 0.32) 100%);
-      clip-path: polygon(
-        13px 0%, calc(100% - 13px) 0%,
-        100% 13px, 100% calc(100% - 13px),
-        calc(100% - 13px) 100%, 13px 100%,
-        0% calc(100% - 13px), 0% 13px
-      );
-    }
     .bezel-card {
       position: relative;
-      background: linear-gradient(160deg, rgba(255, 255, 255, 0.92) 0%, rgba(242, 240, 234, 0.85) 100%);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      background: linear-gradient(165deg, rgba(255, 255, 255, 0.94) 0%, rgba(240, 238, 232, 0.88) 100%);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
       clip-path: polygon(
-        12.5px 0%, calc(100% - 12.5px) 0%,
-        100% 12.5px, 100% calc(100% - 12.5px),
-        calc(100% - 12.5px) 100%, 12.5px 100%,
-        0% calc(100% - 12.5px), 0% 12.5px
+        13.2px 0%, calc(100% - 13.2px) 0%,
+        100% 13.2px, 100% calc(100% - 13.2px),
+        calc(100% - 13.2px) 100%, 13.2px 100%,
+        0% calc(100% - 13.2px), 0% 13.2px
       );
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 12px 30px -8px rgba(17, 18, 21, 0.14);
     }
     html.dark .bezel-card {
-      background: linear-gradient(160deg, rgba(20, 22, 28, 0.90) 0%, rgba(11, 12, 16, 0.94) 100%);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 16px 36px -10px rgba(0, 0, 0, 0.9);
+      background: linear-gradient(165deg, rgba(16, 18, 24, 0.94) 0%, rgba(8, 10, 14, 0.92) 100%);
     }
 
-    /* Tourbillon Watch Case (Main Hero Chronograph) */
     .watch-case-shell {
+      position: relative;
       padding: 1.5px;
-      background: linear-gradient(135deg, #FF1E1E 0%, rgba(255, 255, 255, 0.28) 38%, rgba(82, 82, 91, 0.4) 68%, #DC2626 100%);
+      background: linear-gradient(135deg, #FF1E38 0%, #3F3F46 48%, #FF1E38 100%);
       clip-path: polygon(
-        20px 0%, calc(100% - 20px) 0%,
-        100% 20px, 100% calc(100% - 20px),
-        calc(100% - 20px) 100%, 20px 100%,
-        0% calc(100% - 20px), 0% 20px
+        16px 0%, calc(100% - 16px) 0%,
+        100% 16px, 100% calc(100% - 16px),
+        calc(100% - 16px) 100%, 16px 100%,
+        0% calc(100% - 16px), 0% 16px
       );
-      box-shadow: 0 24px 50px -12px rgba(239, 35, 60, 0.28), 0 20px 40px -10px rgba(0, 0, 0, 0.8);
+      box-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.85), 0 0 24px -4px rgba(255, 30, 56, 0.25);
     }
     .watch-case-inner {
-      background:
-        radial-gradient(circle at 50% 35%, rgba(62, 10, 16, 0.95) 0%, rgba(12, 13, 17, 0.98) 62%, rgba(6, 7, 9, 1) 100%);
+      background: radial-gradient(circle at 85% 15%, rgba(255, 30, 56, 0.18) 0%, transparent 55%),
+                  linear-gradient(160deg, #111319 0%, #06070A 100%);
       clip-path: polygon(
-        19px 0%, calc(100% - 19px) 0%,
-        100% 19px, 100% calc(100% - 19px),
-        calc(100% - 19px) 100%, 19px 100%,
-        0% calc(100% - 19px), 0% 19px
+        15px 0%, calc(100% - 15px) 0%,
+        100% 15px, 100% calc(100% - 15px),
+        calc(100% - 15px) 100%, 15px 100%,
+        0% calc(100% - 15px), 0% 15px
       );
     }
 
-    /* Tactile Chronograph Pusher Button */
     .chrono-pusher {
-      position: relative;
       clip-path: polygon(
-        10px 0%, calc(100% - 10px) 0%,
-        100% 10px, 100% calc(100% - 10px),
-        calc(100% - 10px) 100%, 10px 100%,
-        0% calc(100% - 10px), 0% 10px
+        8px 0%, calc(100% - 8px) 0%,
+        100% 8px, 100% calc(100% - 8px),
+        calc(100% - 8px) 100%, 8px 100%,
+        0% calc(100% - 8px), 0% 8px
       );
-      transition: transform 0.1s cubic-bezier(0.22, 1, 0.36, 1), filter 0.15s ease;
+      transition: transform 0.12s ease, opacity 0.15s ease, background-color 0.2s ease;
     }
-    .chrono-pusher:active {
-      transform: scale(0.968) translateY(1px);
+    .chrono-pusher:active:not(:disabled) {
+      transform: scale(0.97);
+    }
+    .chrono-pusher:disabled {
+      opacity: 0.42;
+      cursor: not-allowed;
+    }
+
+    .tactical-stripes {
+      background-image: repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 8px,
+        rgba(255, 255, 255, 0.06) 8px,
+        rgba(255, 255, 255, 0.06) 16px
+      );
     }
 
     .custom-select {
       -webkit-appearance: none;
       appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23EF233C'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2.4' d='M19 9l-7 7-7-7'%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FF1E38' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
       background-repeat: no-repeat;
       background-position: right 0.65rem center;
-      background-size: 0.9rem;
-      padding-right: 1.85rem;
+      background-size: 0.95em;
+      padding-right: 2rem;
     }
 
-    @keyframes pulse-ring {
-      0% { transform: scale(0.9); opacity: 0.9; }
-      50% { transform: scale(1.28); opacity: 0.3; }
-      100% { transform: scale(0.9); opacity: 0.9; }
-    }
-    .status-pulse {
-      animation: pulse-ring 1.8s infinite ease-in-out;
-    }
-
-    /* Official Payslip Sheet Styling */
     .official-slip-sheet {
       font-family: 'Sarabun', 'IBM Plex Sans Thai', sans-serif;
-      color: #000000;
       background: #FFFFFF;
+      color: #000000;
     }
 
-    /* Landscape PNG Export Layout Override (Exact 920px A5 Landscape Form) */
     .png-landscape-mode {
       width: 920px !important;
       max-width: 920px !important;
-      min-width: 920px !important;
-      padding: 28px 34px 32px 34px !important;
       border-radius: 0 !important;
+      padding: 24px 28px !important;
       box-shadow: none !important;
-      background: #FFFFFF !important;
-    }
-    .png-landscape-mode #slipHeaderRow {
-      display: flex !important;
-      flex-wrap: nowrap !important;
-      justify-content: space-between !important;
-      align-items: center !important;
-      font-size: 13.5px !important;
-      margin-bottom: 6px !important;
     }
     .png-landscape-mode #slipMainGrid {
       display: grid !important;
-      grid-template-columns: 1fr 165px !important;
-      gap: 12px !important;
-      align-items: stretch !important;
+      grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
     }
     .png-landscape-mode #slipLeftCol {
-      grid-column: span 1 !important;
+      grid-column: span 9 / span 9 !important;
     }
     .png-landscape-mode #slipRightCol {
-      grid-column: span 1 !important;
-      display: flex !important;
-      flex-direction: column !important;
-      justify-content: space-between !important;
-      gap: 8px !important;
-    }
-    .png-landscape-mode td,
-    .png-landscape-mode th {
-      white-space: nowrap !important;
+      grid-column: span 3 / span 3 !important;
     }
 
     @media print {
-      @page { size: landscape; margin: 10mm; }
-      body { background: #fff !important; color: #000 !important; }
       body * { visibility: hidden !important; }
-      #printablePayslipArea, #printablePayslipArea * { visibility: visible !important; }
+      #payslipModal, #printablePayslipArea, #printablePayslipArea * {
+        visibility: visible !important;
+      }
+      #payslipModal {
+        position: fixed !important;
+        inset: 0 !important;
+        background: #FFFFFF !important;
+        padding: 0 !important;
+        display: block !important;
+      }
       #printablePayslipArea {
-        position: absolute !important; left: 0 !important; top: 0 !important;
-        width: 100% !important; padding: 0 !important; margin: 0 !important;
-        box-shadow: none !important; background: #fff !important; color: #000 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        padding: 12mm !important;
       }
       .no-print { display: none !important; }
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col bg-brand-bg dark:bg-brand-darkBg text-brand-ink dark:text-zinc-100 transition-colors duration-300">
+<body class="text-zinc-900 dark:text-zinc-100 min-h-screen">
 
-  <!-- =====================================================================
-       BESPOKE HAUTE HOROLOGY & SKELETON MOVEMENT WALLPAPER STAGE
-       ===================================================================== -->
+  <!-- Background Mecha-Tourbillon Stage -->
   <div class="atelier-stage no-print" aria-hidden="true">
     <div class="forged-metal-layer"></div>
     <canvas id="atelierKineticCanvas" class="absolute inset-0 w-full h-full"></canvas>
-
-    <!-- Skeleton Mechanical Escapement & Caliper Architecture -->
-    <svg id="parallaxMovementSvg" class="absolute inset-0 w-full h-full opacity-20 dark:opacity-30 transition-transform duration-200 ease-out" viewBox="0 0 430 932" preserveAspectRatio="xMidYMid slice" fill="none">
-      <!-- Top-Right Skeleton Balance Wheel -->
-      <g class="gear-cw" style="transform-origin: 388px 112px;">
-        <circle cx="388" cy="112" r="142" stroke="#EF233C" stroke-width="1.2" stroke-dasharray="2 7"/>
-        <circle cx="388" cy="112" r="115" stroke="currentColor" stroke-width="0.9" stroke-dasharray="24 8 3 8"/>
-        <line x1="273" y1="112" x2="503" y2="112" stroke="currentColor" stroke-width="0.6" opacity="0.5"/>
-        <line x1="388" y1="-3" x2="388" y2="227" stroke="currentColor" stroke-width="0.6" opacity="0.5"/>
+    <svg id="parallaxMovementSvg" class="absolute -right-24 -top-20 w-[420px] h-[420px] opacity-[0.07] dark:opacity-[0.13] transition-transform duration-300" viewBox="0 0 200 200" fill="none">
+      <g class="gear-cw" style="transform-origin: 100px 100px;">
+        <circle cx="100" cy="100" r="78" stroke="#FF1E38" stroke-width="1.5" stroke-dasharray="6 4"/>
+        <circle cx="100" cy="100" r="62" stroke="currentColor" stroke-width="1"/>
+        <path d="M100 14V26M100 174V186M14 100H26M174 100H186M39 39L48 48M152 152L161 161M161 39L152 48M48 152L39 161" stroke="#FF1E38" stroke-width="2"/>
       </g>
-
-      <!-- Bottom-Left Counter-Rotating Tourbillon Cage -->
-      <g class="gear-ccw" style="transform-origin: 42px 815px;">
-        <circle cx="42" cy="815" r="158" stroke="#EF233C" stroke-width="1.2" stroke-dasharray="3 9"/>
-        <circle cx="42" cy="815" r="122" stroke="currentColor" stroke-width="0.9" stroke-dasharray="18 10"/>
+      <g class="gear-ccw" style="transform-origin: 100px 100px;">
+        <circle cx="100" cy="100" r="42" stroke="#FF1E38" stroke-width="1.2" stroke-dasharray="3 3"/>
+        <polygon points="100,66 129,117 71,117" stroke="currentColor" stroke-width="0.9" fill="none"/>
       </g>
-
-      <!-- Vertical Atelier Vernier Guide Rails -->
-      <line x1="16" y1="0" x2="16" y2="932" stroke="#EF233C" stroke-width="0.65" opacity="0.4"/>
-      <line x1="414" y1="0" x2="414" y2="932" stroke="#EF233C" stroke-width="0.65" opacity="0.4"/>
     </svg>
   </div>
 
-  <!-- Top Navigation Bar (Machined Titanium Header with Exact Untouched Logo) -->
-  <header class="sticky top-0 z-30 bg-brand-bg/80 dark:bg-brand-darkBg/80 backdrop-blur-xl border-b border-zinc-400/35 dark:border-red-500/20 px-4 pb-3 safe-top-header no-print">
-    <div class="max-w-md mx-auto flex justify-between items-center">
-      <div class="flex items-center gap-2.5">
-        <!-- Exact Untouched User Logo Frame -->
-        <div class="w-11 h-10 bg-zinc-950 border border-red-500/45 flex items-center justify-center shadow-md shadow-red-600/25 relative overflow-hidden p-1" style="clip-path: polygon(8px 0%, calc(100% - 8px) 0%, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0% calc(100% - 8px), 0% 8px);">
-          <img src="GEM_PHOTO_CEDFD3BF-AB6F-4C40-8178-6F0E9A571B4A_L0_001_recent_photo_14C60923-746F-4405-A6C3-DBE80BA9E180.jpg" alt="Brand Logo" class="exact-user-logo w-full h-full object-contain drop-shadow-[0_0_6px_rgba(255,20,20,0.65)]">
-        </div>
-        <div>
-          <div class="flex items-center gap-1.5">
-            <h1 class="font-display font-bold text-[15px] tracking-wide uppercase text-zinc-900 dark:text-white">Provide Power</h1>
-            <span id="cloudSyncPill" class="text-[8.5px] font-mono font-bold px-1.5 py-0.5 bg-red-600/12 text-red-700 dark:text-red-400 border border-red-500/30 tracking-wider">READY</span>
+  <!-- Top HUD Header -->
+  <header class="sticky top-0 z-30 safe-top-header px-3.5 pb-2.5 bg-[#E2E0D8]/85 dark:bg-[#050608]/85 backdrop-blur-xl border-b border-zinc-400/35 dark:border-red-500/25 no-print">
+    <div class="max-w-md mx-auto space-y-2">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-9 h-9 bg-zinc-950 border border-red-500/50 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(255,30,56,0.3)]" style="clip-path: polygon(6px 0%, calc(100% - 6px) 0%, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0% calc(100% - 6px), 0% 6px);">
+            <img alt="Provide Power Logo" class="exact-user-logo w-6 h-5 object-contain">
           </div>
-          <p class="text-[10px] text-zinc-600 dark:text-zinc-400 font-medium tracking-tight">ระบบลงเวลา & บริหารค่าตอบแทน</p>
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5">
+              <h1 class="font-hud font-extrabold text-xs tracking-wider text-zinc-900 dark:text-white truncate">PROVIDE POWER</h1>
+              <span id="cloudSyncPill" onclick="flushOfflineQueue(false)" title="แตะเพื่อส่งคิวที่ค้าง" class="cursor-pointer text-[8.5px] font-mono font-extrabold px-1.5 py-[1px] bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40 tracking-wider shrink-0">CLOUD OK</span>
+            </div>
+            <p class="text-[9.5px] font-mono text-zinc-500 dark:text-zinc-400 tracking-wider truncate">MECHA-TOURBILLON HUD // v4.0</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button id="audioToggleBtn" onclick="toggleAudio()" title="เปิด/ปิดเสียงปุ่มกด" class="chrono-pusher w-8 h-8 bg-zinc-900/10 dark:bg-white/10 hover:bg-red-600 hover:text-white flex items-center justify-center text-zinc-700 dark:text-zinc-300 border border-zinc-400/30 dark:border-white/10">
+            <i id="audioIcon" class="fa-solid fa-volume-high text-xs"></i>
+          </button>
+          <button onclick="cycleThemeMode()" title="สลับโหมดสีหน้าจอ" class="chrono-pusher h-8 px-2 bg-zinc-900/10 dark:bg-white/10 hover:bg-red-600/20 flex items-center gap-1 border border-zinc-400/30 dark:border-white/10">
+            <i id="themeIcon" class="fa-solid fa-moon text-[11px] text-red-400"></i>
+            <span id="themeLabel" class="text-[9px] font-hud font-bold">AUTO</span>
+          </button>
+          <button onclick="pullFromGoogleSheets(false)" title="ซิงค์ข้อมูลจาก Google Sheets" class="chrono-pusher w-8 h-8 bg-zinc-900/10 dark:bg-white/10 hover:bg-emerald-600 hover:text-white flex items-center justify-center text-zinc-700 dark:text-zinc-300 border border-zinc-400/30 dark:border-white/10">
+            <i id="topSyncIcon" class="fa-solid fa-arrows-rotate text-xs"></i>
+          </button>
+          <button onclick="openConfigModal()" title="ตั้งค่าการเชื่อมต่อ" class="chrono-pusher w-8 h-8 bg-zinc-950 text-white hover:bg-red-600 flex items-center justify-center border border-red-500/40">
+            <i class="fa-solid fa-gear text-xs"></i>
+          </button>
         </div>
       </div>
 
-      <div class="flex items-center gap-1.5">
-        <button onclick="pullFromGoogleSheets(false)" id="btnTopSync" title="ซิงค์ข้อมูล" aria-label="ซิงค์ข้อมูล" class="chrono-pusher w-8 h-8 bg-white/85 dark:bg-zinc-900/90 border border-zinc-300 dark:border-zinc-700 flex items-center justify-center text-zinc-700 dark:text-zinc-300">
-          <i class="fa-solid fa-arrows-rotate text-xs text-red-600 dark:text-red-400" id="topSyncIcon"></i>
-        </button>
-        <button onclick="toggleAudio()" id="audioToggleBtn" aria-label="สลับเสียง" class="chrono-pusher w-8 h-8 bg-white/85 dark:bg-zinc-900/90 border border-zinc-300 dark:border-zinc-700 flex items-center justify-center text-zinc-700 dark:text-zinc-300">
-          <i class="fa-solid fa-volume-high text-xs" id="audioIcon"></i>
-        </button>
-        <button onclick="cycleThemeMode()" id="themeToggleBtn" title="สลับโหมดธีม (อัตโนมัติตามเวลา / กลางวัน / กลางคืน)" aria-label="สลับโหมดธีม" class="chrono-pusher h-8 px-2 bg-white/85 dark:bg-zinc-900/90 border border-zinc-300 dark:border-zinc-700 flex items-center justify-center gap-1 text-zinc-800 dark:text-zinc-200">
-          <i class="fa-solid fa-clock text-[11px] text-red-600 dark:text-red-400" id="themeIcon"></i>
-          <span class="text-[9.5px] font-mono font-bold" id="themeLabel">AUTO</span>
-        </button>
-        <button onclick="openConfigModal()" aria-label="ตั้งค่า" class="chrono-pusher w-8 h-8 bg-white/85 dark:bg-zinc-900/90 border border-zinc-300 dark:border-zinc-700 flex items-center justify-center text-zinc-700 dark:text-zinc-300">
-          <i class="fa-solid fa-gear text-xs"></i>
-        </button>
+      <!-- Employee Selector Strip -->
+      <div class="flex items-center gap-2 bg-white/75 dark:bg-zinc-900/90 border border-zinc-300/90 dark:border-zinc-800 px-2.5 py-1.5" style="clip-path: polygon(8px 0%, calc(100% - 8px) 0%, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0% calc(100% - 8px), 0% 8px);">
+        <span class="relative flex h-2.5 w-2.5 shrink-0">
+          <span id="statusLedPing" class="status-pulse absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span id="statusLed" class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+        </span>
+        <select id="globalEmployeeSelect" onchange="onEmployeeChange(this.value)" class="custom-select flex-1 bg-transparent font-bold text-xs text-zinc-900 dark:text-white outline-none truncate">
+        </select>
+        <span id="dutyBadge" class="text-[10px] px-2.5 py-0.5 bg-zinc-900/10 dark:bg-white/10 font-bold text-zinc-800 dark:text-zinc-200 border border-zinc-400/30 dark:border-white/10 shrink-0">พร้อมปฏิบัติงาน</span>
       </div>
     </div>
   </header>
 
   <!-- Main Workspace -->
-  <main class="relative z-10 flex-1 max-w-md w-full mx-auto px-4 py-3.5 space-y-3.5 pb-28 no-print">
+  <main class="relative z-10 max-w-md mx-auto px-3.5 pt-3.5 pb-28 space-y-3.5 no-print">
 
-    <!-- Bespoke Metallic Employee ID Pass -->
-    <div class="bezel-shell">
-      <div class="bezel-card p-3.5 relative overflow-hidden">
-        <!-- Milled Titanium Corner Screws -->
-        <span class="absolute top-1.5 left-3.5 w-1 h-1 rounded-full bg-zinc-400/70 dark:bg-zinc-600"></span>
-        <span class="absolute top-1.5 right-3.5 w-1 h-1 rounded-full bg-zinc-400/70 dark:bg-zinc-600"></span>
-        <span class="absolute bottom-1.5 left-3.5 w-1 h-1 rounded-full bg-zinc-400/70 dark:bg-zinc-600"></span>
-        <span class="absolute bottom-1.5 right-3.5 w-1 h-1 rounded-full bg-zinc-400/70 dark:bg-zinc-600"></span>
-
-        <!-- Subtle Exact User Logo Watermark on Right -->
-        <img src="GEM_PHOTO_CEDFD3BF-AB6F-4C40-8178-6F0E9A571B4A_L0_001_recent_photo_14C60923-746F-4405-A6C3-DBE80BA9E180.jpg" alt="" aria-hidden="true" class="exact-user-logo absolute -right-2 -bottom-2 w-28 h-16 object-contain opacity-12 dark:opacity-18 pointer-events-none">
-
-        <div class="relative flex items-center justify-between mb-2">
-          <div class="flex items-center gap-2">
-            <span class="relative flex h-2.5 w-2.5">
-              <span id="statusLedPing" class="status-pulse absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span id="statusLed" class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-            </span>
-            <span class="font-display text-[10.5px] font-bold uppercase tracking-widest text-zinc-600 dark:text-zinc-400">OPERATOR PASS // บัตรพนักงาน</span>
-          </div>
-          <span id="dutyBadge" class="text-[10px] font-bold px-2.5 py-0.5 bg-zinc-900/10 dark:bg-white/10 text-zinc-800 dark:text-zinc-200 border border-zinc-400/30 dark:border-white/10">พร้อมปฏิบัติงาน</span>
-        </div>
-
-        <div class="relative flex items-center gap-2.5">
-          <div class="w-11 h-10 bg-zinc-950 border border-red-500/40 flex items-center justify-center shrink-0 p-1" style="clip-path: polygon(6px 0%, calc(100% - 6px) 0%, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0% calc(100% - 6px), 0% 6px);">
-            <img src="GEM_PHOTO_CEDFD3BF-AB6F-4C40-8178-6F0E9A571B4A_L0_001_recent_photo_14C60923-746F-4405-A6C3-DBE80BA9E180.jpg" alt="Logo" class="exact-user-logo w-full h-full object-contain">
-          </div>
-          <select id="globalEmployeeSelect" onchange="onEmployeeChange(this.value)" class="custom-select w-full bg-white/85 dark:bg-zinc-900/95 border border-zinc-300 dark:border-zinc-700 text-xs font-bold py-2.5 px-3 outline-none cursor-pointer text-zinc-900 dark:text-white" style="clip-path: polygon(8px 0%, calc(100% - 8px) 0%, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0% calc(100% - 8px), 0% 8px);">
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB 1: Live Punch Chronograph -->
+    <!-- TAB 1: Live Chronograph & Time Punch -->
     <section id="tab-1" class="tab-content space-y-3.5">
-      
-      <!-- Skeleton Tourbillon Chronograph Watch Case -->
+      <!-- Tourbillon Digital Chronograph Dial -->
       <div class="watch-case-shell">
         <div class="watch-case-inner p-4 text-white relative overflow-hidden">
-          <!-- Skeleton Mechanical Gear Train & Chronometer Ring -->
-          <svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 400 280" preserveAspectRatio="xMidYMid slice" fill="none">
-            <defs>
-              <pattern id="atelierGrid" width="14" height="14" patternUnits="userSpaceOnUse">
-                <path d="M 14 0 L 0 0 0 14" fill="none" stroke="#ffffff" stroke-width="0.35" opacity="0.07"/>
-              </pattern>
-            </defs>
-            <rect width="400" height="280" fill="url(#atelierGrid)"/>
+          <div class="hud-scanner absolute inset-x-0 h-12 bg-gradient-to-b from-transparent via-red-500/20 to-transparent pointer-events-none"></div>
+          <img alt="" aria-hidden="true" class="exact-user-logo absolute -right-4 -bottom-4 w-32 h-28 object-contain opacity-15 pointer-events-none">
 
-            <!-- Outer Chronometer Minute Track -->
-            <g class="gear-cw" style="transform-origin: 200px 108px;" opacity="0.42">
-              <circle cx="200" cy="108" r="98" stroke="#EF233C" stroke-width="1.3" stroke-dasharray="2 6"/>
-              <circle cx="200" cy="108" r="84" stroke="#ffffff" stroke-width="0.75" stroke-dasharray="18 8 2 8"/>
-            </g>
-
-            <!-- Inner Skeleton Escapement Wheel -->
-            <g class="gear-ccw" style="transform-origin: 200px 108px;" opacity="0.25">
-              <circle cx="200" cy="108" r="64" stroke="#EF233C" stroke-width="1.2" stroke-dasharray="8 4"/>
-              <line x1="136" y1="108" x2="264" y2="108" stroke="#EF233C" stroke-width="0.8"/>
-              <line x1="200" y1="44" x2="200" y2="172" stroke="#EF233C" stroke-width="0.8"/>
-            </g>
-
-            <!-- Horizontal Reference Crosshair -->
-            <path d="M0 108 H 48 M 352 108 H 400" stroke="#EF233C" stroke-width="1.2" opacity="0.5"/>
-          </svg>
-
-          <!-- Exact Untouched User Logo Centered in Skeleton Dial -->
-          <div class="absolute inset-x-0 top-[54px] flex justify-center pointer-events-none opacity-22">
-            <img src="GEM_PHOTO_CEDFD3BF-AB6F-4C40-8178-6F0E9A571B4A_L0_001_recent_photo_14C60923-746F-4405-A6C3-DBE80BA9E180.jpg" alt="" class="exact-user-logo w-36 h-20 object-contain drop-shadow-[0_0_12px_rgba(255,30,30,0.7)]">
-          </div>
-
-          <!-- Top Telemetry Strip -->
-          <div class="relative flex justify-between items-center text-[11px] text-zinc-400 pb-2.5 border-b border-white/10">
-            <span id="currentDateDisplay" class="font-medium text-zinc-200">--/--/----</span>
-            <span id="lcdModeTag" class="bg-emerald-500/15 text-emerald-300 px-2.5 py-0.5 text-[9.5px] font-mono font-bold tracking-wider border border-emerald-500/30">STANDBY</span>
-          </div>
-
-          <!-- Center Chronograph Time Readout -->
-          <div class="relative text-center py-3.5">
-            <div class="font-mono text-[45px] font-extrabold tracking-tight leading-none text-white drop-shadow-[0_0_22px_rgba(239,35,60,0.5)]" id="liveClock">
-              00:00:00<span class="text-xl text-[#FF2A2A] font-bold">.0</span>
-            </div>
-
-            <div id="liveShiftElapsedBar" class="hidden mt-3 pt-2.5 border-t border-white/10 flex justify-between items-center text-[11px] px-1">
-              <span class="text-amber-300 font-semibold flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping"></span>
-                ทำงานแล้ว: <span id="liveElapsedText" class="font-mono">00h 00m</span>
-              </span>
-              <span class="text-emerald-300 font-bold font-mono">สะสมวันนี้: <span id="liveAccruedPay">0 ฿</span></span>
-            </div>
-          </div>
-
-          <!-- Mechanical Rocker Switches -->
-          <div class="relative space-y-2.5 pt-2.5 border-t border-white/10 text-[10.5px]">
-            <div class="grid grid-cols-2 gap-2">
-              <div class="min-w-0">
-                <span class="block text-zinc-400 text-[9.5px] mb-1 font-semibold uppercase tracking-wider">กะการทำงาน</span>
-                <div class="grid grid-cols-2 bg-black/75 p-1 border border-white/12" style="clip-path: polygon(6px 0%, calc(100% - 6px) 0%, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0% calc(100% - 6px), 0% 6px);">
-                  <button type="button" id="swShiftDay" onclick="setSwitchValue('shift', 'DAY')" class="py-1.5 font-bold text-[10.5px] transition">กลางวัน</button>
-                  <button type="button" id="swShiftNight" onclick="setSwitchValue('shift', 'NIGHT')" class="py-1.5 font-bold text-[10.5px] transition">กลางคืน</button>
-                </div>
-              </div>
-              <div class="min-w-0">
-                <span class="block text-zinc-400 text-[9.5px] mb-1 font-semibold uppercase tracking-wider">ประเภทวัน</span>
-                <div class="grid grid-cols-2 bg-black/75 p-1 border border-white/12" style="clip-path: polygon(6px 0%, calc(100% - 6px) 0%, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0% calc(100% - 6px), 0% 6px);">
-                  <button type="button" id="swDayReg" onclick="setSwitchValue('dayType', 'REGULAR')" class="py-1.5 font-bold text-[10.5px] transition">ปกติ 1.5</button>
-                  <button type="button" id="swDayHol" onclick="setSwitchValue('dayType', 'HOLIDAY')" class="py-1.5 font-bold text-[10.5px] transition">หยุด 2/3</button>
-                </div>
-              </div>
-            </div>
-
+          <div class="flex justify-between items-start relative z-10">
             <div>
-              <span class="block text-zinc-400 text-[9.5px] mb-1 font-semibold uppercase tracking-wider">รูปแบบเวลา</span>
-              <div class="grid grid-cols-2 bg-black/75 p-1 border border-white/12" style="clip-path: polygon(6px 0%, calc(100% - 6px) 0%, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0% calc(100% - 6px), 0% 6px);">
-                <button type="button" id="swModeFull" onclick="setSwitchValue('workType', 'FULL')" class="py-1.5 font-bold text-[10.5px] transition">เต็มวัน (8 ชม.)</button>
-                <button type="button" id="swModeHalf" onclick="setSwitchValue('workType', 'HALF')" class="py-1.5 font-bold text-[10.5px] transition">ลาครึ่งวัน (200฿)</button>
+              <div class="text-[10px] font-mono text-zinc-400" id="currentDateDisplay">กำลังโหลดวันที่...</div>
+              <div class="font-hud text-3xl sm:text-4xl font-black tracking-wider text-white mt-1" id="liveClock">00:00:00<span class="text-xl text-[#FF1E38] font-bold">.0</span></div>
+            </div>
+
+            <!-- Tourbillon Sweep Gauge -->
+            <div class="flex flex-col items-end gap-1.5">
+              <span id="lcdModeTag" class="bg-emerald-500/15 text-emerald-300 px-2.5 py-0.5 text-[9px] font-hud font-bold tracking-widest border border-emerald-500/35">STANDBY</span>
+              <div class="w-11 h-11 rounded-full border border-red-500/45 bg-black/60 relative flex items-center justify-center shadow-inner">
+                <div class="w-8 h-8 rounded-full border border-dashed border-zinc-600"></div>
+                <div id="tourbillonSweepHand" class="absolute w-[1.5px] h-4 bg-[#FF1E38] origin-bottom bottom-1/2 rounded-full"></div>
+                <div class="w-1.5 h-1.5 rounded-full bg-white z-10"></div>
               </div>
             </div>
+          </div>
+
+          <!-- Active Duty Live Accrued Counter -->
+          <div id="liveShiftElapsedBar" class="hidden mt-3 pt-2.5 border-t border-red-500/30 flex justify-between items-center text-xs relative z-10">
+            <div class="flex items-center gap-1.5 text-zinc-300">
+              <i class="fa-solid fa-stopwatch text-red-400"></i>
+              <span>เวลาสะสม: <strong id="liveElapsedText" class="font-mono text-white">00 ชม. 00 น.</strong></span>
+            </div>
+            <div class="font-mono font-extrabold text-sm text-emerald-400" id="liveAccruedPay">0.00 ฿</div>
           </div>
         </div>
       </div>
 
-      <!-- Daily Rate Telemetry Strip -->
+      <!-- Shift & DayType Tactical Switches -->
       <div class="bezel-shell">
         <div class="bezel-card p-3.5 space-y-2.5">
-          <div class="flex justify-between items-center text-[10.5px] font-semibold text-zinc-600 dark:text-zinc-400">
-            <span id="shiftScheduleHint" class="flex items-center gap-1.5">
-              <i class="fa-regular fa-clock text-red-600"></i> กะปกติ 08:00 - 16:50
+          <div class="flex justify-between items-center">
+            <span id="shiftScheduleHint" class="text-[11px] font-bold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
+              <i class="fa-regular fa-sun text-red-600"></i> กะกลางวัน 08:00 - 16:50
             </span>
-            <span class="text-red-600 dark:text-red-400 font-bold" id="estHeaderTag">ประมาณการขั้นต่ำ</span>
+            <button type="button" onclick="autoDetectShiftAndDayType(true)" class="chrono-pusher px-2 py-0.5 bg-zinc-900 dark:bg-zinc-800 text-white text-[9.5px] font-hud font-bold tracking-wider border border-red-500/40 flex items-center gap-1">
+              <i class="fa-solid fa-wand-magic-sparkles text-red-400 text-[9px]"></i> AUTO
+            </button>
           </div>
-          <div class="grid grid-cols-3 gap-2 text-center">
-            <div class="bg-black/5 dark:bg-white/5 border border-zinc-300/70 dark:border-zinc-800 p-2.5">
-              <span class="block text-[9.5px] text-zinc-500 dark:text-zinc-400" id="estBaseLabel">ค่าแรงฐาน</span>
-              <span id="estBasePay" class="font-mono text-xs font-extrabold mt-0.5 block">400 ฿</span>
-            </div>
-            <div class="bg-black/5 dark:bg-white/5 border border-zinc-300/70 dark:border-zinc-800 p-2.5">
-              <span class="block text-[9.5px] text-zinc-500 dark:text-zinc-400">ค่าอาหาร/กะ</span>
-              <span id="estAllowance" class="font-mono text-xs font-extrabold mt-0.5 block">10 ฿</span>
-            </div>
-            <div class="bg-red-600/12 border border-red-500/35 p-2.5">
-              <span class="block text-[9.5px] text-red-700 dark:text-red-300 font-semibold">รวมขั้นต่ำ</span>
-              <span id="estTotal" class="font-mono text-xs font-extrabold text-red-600 dark:text-red-400 mt-0.5 block">410 ฿</span>
-            </div>
+
+          <div id="switchLockHint" class="hidden text-[10px] text-amber-700 dark:text-amber-300 bg-amber-500/15 border border-amber-500/35 px-2.5 py-1 font-semibold">
+            <i class="fa-solid fa-lock mr-1"></i> ล็อกค่าตามเวลาที่เข้างาน (กดออกงานเพื่อปลดล็อก)
+          </div>
+
+          <div class="grid grid-cols-2 gap-1.5 bg-zinc-950 p-1">
+            <button type="button" id="swShiftDay" onclick="setSwitchValue('shift', 'DAY')" class="py-1.5 font-bold text-[10.5px] transition">กะกลางวัน (DAY)</button>
+            <button type="button" id="swShiftNight" onclick="setSwitchValue('shift', 'NIGHT')" class="py-1.5 font-bold text-[10.5px] transition">กะกลางคืน (NIGHT)</button>
+          </div>
+
+          <div class="grid grid-cols-2 gap-1.5 bg-zinc-950 p-1">
+            <button type="button" id="swDayReg" onclick="setSwitchValue('dayType', 'REGULAR')" class="py-1.5 font-bold text-[10.5px] transition">วันปกติ (OT 1.5)</button>
+            <button type="button" id="swDayHol" onclick="setSwitchValue('dayType', 'HOLIDAY')" class="py-1.5 font-bold text-[10.5px] transition">วันหยุด (OT 2.0/3.0)</button>
+          </div>
+
+          <div class="grid grid-cols-2 gap-1.5 bg-zinc-950 p-1">
+            <button type="button" id="swModeFull" onclick="setSwitchValue('workType', 'FULL')" class="py-1.5 font-bold text-[10.5px] transition">เต็มวัน (Full Day)</button>
+            <button type="button" id="swModeHalf" onclick="setSwitchValue('workType', 'HALF')" class="py-1.5 font-bold text-[10.5px] transition">ครึ่งวัน (Half Day)</button>
           </div>
         </div>
       </div>
 
-      <!-- Check In / Check Out Time Stamps -->
+      <!-- Dual Chronograph Punch Triggers -->
       <div class="grid grid-cols-2 gap-2.5">
-        <div class="bezel-shell">
-          <div class="bezel-card p-3.5 flex items-center justify-between">
-            <div>
-              <span class="text-[10px] text-zinc-500 dark:text-zinc-400 font-semibold block">เวลาเข้างาน</span>
-              <span class="font-mono text-xl font-extrabold tracking-tight text-zinc-900 dark:text-white" id="displayCheckInTime">--:--</span>
-            </div>
-            <div class="w-9 h-9 bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-              <i class="fa-solid fa-arrow-right-to-bracket text-sm"></i>
-            </div>
+        <button id="btnCheckIn" onclick="handleLiveCheckIn()" class="chrono-pusher tactical-stripes bg-gradient-to-br from-emerald-600 to-emerald-800 hover:from-emerald-500 hover:to-emerald-700 text-white p-3.5 text-left shadow-lg shadow-emerald-900/30 border border-emerald-400/40">
+          <div class="flex justify-between items-center">
+            <span class="font-hud text-[10px] font-bold tracking-wider text-emerald-200">CHECK IN</span>
+            <i class="fa-solid fa-right-to-bracket text-sm"></i>
           </div>
-        </div>
-        <div class="bezel-shell">
-          <div class="bezel-card p-3.5 flex items-center justify-between">
-            <div>
-              <span class="text-[10px] text-zinc-500 dark:text-zinc-400 font-semibold block">เวลาออกงาน</span>
-              <span class="font-mono text-xl font-extrabold tracking-tight text-zinc-900 dark:text-white" id="displayCheckOutTime">--:--</span>
-            </div>
-            <div class="w-9 h-9 bg-red-500/15 border border-red-500/30 text-red-600 dark:text-red-400 flex items-center justify-center">
-              <i class="fa-solid fa-arrow-right-from-bracket text-sm"></i>
-            </div>
+          <div class="font-mono text-2xl font-extrabold mt-1.5" id="displayCheckInTime">--:--</div>
+          <div class="text-[10.5px] text-emerald-100 mt-0.5 truncate" id="checkInStatusText">กดเพื่อเริ่มนับเวลา</div>
+        </button>
+
+        <button id="btnCheckOut" onclick="handleLiveCheckOut()" disabled class="chrono-pusher tactical-stripes bg-gradient-to-br from-[#FF1E38] to-[#991B1B] hover:from-[#FF334B] hover:to-[#B91C1C] text-white p-3.5 text-left shadow-lg shadow-red-900/35 border border-red-400/40">
+          <div class="flex justify-between items-center">
+            <span class="font-hud text-[10px] font-bold tracking-wider text-red-200">CHECK OUT</span>
+            <i class="fa-solid fa-right-from-bracket text-sm"></i>
           </div>
-        </div>
+          <div class="font-mono text-2xl font-extrabold mt-1.5" id="displayCheckOutTime">--:--</div>
+          <div class="text-[10.5px] text-red-100 mt-0.5 truncate" id="checkOutStatusText">คำนวณค่าแรงวันนี้</div>
+        </button>
       </div>
 
-      <!-- Primary Chronograph Pushers -->
-      <div class="grid grid-cols-2 gap-3 pt-0.5">
-        <button id="btnCheckIn" onclick="handleLiveCheckIn()" class="chrono-pusher py-3.5 px-3 bg-gradient-to-br from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white font-bold text-xs shadow-lg shadow-emerald-600/25 flex flex-col items-center justify-center gap-0.5">
-          <div class="flex items-center gap-1.5">
-            <i class="fa-solid fa-fingerprint text-sm"></i>
-            <span>ลงเวลาเข้างาน</span>
+      <!-- Live Base Rate Estimator -->
+      <div class="bezel-shell">
+        <div class="bezel-card p-3.5 space-y-2 text-xs">
+          <div class="flex justify-between items-center border-b border-zinc-200 dark:border-zinc-800 pb-1.5">
+            <span class="font-bold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
+              <i class="fa-solid fa-calculator text-red-600"></i> <span id="estHeaderTag">ประมาณการขั้นต่ำ</span>
+            </span>
+            <span class="font-mono font-extrabold text-sm text-red-600 dark:text-red-400" id="estTotal">410 ฿</span>
           </div>
-          <span class="text-[10px] font-normal opacity-90" id="checkInStatusText">กดเพื่อเริ่มนับเวลา</span>
-        </button>
-
-        <button id="btnCheckOut" onclick="handleLiveCheckOut()" class="chrono-pusher py-3.5 px-3 bg-gradient-to-br from-[#EF233C] to-[#B91C1C] hover:from-[#FF2E47] hover:to-[#DC2626] text-white font-bold text-xs shadow-lg shadow-red-600/30 flex flex-col items-center justify-center gap-0.5">
-          <div class="flex items-center gap-1.5">
-            <i class="fa-solid fa-check-circle text-sm"></i>
-            <span>ลงเวลาออกงาน</span>
+          <div class="grid grid-cols-2 gap-2 text-[11px]">
+            <div class="flex justify-between bg-black/5 dark:bg-white/5 px-2.5 py-1.5">
+              <span class="text-zinc-500 dark:text-zinc-400" id="estBaseLabel">ค่าแรงฐาน</span>
+              <span class="font-mono font-bold" id="estBasePay">400 ฿</span>
+            </div>
+            <div class="flex justify-between bg-black/5 dark:bg-white/5 px-2.5 py-1.5">
+              <span class="text-zinc-500 dark:text-zinc-400">ค่ากะ + อาหาร</span>
+              <span class="font-mono font-bold" id="estAllowance">10 ฿</span>
+            </div>
           </div>
-          <span class="text-[10px] font-normal opacity-90" id="checkOutStatusText">คำนวณค่าแรงวันนี้</span>
-        </button>
+        </div>
       </div>
     </section>
 
-    <!-- TAB 2: Manual Edit -->
-    <section id="tab-2" class="tab-content hidden space-y-3">
+    <!-- TAB 2: Manual / Backdated Entry -->
+    <section id="tab-2" class="tab-content hidden space-y-4">
       <div class="bezel-shell">
         <div class="bezel-card overflow-hidden">
-          <div class="bg-gradient-to-r from-zinc-950 via-zinc-900 to-red-950 px-4 py-3 text-white flex items-center justify-between relative overflow-hidden border-b border-red-500/25">
-            <div class="relative z-10 flex items-center gap-3">
-              <div class="w-10 h-10 bg-red-600/20 border border-red-500/35 flex items-center justify-center shrink-0">
-                <svg class="w-5 h-5 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="9"/>
-                  <polyline points="12 7 12 12 15 14"/>
-                  <path d="M16.5 3.5l4 4"/>
-                </svg>
+          <div class="bg-gradient-to-r from-zinc-950 via-zinc-900 to-red-900 px-4 py-3 text-white flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 bg-red-600/20 border border-red-500/40 flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-clock-rotate-left text-red-400 text-base"></i>
               </div>
               <div>
-                <h2 class="font-bold text-xs">บันทึกเวลาย้อนหลัง</h2>
-                <p class="text-[10.5px] text-zinc-400">เพิ่มหรือแก้ไขข้อมูลการทำงานรายวัน</p>
+                <h2 class="font-bold text-xs">บันทึก / แก้ไขเวลาย้อนหลัง</h2>
+                <p class="text-[10.5px] text-zinc-300">ระบุวันที่และเวลาเข้า-ออก เพื่อคำนวณค่าแรงใหม่</p>
               </div>
             </div>
-            <span id="manualExistingBadge" class="hidden relative z-10 text-[9px] font-bold bg-red-500/20 text-red-300 px-2 py-0.5 border border-red-400/30">มีข้อมูลเดิม</span>
+            <span id="manualExistingBadge" class="hidden text-[9.5px] bg-amber-500/25 text-amber-300 border border-amber-400/50 px-2 py-0.5 font-bold">มีข้อมูลเดิม</span>
           </div>
 
           <form id="manualForm" onsubmit="handleManualSubmit(event)" class="p-4 space-y-3 text-xs">
-            <div class="grid grid-cols-2 gap-2.5">
-              <div class="min-w-0">
-                <label class="block text-[10.5px] font-semibold text-zinc-600 dark:text-zinc-400 mb-1 truncate">วันที่ต้องการบันทึก</label>
-                <input type="date" id="manualDate" onchange="prefillManualByDate()" required class="w-full min-w-0 max-w-full bg-white/85 dark:bg-zinc-900/95 border border-zinc-300 dark:border-zinc-700 px-2.5 py-1.5 font-mono text-[11px] outline-none">
-              </div>
-              <div class="min-w-0">
-                <label class="block text-[10.5px] font-semibold text-zinc-600 dark:text-zinc-400 mb-1 truncate">สถานะการทำงาน</label>
-                <select id="manualWorkType" onchange="updateManualPreview()" class="custom-select w-full min-w-0 max-w-full bg-white/85 dark:bg-zinc-900/95 border border-zinc-300 dark:border-zinc-700 px-2.5 py-2 text-[11px] font-medium outline-none">
-                  <option value="FULL">เต็มวัน (8 ชม.)</option>
-                  <option value="HALF">ลาครึ่งวัน (200฿)</option>
-                </select>
-              </div>
+            <div class="min-w-0">
+              <label class="block text-[10.5px] font-semibold text-zinc-600 dark:text-zinc-400 mb-1">วันที่ปฏิบัติงาน</label>
+              <input type="date" id="manualDate" onchange="prefillManualByDate()" required class="w-full min-w-0 max-w-full bg-white/85 dark:bg-zinc-900/95 border border-zinc-300 dark:border-zinc-700 px-2.5 py-1.5 font-mono text-[11px] outline-none">
             </div>
 
             <div class="grid grid-cols-2 gap-2.5">
               <div class="min-w-0">
-                <label class="block text-[10.5px] font-semibold text-zinc-600 dark:text-zinc-400 mb-1 truncate">กะการทำงาน</label>
-                <select id="manualShift" onchange="updateManualPreview()" class="custom-select w-full min-w-0 max-w-full bg-white/85 dark:bg-zinc-900/95 border border-zinc-300 dark:border-zinc-700 px-2.5 py-2 text-[11px] font-medium outline-none">
-                  <option value="DAY">กลางวัน (08:00)</option>
-                  <option value="NIGHT">กลางคืน (20:00)</option>
+                <label class="block text-[10.5px] font-semibold text-zinc-600 dark:text-zinc-400 mb-1">กะการทำงาน</label>
+                <select id="manualShift" onchange="updateManualPreview()" class="custom-select w-full bg-white/85 dark:bg-zinc-900/95 border border-zinc-300 dark:border-zinc-700 p-2.5 font-medium outline-none">
+                  <option value="DAY">กะกลางวัน (DAY)</option>
+                  <option value="NIGHT">กะกลางคืน (NIGHT)</option>
                 </select>
               </div>
               <div class="min-w-0">
-                <label class="block text-[10.5px] font-semibold text-zinc-600 dark:text-zinc-400 mb-1 truncate">ประเภทวัน</label>
-                <select id="manualDayType" onchange="updateManualPreview()" class="custom-select w-full min-w-0 max-w-full bg-white/85 dark:bg-zinc-900/95 border border-zinc-300 dark:border-zinc-700 px-2.5 py-2 text-[11px] font-medium outline-none">
+                <label class="block text-[10.5px] font-semibold text-zinc-600 dark:text-zinc-400 mb-1">ประเภทวัน</label>
+                <select id="manualDayType" onchange="updateManualPreview()" class="custom-select w-full bg-white/85 dark:bg-zinc-900/95 border border-zinc-300 dark:border-zinc-700 p-2.5 font-medium outline-none">
                   <option value="REGULAR">วันปกติ (OT 1.5)</option>
                   <option value="HOLIDAY">วันหยุด (OT 2.0/3.0)</option>
                 </select>
               </div>
+            </div>
+
+            <div id="manualNightShiftNote" class="hidden text-[10px] text-indigo-700 dark:text-indigo-300 bg-indigo-500/10 border border-indigo-500/30 px-2.5 py-1.5">
+              <i class="fa-solid fa-moon mr-1"></i> กะกลางคืน: ใส่วันที่เริ่มเข้ากะ (เช่น เข้า 20:00 ออก 07:50 ระบบคำนวณข้ามเที่ยงคืนให้อัตโนมัติ)
+            </div>
+
+            <div class="min-w-0">
+              <label class="block text-[10.5px] font-semibold text-zinc-600 dark:text-zinc-400 mb-1">รูปแบบการทำงาน</label>
+              <select id="manualWorkType" onchange="updateManualPreview()" class="custom-select w-full bg-white/85 dark:bg-zinc-900/95 border border-zinc-300 dark:border-zinc-700 p-2.5 font-medium outline-none">
+                <option value="FULL">เต็มวัน (Full Day)</option>
+                <option value="HALF">ครึ่งวัน (Half Day)</option>
+              </select>
             </div>
 
             <div class="grid grid-cols-2 gap-2.5">
@@ -794,12 +640,12 @@
               </div>
             </div>
 
-            <div id="manualPreviewBox" class="hidden bg-zinc-950 text-emerald-400 font-mono px-3 py-2 flex justify-between items-center text-[10.5px] border border-red-500/30">
+            <div id="manualPreviewBox" class="hidden bg-zinc-950 text-emerald-400 font-mono px-3 py-2 flex justify-between items-center text-[10.5px] border border-red-500/35">
               <span id="manPrevDetail">OT: 0h</span>
               <span class="font-extrabold text-xs text-white">สุทธิ <span id="manPrevTotal" class="text-red-400">0</span> ฿</span>
             </div>
 
-            <button type="submit" class="chrono-pusher w-full py-3 bg-gradient-to-r from-[#EF233C] to-[#B91C1C] hover:from-[#FF2E47] hover:to-[#DC2626] text-white font-bold text-xs shadow-md shadow-red-600/25 mt-1">
+            <button type="submit" class="chrono-pusher tactical-stripes w-full py-3 bg-gradient-to-r from-[#FF1E38] to-[#991B1B] hover:from-[#FF334B] hover:to-[#B91C1C] text-white font-bold text-xs shadow-md shadow-red-600/30 mt-1">
               คำนวณ & บันทึกย้อนหลัง
             </button>
           </form>
@@ -853,7 +699,7 @@
               <label class="block text-[10.5px] font-semibold text-zinc-600 dark:text-zinc-400 mb-1">เหตุผลการลา</label>
               <textarea id="leaveReason" rows="2" placeholder="ระบุเหตุผลสั้น ๆ..." class="w-full min-w-0 max-w-full bg-white/85 dark:bg-zinc-900/95 border border-zinc-300 dark:border-zinc-700 p-2.5 outline-none resize-none"></textarea>
             </div>
-            <button type="submit" class="chrono-pusher w-full py-3 bg-zinc-950 dark:bg-red-600 hover:opacity-95 text-white font-bold text-xs shadow-md mt-1">
+            <button type="submit" class="chrono-pusher tactical-stripes w-full py-3 bg-zinc-950 dark:bg-red-600 hover:opacity-95 text-white font-bold text-xs shadow-md mt-1">
               ส่งใบลางาน
             </button>
           </form>
@@ -894,7 +740,7 @@
       <div class="grid grid-cols-2 gap-2.5">
         <div class="col-span-2 watch-case-shell">
           <div class="watch-case-inner text-white p-4 relative overflow-hidden">
-            <img src="GEM_PHOTO_CEDFD3BF-AB6F-4C40-8178-6F0E9A571B4A_L0_001_recent_photo_14C60923-746F-4405-A6C3-DBE80BA9E180.jpg" alt="" aria-hidden="true" class="exact-user-logo absolute right-3 bottom-2 w-28 h-16 object-contain opacity-20 pointer-events-none">
+            <img alt="" aria-hidden="true" class="exact-user-logo absolute right-3 bottom-2 w-24 h-20 object-contain opacity-25 pointer-events-none">
             <span class="text-[11px] text-zinc-400 font-medium">ยอดรวมค่าแรง + OT ในรอบนี้</span>
             <div class="flex justify-between items-baseline mt-1.5 relative z-10">
               <div class="font-mono text-3xl font-extrabold text-red-400 tracking-tight" id="summaryTotalSalary">0.00 ฿</div>
@@ -932,7 +778,7 @@
 
   <!-- Floating Milled Titanium Bottom Control Dock -->
   <nav class="fixed left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-sm z-40 safe-bottom-nav no-print">
-    <div class="bg-zinc-950/92 backdrop-blur-xl border border-red-500/30 p-1.5 flex justify-between shadow-2xl" style="clip-path: polygon(12px 0%, calc(100% - 12px) 0%, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0% calc(100% - 12px), 0% 12px);">
+    <div class="bg-zinc-950/95 backdrop-blur-xl border border-red-500/45 p-1.5 flex justify-between shadow-[0_14px_34px_rgba(0,0,0,0.85)]" style="clip-path: polygon(12px 0%, calc(100% - 12px) 0%, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0% calc(100% - 12px), 0% 12px);">
       <button onclick="switchTab(1)" id="nav-1" class="chrono-pusher flex-1 flex flex-col items-center justify-center py-2 text-white bg-red-600 font-bold transition-all">
         <i class="fa-solid fa-clock text-xs"></i>
         <span class="text-[10px] mt-0.5">บันทึกสด</span>
@@ -953,7 +799,7 @@
   </nav>
 
   <!-- Breakdown Modal -->
-  <div id="breakdownModal" onclick="if(event.target===this) closeBreakdownModal()" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs hidden flex items-center justify-center p-4 no-print">
+  <div id="breakdownModal" onclick="if(event.target===this) closeBreakdownModal()" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs hidden flex items-center justify-center p-4 no-print">
     <div class="bezel-shell w-full max-w-xs">
       <div class="bezel-card p-5 space-y-3">
         <div class="flex justify-between items-center border-b border-zinc-200 dark:border-zinc-800 pb-2.5">
@@ -1059,12 +905,12 @@
             <div id="ytdSocSourceHint" class="text-[9.5px] text-indigo-600 mt-0.5 font-medium"></div>
           </div>
           <div class="col-span-2 sm:col-span-2 min-w-0">
-            <label class="block text-slate-600 font-semibold">วันเสาร์ที่บริษัทกำหนดให้ทำงาน (คั่นด้วยลูกน้ำ)</label>
-            <input type="text" id="workingSaturdaysInput" placeholder="เช่น 2026-11-07, 2026-11-14, 2026-11-21, 2026-11-28" oninput="saveScheduleOverrides()" class="w-full border border-slate-300 rounded px-2 py-1 font-mono bg-white">
+            <label class="block text-slate-600 font-semibold">วันเสาร์ที่บริษัทกำหนดให้ทำงาน (ปฏิทิน 2026)</label>
+            <input type="text" id="workingSaturdaysInput" oninput="saveScheduleOverrides()" class="w-full border border-slate-300 rounded px-2 py-1 font-mono bg-white">
           </div>
           <div class="col-span-2 sm:col-span-2 min-w-0">
-            <label class="block text-slate-600 font-semibold">วันหยุดบริษัทเพิ่มเติม (คั่นด้วยลูกน้ำ)</label>
-            <input type="text" id="customHolidaysInput" placeholder="เช่น 2026-11-25, 2026-12-25" oninput="saveScheduleOverrides()" class="w-full border border-slate-300 rounded px-2 py-1 font-mono bg-white">
+            <label class="block text-slate-600 font-semibold">วันหยุดบริษัทเพิ่มเติม (ปฏิทิน 2026)</label>
+            <input type="text" id="customHolidaysInput" oninput="saveScheduleOverrides()" class="w-full border border-slate-300 rounded px-2 py-1 font-mono bg-white">
           </div>
           <div class="col-span-2 sm:col-span-4">
             <div id="payDateRuleHint" class="text-[10px] text-emerald-700 font-medium"></div>
@@ -1078,16 +924,11 @@
         <h3 class="font-bold text-[18px] leading-tight">บริษัท โพร์ไวด์ เพาเวอร์เอ้าท์ซอร์สซิ่ง จำกัด</h3>
       </div>
 
-      <!-- Employee Metadata Strip -->
       <div id="slipHeaderRow" class="flex flex-wrap justify-between items-center text-[13px] pt-1 pb-0.5 font-normal gap-3 italic text-black"></div>
 
-      <!-- Main Payslip Grid -->
       <div id="slipMainGrid" class="grid grid-cols-12 gap-3 text-[12px] leading-[1.38] italic text-black">
-        
-        <!-- Left Ledger Box -->
         <div id="slipLeftCol" class="col-span-12 sm:col-span-9 border-[1.5px] border-black flex flex-col justify-between bg-white">
           <div class="grid grid-cols-12 flex-1">
-            <!-- Earnings Columns (7/12) -->
             <div class="col-span-7 border-r-[1.5px] border-black flex flex-col">
               <table class="w-full text-left border-collapse flex-1">
                 <thead>
@@ -1101,7 +942,6 @@
               </table>
             </div>
 
-            <!-- Deductions Columns (5/12) -->
             <div class="col-span-5 flex flex-col">
               <table class="w-full text-left border-collapse flex-1">
                 <thead>
@@ -1115,7 +955,6 @@
             </div>
           </div>
 
-          <!-- Totals Footer Bar -->
           <div class="grid grid-cols-12 border-t-[1.5px] border-black font-bold text-[13px]">
             <div class="col-span-7 border-r-[1.5px] border-black flex items-stretch">
               <div class="flex-1 py-1.5 px-2 text-center border-r border-black">รวมเงินได้</div>
@@ -1128,16 +967,12 @@
           </div>
         </div>
 
-        <!-- Right Summary Column -->
         <div id="slipRightCol" class="col-span-12 sm:col-span-3 flex flex-col justify-between space-y-2.5 text-[12px] italic text-black bg-white">
-          
-          <!-- Box 1: Pay Date -->
           <div class="border-[1.5px] border-black text-center bg-white">
             <div class="border-b border-black py-1 font-bold text-[12.5px]">วันที่จ่าย</div>
             <div id="payslipPayDate" class="py-1 font-normal text-[12.5px]">--/--/----</div>
           </div>
 
-          <!-- Box 2: Annual YTD Accumulations -->
           <div class="border-[1.5px] border-black text-center flex-1 flex flex-col justify-between bg-white">
             <div class="border-b border-black">
               <div class="py-0.5 font-bold border-b border-black">เงินได้สะสมต่อปี</div>
@@ -1161,7 +996,6 @@
             </div>
           </div>
 
-          <!-- Box 3: Net Pay -->
           <div class="border-[1.5px] border-black text-center bg-white">
             <div class="border-b border-black py-1 font-bold text-[12.5px]">เงินรับสุทธิ</div>
             <div id="payslipNetPay" class="py-1.5 font-bold text-[13.5px]">0.00</div>
@@ -1169,7 +1003,6 @@
         </div>
       </div>
 
-      <!-- Footer E_PaySlip ID & Employee Signature -->
       <div class="pt-0.5 space-y-2.5 text-black">
         <div class="text-[9.5px] tracking-tight font-sans text-zinc-800" id="payslipRefID">E_PaySlip : ID:20261117000000(PROVIDE POWER OUTSOURCING CO., LTD.)</div>
         <div class="pl-12 font-bold text-[13.5px] italic text-black">ลงชื่อพนักงาน</div>
@@ -1177,8 +1010,8 @@
     </div>
   </div>
 
-  <!-- Settings Config Modal -->
-  <div id="configModal" onclick="if(event.target===this) closeConfigModal()" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs hidden flex items-center justify-center p-4 no-print">
+  <!-- Settings Config Modal (Zero Token Exposed) -->
+  <div id="configModal" onclick="if(event.target===this) closeConfigModal()" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs hidden flex items-center justify-center p-4 no-print">
     <div class="bezel-shell w-full max-w-xs">
       <div class="bezel-card p-5 space-y-3">
         <div class="flex justify-between items-center border-b border-zinc-200 dark:border-zinc-800 pb-2.5">
@@ -1190,13 +1023,16 @@
             <label class="block text-[10px] font-bold text-zinc-500 mb-1">Google Apps Script URL</label>
             <input type="text" id="gasUrlInput" class="w-full bg-white/85 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 p-2 text-[10px] font-mono outline-none">
           </div>
-          <div>
-            <label class="block text-[10px] font-bold text-zinc-500 mb-1">LINE Channel Token</label>
-            <input type="text" id="lineTokenInput" class="w-full bg-white/85 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 p-2 text-[10px] font-mono outline-none">
+          <div class="bg-emerald-500/10 border border-emerald-500/30 p-2 text-[10px] text-emerald-700 dark:text-emerald-300">
+            <i class="fa-solid fa-shield-halved mr-1"></i> LINE Token ถูกจัดเก็บอย่างปลอดภัยบน Server (Apps Script) แล้ว หากต้องการเปลี่ยนค่าใหม่ให้กรอกด้านล่างแล้วกดอัปเดต
           </div>
           <div>
-            <label class="block text-[10px] font-bold text-zinc-500 mb-1">LINE User ID</label>
-            <input type="text" id="lineUserIdInput" class="w-full bg-white/85 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 p-2 text-[10px] font-mono outline-none">
+            <label class="block text-[10px] font-bold text-zinc-500 mb-1">อัปเดต LINE Channel Token ใหม่ (เว้นว่างถ้าใช้ค่าเดิม)</label>
+            <input type="password" id="lineTokenInput" placeholder="••••••••••••••••••••" class="w-full bg-white/85 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 p-2 text-[10px] font-mono outline-none">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-zinc-500 mb-1">อัปเดต LINE User ID ใหม่ (เว้นว่างถ้าใช้ค่าเดิม)</label>
+            <input type="text" id="lineUserIdInput" placeholder="U2fd9fade..." class="w-full bg-white/85 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 p-2 text-[10px] font-mono outline-none">
           </div>
         </div>
         <button onclick="saveConfigSettings()" class="chrono-pusher w-full bg-red-600 text-white font-bold py-2.5 text-xs">
@@ -1207,7 +1043,7 @@
   </div>
 
   <!-- Toast Notification -->
-  <div id="toast" class="fixed top-12 left-1/2 -translate-x-1/2 z-50 bg-zinc-950 text-white text-xs font-bold px-4 py-2.5 shadow-xl hidden border border-red-500/50 whitespace-nowrap" style="clip-path: polygon(8px 0%, calc(100% - 8px) 0%, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0% calc(100% - 8px), 0% 8px);">
+  <div id="toast" class="fixed top-12 left-1/2 -translate-x-1/2 z-50 bg-zinc-950 text-white text-xs font-bold px-4 py-2.5 shadow-xl hidden border border-red-500/60 whitespace-nowrap" style="clip-path: polygon(8px 0%, calc(100% - 8px) 0%, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0% calc(100% - 8px), 0% 8px);">
     <span id="toastMsg">แจ้งเตือนระบบ</span>
   </div>
 
@@ -1233,14 +1069,14 @@
       window.addEventListener('resize', resize, { passive: true });
       resize();
 
-      const count = Math.min(30, Math.max(18, Math.floor((w * h) / 20000)));
+      const count = Math.min(34, Math.max(20, Math.floor((w * h) / 18000)));
       for (let i = 0; i < count; i++) {
         nodes.push({
           x: Math.random() * w,
           y: Math.random() * h,
-          vx: (Math.random() - 0.5) * 0.45,
-          vy: (Math.random() - 0.5) * 0.45,
-          r: Math.random() * 1.4 + 1.0,
+          vx: (Math.random() - 0.5) * 0.55,
+          vy: (Math.random() - 0.5) * 0.55,
+          r: Math.random() * 1.5 + 1.0,
           isSilver: i % 3 === 0
         });
       }
@@ -1255,14 +1091,14 @@
         pointer.x = e.clientX;
         pointer.y = e.clientY;
         pointer.active = true;
-        shockwaves.push({ x: e.clientX, y: e.clientY, r: 6, alpha: 0.72 });
+        shockwaves.push({ x: e.clientX, y: e.clientY, r: 6, alpha: 0.85 });
       }, { passive: true });
 
       const moveSvg = document.getElementById('parallaxMovementSvg');
       window.addEventListener('deviceorientation', (e) => {
         if (!moveSvg || e.gamma === null || e.beta === null) return;
-        const tx = Math.max(-14, Math.min(14, e.gamma * 0.35));
-        const ty = Math.max(-14, Math.min(14, (e.beta - 45) * 0.25));
+        const tx = Math.max(-16, Math.min(16, e.gamma * 0.4));
+        const ty = Math.max(-16, Math.min(16, (e.beta - 45) * 0.3));
         moveSvg.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
       }, { passive: true });
 
@@ -1280,10 +1116,10 @@
           for (let j = i + 1; j < nodes.length; j++) {
             const n2 = nodes[j];
             const dist = Math.hypot(n.x - n2.x, n.y - n2.y);
-            if (dist < 105) {
-              const a = (1 - dist / 105) * (isDark ? 0.28 : 0.16);
-              ctx.strokeStyle = `rgba(239, 35, 60, ${a})`;
-              ctx.lineWidth = 0.8;
+            if (dist < 115) {
+              const a = (1 - dist / 115) * (isDark ? 0.34 : 0.18);
+              ctx.strokeStyle = `rgba(255, 30, 56, ${a})`;
+              ctx.lineWidth = 0.85;
               ctx.beginPath();
               ctx.moveTo(n.x, n.y);
               ctx.lineTo(n2.x, n2.y);
@@ -1293,10 +1129,10 @@
 
           if (pointer.active) {
             const pd = Math.hypot(n.x - pointer.x, n.y - pointer.y);
-            if (pd < 135) {
-              const a = (1 - pd / 135) * (isDark ? 0.48 : 0.28);
-              ctx.strokeStyle = `rgba(255, 30, 30, ${a})`;
-              ctx.lineWidth = 0.95;
+            if (pd < 145) {
+              const a = (1 - pd / 145) * (isDark ? 0.56 : 0.32);
+              ctx.strokeStyle = `rgba(255, 30, 56, ${a})`;
+              ctx.lineWidth = 1.05;
               ctx.beginPath();
               ctx.moveTo(n.x, n.y);
               ctx.lineTo(pointer.x, pointer.y);
@@ -1305,8 +1141,8 @@
           }
 
           ctx.fillStyle = n.isSilver
-            ? (isDark ? 'rgba(228,228,231,0.55)' : 'rgba(24,24,27,0.4)')
-            : (isDark ? 'rgba(239,35,60,0.85)' : 'rgba(220,38,38,0.65)');
+            ? (isDark ? 'rgba(228,228,231,0.65)' : 'rgba(24,24,27,0.45)')
+            : (isDark ? 'rgba(255,30,56,0.9)' : 'rgba(220,38,38,0.72)');
           ctx.beginPath();
           ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
           ctx.fill();
@@ -1314,10 +1150,10 @@
 
         for (let i = shockwaves.length - 1; i >= 0; i--) {
           const sw = shockwaves[i];
-          sw.r += 3.8;
-          sw.alpha *= 0.93;
-          ctx.strokeStyle = `rgba(239, 35, 60, ${sw.alpha})`;
-          ctx.lineWidth = 1.4;
+          sw.r += 4.2;
+          sw.alpha *= 0.92;
+          ctx.strokeStyle = `rgba(255, 30, 56, ${sw.alpha})`;
+          ctx.lineWidth = 1.6;
           ctx.beginPath();
           for (let k = 0; k < 8; k++) {
             const ang = (Math.PI / 4) * k;
@@ -1339,10 +1175,11 @@
 
   <script>
     const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbzIC7PtGt_PeyQ7Co1GTiC0Ev6dPfDSiGhhyHClbKL1yMzUCTmeju8JKOYAtNGJZaB7/exec";
-    const DEFAULT_LINE_TOKEN = "NCURffVn9SZ4I+MpbibQluWUNeLs5BM7xXT9lrs7HnE+IlDaKy9muokRv3gvBqsNDH0quqVo/PqSvf9kebRHZEPfLx7I4RJzjBUTEwSHbRewZ61/uhLgQjfUWjY1LpA8khVSbngeM6ewKPB5bw8qdAdB04t89/1O/w1cDnyilFU=";
-    const DEFAULT_LINE_USER_ID = "U2fd9fade0d6d5c8b5df8582841fbbb9e";
 
-    const employeeList = [
+    localStorage.removeItem("line_token");
+    localStorage.removeItem("line_user_id");
+
+    const DEFAULT_EMPLOYEES = [
       {
         id: "50001024",
         name: "นาย พันธกานต์ จูมจันทร์",
@@ -1365,13 +1202,17 @@
       }
     ];
 
+    let employeeList = JSON.parse(localStorage.getItem("cached_employees") || "null") || DEFAULT_EMPLOYEES;
+
+    // ปฏิทินวันหยุดนักขัตฤกษ์ + วันหยุดพิเศษ Toyoda Gosei 2026
     const THAI_PUBLIC_HOLIDAYS = new Set([
-      "2026-01-01", "2026-01-02", "2026-03-03", "2026-04-06",
-      "2026-04-13", "2026-04-14", "2026-04-15", "2026-05-01",
-      "2026-05-04", "2026-05-31", "2026-06-01", "2026-06-03",
-      "2026-07-28", "2026-07-29", "2026-07-30", "2026-08-12",
-      "2026-10-13", "2026-10-23", "2026-12-05",
-      "2026-12-10", "2026-12-31",
+      "2026-01-01", "2026-01-02", "2026-03-02", "2026-03-03", "2026-04-06",
+      "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-18",
+      "2026-05-01", "2026-05-04", "2026-05-31", "2026-06-01", "2026-06-02", "2026-06-03",
+      "2026-07-11", "2026-07-12", "2026-07-27", "2026-07-28", "2026-07-29", "2026-07-30",
+      "2026-08-12", "2026-10-12", "2026-10-13", "2026-10-23",
+      "2026-12-05", "2026-12-07", "2026-12-10", "2026-12-12",
+      "2026-12-28", "2026-12-29", "2026-12-30", "2026-12-31",
       "2027-01-01", "2027-02-21", "2027-02-22", "2027-04-06",
       "2027-04-13", "2027-04-14", "2027-04-15", "2027-05-01",
       "2027-05-03", "2027-05-04", "2027-05-20", "2027-06-03",
@@ -1379,6 +1220,10 @@
       "2027-10-13", "2027-10-23", "2027-10-25", "2027-12-05",
       "2027-12-06", "2027-12-10", "2027-12-31"
     ]);
+
+    // วันเสาร์ทำงานตลอดปี 2026 (แถบสีชมพู + ทุกเสาร์ในเดือน พ.ย.)
+    const DEFAULT_WORKING_SATURDAYS_2026 = "2026-01-17, 2026-02-14, 2026-03-14, 2026-04-11, 2026-05-09, 2026-06-06, 2026-07-04, 2026-08-08, 2026-09-05, 2026-10-03, 2026-10-31, 2026-11-07, 2026-11-14, 2026-11-21, 2026-11-28, 2026-12-19";
+    const DEFAULT_CUSTOM_HOLIDAYS_2026 = "2026-01-02, 2026-03-02, 2026-04-16, 2026-04-17, 2026-04-18, 2026-06-02, 2026-07-11, 2026-07-12, 2026-07-27, 2026-10-12, 2026-12-07, 2026-12-12, 2026-12-28, 2026-12-29, 2026-12-30";
 
     let currentEmpId = employeeList[0].id;
     let currentShift = "DAY";
@@ -1392,7 +1237,9 @@
     let isLineSlipSending = false;
     let isPullingSheets = false;
     let isSavingPng = false;
+    let isFlushingQueue = false;
     let deletedRecordKeys = new Set();
+    let deletedLeaveKeys = new Set();
     let latestRenderedSlipSnapshot = null;
 
     let themePreference = localStorage.getItem('theme_mode') || 'auto';
@@ -1417,13 +1264,22 @@
       return Number.isFinite(n) ? n : 0;
     }
 
-    function setBodyScrollLock(locked) {
-      if (locked) {
-        document.body.classList.add('overflow-hidden');
-      } else {
-        document.body.classList.remove('overflow-hidden');
-      }
+    function syncBodyScrollLock() {
+      const anyOpen =
+        !document.getElementById('breakdownModal').classList.contains('hidden') ||
+        !document.getElementById('payslipModal').classList.contains('hidden') ||
+        !document.getElementById('configModal').classList.contains('hidden');
+      if (anyOpen) document.body.classList.add('overflow-hidden');
+      else document.body.classList.remove('overflow-hidden');
     }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeBreakdownModal();
+        closePayslipModal();
+        closeConfigModal();
+      }
+    });
 
     function applyThemeByPreference(showNotification = false) {
       const html = document.documentElement;
@@ -1440,10 +1296,10 @@
       const metaThemeColor = document.querySelector('meta[name="theme-color"]');
       if (shouldBeDark) {
         html.classList.add('dark');
-        if (metaThemeColor) metaThemeColor.setAttribute('content', '#07080A');
+        if (metaThemeColor) metaThemeColor.setAttribute('content', '#050608');
       } else {
         html.classList.remove('dark');
-        if (metaThemeColor) metaThemeColor.setAttribute('content', '#E6E4DE');
+        if (metaThemeColor) metaThemeColor.setAttribute('content', '#E2E0D8');
       }
 
       const iconEl = document.getElementById('themeIcon');
@@ -1533,20 +1389,38 @@
     }
 
     function normalizeRecordItem(r) {
+      const dayType = String(r.dayType || 'REGULAR').toUpperCase() === 'HOLIDAY' ? 'HOLIDAY' : 'REGULAR';
+      const otHours = sanitizeNumber(r.otHours);
+      const otPay = sanitizeNumber(r.otPay);
+      let ot20Hours = sanitizeNumber(r.ot20Hours);
+      let ot20Pay = sanitizeNumber(r.ot20Pay);
+      let ot30Hours = sanitizeNumber(r.ot30Hours);
+      let ot30Pay = sanitizeNumber(r.ot30Pay);
+
+      if (dayType === 'HOLIDAY' && ot20Hours === 0 && ot30Hours === 0 && otHours > 0) {
+        ot20Hours = Math.min(otHours, 8);
+        ot20Pay = Math.round(ot20Hours * 100 * 100) / 100;
+        ot30Hours = Math.max(0, Math.round((otHours - 8) * 100) / 100);
+        ot30Pay = Math.round(ot30Hours * 150 * 100) / 100;
+      }
+
       return {
         ...r,
         id: String(r.id || '').trim(),
         date: normalizeDateFromSheet(r.date),
+        shift: String(r.shift || 'DAY').toUpperCase() === 'NIGHT' ? 'NIGHT' : 'DAY',
+        dayType,
+        workType: String(r.workType || 'FULL').toUpperCase() === 'HALF' ? 'HALF' : 'FULL',
         baseSalary: sanitizeNumber(r.baseSalary),
         workedHours: sanitizeNumber(r.workedHours),
-        otHours: sanitizeNumber(r.otHours),
-        otPay: sanitizeNumber(r.otPay),
+        otHours,
+        otPay,
         ot15Hours: sanitizeNumber(r.ot15Hours),
         ot15Pay: sanitizeNumber(r.ot15Pay),
-        ot20Hours: sanitizeNumber(r.ot20Hours),
-        ot20Pay: sanitizeNumber(r.ot20Pay),
-        ot30Hours: sanitizeNumber(r.ot30Hours),
-        ot30Pay: sanitizeNumber(r.ot30Pay),
+        ot20Hours,
+        ot20Pay,
+        ot30Hours,
+        ot30Pay,
         shiftAllowance: sanitizeNumber(r.shiftAllowance),
         normalMeal: sanitizeNumber(r.normalMeal ?? 10),
         otMeal: sanitizeNumber(r.otMeal),
@@ -1566,12 +1440,12 @@
     }
 
     function getCustomHolidaysSet() {
-      const customRaw = localStorage.getItem("custom_company_holidays") || "";
+      const customRaw = localStorage.getItem("custom_company_holidays") || DEFAULT_CUSTOM_HOLIDAYS_2026;
       return new Set(customRaw.split(',').map(s => s.trim()).filter(Boolean));
     }
 
     function getWorkingSaturdaysSet() {
-      const satRaw = localStorage.getItem("working_saturdays") || "2026-11-07, 2026-11-14, 2026-11-21, 2026-11-28";
+      const satRaw = localStorage.getItem("working_saturdays") || DEFAULT_WORKING_SATURDAYS_2026;
       return new Set(satRaw.split(',').map(s => s.trim()).filter(Boolean));
     }
 
@@ -1585,6 +1459,15 @@
       return false;
     }
 
+    function isHolidayForWorkDay(dateObj) {
+      const dateStr = getLocalDateStr(dateObj);
+      if (THAI_PUBLIC_HOLIDAYS.has(dateStr) || getCustomHolidaysSet().has(dateStr)) return true;
+      const dow = dateObj.getDay();
+      if (dow === 0) return true;
+      if (dow === 6 && !getWorkingSaturdaysSet().has(dateStr)) return true;
+      return false;
+    }
+
     function isRequiredWorkDayForDiligence(dateObj) {
       const dateStr = getLocalDateStr(dateObj);
       if (THAI_PUBLIC_HOLIDAYS.has(dateStr) || getCustomHolidaysSet().has(dateStr)) {
@@ -1594,6 +1477,11 @@
       if (dayOfWeek >= 1 && dayOfWeek <= 5) return true;
       if (dayOfWeek === 6 && getWorkingSaturdaysSet().has(dateStr)) return true;
       return false;
+    }
+
+    function isQualifiedFullRegularDay(r) {
+      if (!r || r.dayType === 'HOLIDAY' || r.workType === 'HALF') return false;
+      return (r.baseSalary || 0) >= 400 || (r.workedHours || 0) >= 8;
     }
 
     function computeScheduledPayDate(startStr, endStr, latestRecordDateStr = '') {
@@ -1664,7 +1552,7 @@
         const dStr = getLocalDateStr(dateObj);
         const rec = recordMap.get(dStr);
 
-        if (!hasLeaveOnDate(dStr) && rec && rec.workType !== 'HALF' && ((rec.baseSalary || 0) >= 400 || (rec.workedHours || 0) >= 8)) {
+        if (!hasLeaveOnDate(dStr) && isQualifiedFullRegularDay(rec)) {
           workedWeekdays++;
         } else {
           missingDates.push(dStr);
@@ -1718,18 +1606,18 @@
 
         if (type === 'confirm') {
           osc.type = 'sine';
-          osc.frequency.setValueAtTime(980, now);
-          osc.frequency.exponentialRampToValueAtTime(1420, now + 0.045);
+          osc.frequency.setValueAtTime(1040, now);
+          osc.frequency.exponentialRampToValueAtTime(1520, now + 0.045);
           gain.gain.setValueAtTime(0.24, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.055);
           osc.connect(gain);
           gain.connect(sharedAudioCtx.destination);
           osc.start(now);
-          osc.stop(now + 0.055);
+          osc.stop(now + 0.06);
         } else {
           osc.type = 'triangle';
-          osc.frequency.setValueAtTime(860, now);
-          osc.frequency.exponentialRampToValueAtTime(210, now + 0.032);
+          osc.frequency.setValueAtTime(920, now);
+          osc.frequency.exponentialRampToValueAtTime(220, now + 0.032);
           gain.gain.setValueAtTime(0.28, now);
           gain.gain.exponentialRampToValueAtTime(0.001, now + 0.038);
           osc.connect(gain);
@@ -1738,13 +1626,13 @@
           osc.stop(now + 0.042);
         }
 
-        if (navigator.vibrate) navigator.vibrate(12);
+        if (navigator.vibrate) navigator.vibrate(14);
       } catch (e) {}
     }
 
     document.addEventListener('pointerdown', (e) => {
       const btn = e.target.closest('button, select, input[type="date"], input[type="time"]');
-      if (btn && btn.id !== 'audioToggleBtn') playClick('normal');
+      if (btn && !btn.disabled && btn.id !== 'audioToggleBtn') playClick('normal');
     }, { passive: true });
 
     function formatThaiBE(dateStr) {
@@ -1764,7 +1652,42 @@
       return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
+    function getActiveCheckInForCurrentEmp() {
+      try {
+        const activeCheckins = JSON.parse(localStorage.getItem("active_checkins") || "{}");
+        return activeCheckins[currentEmpId] || null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function autoDetectShiftAndDayType(notify = false) {
+      if (getActiveCheckInForCurrentEmp()) {
+        if (notify) showToast("กำลังปฏิบัติงานอยู่ ระบบล็อกค่ากะไว้แล้ว");
+        return;
+      }
+      const now = new Date();
+      const h = now.getHours();
+      currentShift = (h >= 17 || h < 6) ? "NIGHT" : "DAY";
+      const targetWorkDate = (currentShift === "NIGHT" && h < 6)
+        ? new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1)
+        : now;
+      currentDayType = isHolidayForWorkDay(targetWorkDate) ? "HOLIDAY" : "REGULAR";
+      currentWorkType = "FULL";
+      renderSwitchStates();
+      saveShiftPreference();
+      updateLiveEstimator();
+      if (notify) {
+        showToast(`ตรวจจับอัตโนมัติ: กะ${currentShift === 'DAY' ? 'กลางวัน' : 'กลางคืน'} • ${currentDayType === 'HOLIDAY' ? 'วันหยุด (2.0/3.0)' : 'วันปกติ (1.5)'}`);
+      }
+    }
+
     function setSwitchValue(group, val, shouldSave = true) {
+      if (getActiveCheckInForCurrentEmp()) {
+        showToast("กำลังปฏิบัติงานอยู่ ไม่สามารถเปลี่ยนกะระหว่างเข้างานได้");
+        return;
+      }
+
       if (group === 'shift') currentShift = val;
       if (group === 'dayType') currentDayType = val;
       if (group === 'workType') currentWorkType = val;
@@ -1775,17 +1698,47 @@
     }
 
     function renderSwitchStates() {
-      const activeCls = "bg-[#EF233C] text-white shadow-xs";
+      const activeIn = getActiveCheckInForCurrentEmp();
+      const locked = Boolean(activeIn);
+
+      if (activeIn) {
+        currentShift = activeIn.shift || currentShift;
+        currentDayType = activeIn.dayType || currentDayType;
+        currentWorkType = activeIn.workType || currentWorkType;
+      }
+
+      const activeCls = "bg-[#FF1E38] text-white shadow-[0_0_12px_rgba(255,30,56,0.5)]";
       const inactiveCls = "text-zinc-400 hover:text-zinc-200";
+      const lockOpacity = locked ? " opacity-75 cursor-not-allowed" : "";
 
-      document.getElementById('swShiftDay').className = `py-1.5 font-bold text-[10.5px] transition ${currentShift === 'DAY' ? activeCls : inactiveCls}`;
-      document.getElementById('swShiftNight').className = `py-1.5 font-bold text-[10.5px] transition ${currentShift === 'NIGHT' ? activeCls : inactiveCls}`;
+      const swShiftDay = document.getElementById('swShiftDay');
+      const swShiftNight = document.getElementById('swShiftNight');
+      const swDayReg = document.getElementById('swDayReg');
+      const swDayHol = document.getElementById('swDayHol');
+      const swModeFull = document.getElementById('swModeFull');
+      const swModeHalf = document.getElementById('swModeHalf');
 
-      document.getElementById('swDayReg').className = `py-1.5 font-bold text-[10.5px] transition ${currentDayType === 'REGULAR' ? activeCls : inactiveCls}`;
-      document.getElementById('swDayHol').className = `py-1.5 font-bold text-[10.5px] transition ${currentDayType === 'HOLIDAY' ? activeCls : inactiveCls}`;
+      swShiftDay.disabled = locked;
+      swShiftNight.disabled = locked;
+      swDayReg.disabled = locked;
+      swDayHol.disabled = locked;
+      swModeFull.disabled = locked;
+      swModeHalf.disabled = locked;
 
-      document.getElementById('swModeFull').className = `py-1.5 font-bold text-[10.5px] transition ${currentWorkType === 'FULL' ? activeCls : inactiveCls}`;
-      document.getElementById('swModeHalf').className = `py-1.5 font-bold text-[10.5px] transition ${currentWorkType === 'HALF' ? activeCls : inactiveCls}`;
+      swShiftDay.className = `py-1.5 font-bold text-[10.5px] transition ${currentShift === 'DAY' ? activeCls : inactiveCls}${lockOpacity}`;
+      swShiftNight.className = `py-1.5 font-bold text-[10.5px] transition ${currentShift === 'NIGHT' ? activeCls : inactiveCls}${lockOpacity}`;
+
+      swDayReg.className = `py-1.5 font-bold text-[10.5px] transition ${currentDayType === 'REGULAR' ? activeCls : inactiveCls}${lockOpacity}`;
+      swDayHol.className = `py-1.5 font-bold text-[10.5px] transition ${currentDayType === 'HOLIDAY' ? activeCls : inactiveCls}${lockOpacity}`;
+
+      swModeFull.className = `py-1.5 font-bold text-[10.5px] transition ${currentWorkType === 'FULL' ? activeCls : inactiveCls}${lockOpacity}`;
+      swModeHalf.className = `py-1.5 font-bold text-[10.5px] transition ${currentWorkType === 'HALF' ? activeCls : inactiveCls}${lockOpacity}`;
+
+      const lockHint = document.getElementById('switchLockHint');
+      if (lockHint) {
+        if (locked) lockHint.classList.remove('hidden');
+        else lockHint.classList.add('hidden');
+      }
 
       document.getElementById('shiftScheduleHint').innerHTML = currentShift === 'DAY'
         ? `<i class="fa-regular fa-sun text-red-600"></i> กะกลางวัน 08:00 - 16:50`
@@ -1793,9 +1746,10 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
+      applyEmbeddedLogoToAllSlots();
       if (!localStorage.getItem("gas_url")) localStorage.setItem("gas_url", DEFAULT_GAS_URL);
-      if (!localStorage.getItem("line_token")) localStorage.setItem("line_token", DEFAULT_LINE_TOKEN);
-      if (!localStorage.getItem("line_user_id")) localStorage.setItem("line_user_id", DEFAULT_LINE_USER_ID);
+      if (!localStorage.getItem("working_saturdays")) localStorage.setItem("working_saturdays", DEFAULT_WORKING_SATURDAYS_2026);
+      if (!localStorage.getItem("custom_company_holidays")) localStorage.setItem("custom_company_holidays", DEFAULT_CUSTOM_HOLIDAYS_2026);
 
       applyThemeByPreference(false);
       renderEmployeeDropdowns();
@@ -1805,6 +1759,7 @@
       buildCutoffOptions();
       renderHistories();
       updateLiveEstimator();
+      updateQueueBadge();
 
       const todayStr = getLocalDateStr();
       document.getElementById('manualDate').value = todayStr;
@@ -1812,13 +1767,22 @@
       document.getElementById('leaveEndDate').value = todayStr;
       prefillManualByDate();
 
-      pullFromGoogleSheets(true);
+      flushOfflineQueue(true).then(() => pullFromGoogleSheets(true));
+    });
+
+    window.addEventListener('online', () => {
+      flushOfflineQueue(false);
     });
 
     function renderEmployeeDropdowns() {
       const select = document.getElementById("globalEmployeeSelect");
       select.innerHTML = employeeList.map(emp => `<option value="${escapeHTML(emp.id)}">${escapeHTML(emp.id)} • ${escapeHTML(emp.name)}</option>`).join('');
-      select.value = currentEmpId;
+      if (employeeList.some(e => e.id === currentEmpId)) {
+        select.value = currentEmpId;
+      } else if (employeeList.length > 0) {
+        currentEmpId = employeeList[0].id;
+        select.value = currentEmpId;
+      }
     }
 
     function onEmployeeChange(id) {
@@ -1841,7 +1805,7 @@
       for (let i = 1; i <= 4; i++) {
         const navBtn = document.getElementById(`nav-${i}`);
         if (i === tabNum) {
-          navBtn.className = "chrono-pusher flex-1 flex flex-col items-center justify-center py-2 text-white bg-red-600 font-bold transition-all";
+          navBtn.className = "chrono-pusher flex-1 flex flex-col items-center justify-center py-2 text-white bg-red-600 font-bold transition-all shadow-[0_0_15px_rgba(255,30,56,0.45)]";
         } else {
           navBtn.className = "chrono-pusher flex-1 flex flex-col items-center justify-center py-2 text-zinc-400 hover:text-white transition-all";
         }
@@ -1854,39 +1818,36 @@
       const baseDate = new Date(`${activeIn.date}T${activeIn.time}:00`);
       if (isNaN(baseDate.getTime())) return new Date();
       const inHour = Number((activeIn.time || '00:00').split(':')[0]);
-      if (activeIn.shift === 'NIGHT' && inHour < 12) {
-        const todayStr = getLocalDateStr(new Date());
-        if (activeIn.date !== todayStr) {
-          baseDate.setDate(baseDate.getDate() + 1);
-        }
+      if (activeIn.shift === 'NIGHT' && inHour < 8) {
+        baseDate.setDate(baseDate.getDate() + 1);
       }
       return baseDate;
     }
 
     function startLiveChronograph() {
+      const sweepHand = document.getElementById('tourbillonSweepHand');
       const update = () => {
         const now = new Date();
         const timeStr = now.toTimeString().split(' ')[0];
         const ms = Math.floor(now.getMilliseconds() / 100);
-        document.getElementById('liveClock').innerHTML = `${timeStr}<span class="text-xl text-[#FF2A2A] font-bold">.${ms}</span>`;
+        document.getElementById('liveClock').innerHTML = `${timeStr}<span class="text-xl text-[#FF1E38] font-bold">.${ms}</span>`;
         document.getElementById('currentDateDisplay').textContent = now.toLocaleDateString('th-TH', {
           weekday: 'long', year: 'numeric', month: 'short', day: 'numeric'
         });
 
-        let activeCheckins = {};
-        try {
-          activeCheckins = JSON.parse(localStorage.getItem("active_checkins") || "{}");
-        } catch (e) {
-          activeCheckins = {};
+        if (sweepHand) {
+          const deg = (now.getSeconds() + now.getMilliseconds() / 1000) * 6;
+          sweepHand.style.transform = `rotate(${deg}deg)`;
         }
-        const activeIn = activeCheckins[currentEmpId];
+
+        const activeIn = getActiveCheckInForCurrentEmp();
         const elapsedBar = document.getElementById('liveShiftElapsedBar');
         const lcdTag = document.getElementById('lcdModeTag');
 
         if (activeIn) {
           elapsedBar.classList.remove('hidden');
           lcdTag.textContent = "ON DUTY";
-          lcdTag.className = "bg-red-500/20 text-red-300 px-2.5 py-0.5 text-[9.5px] font-mono font-bold tracking-wider border border-red-500/40";
+          lcdTag.className = "bg-red-500/25 text-red-300 px-2.5 py-0.5 text-[9px] font-hud font-bold tracking-widest border border-red-500/50 shadow-[0_0_10px_rgba(255,30,56,0.3)]";
 
           const inDateTime = buildCheckInTimestamp(activeIn);
           const diffMs = Math.max(0, now - inDateTime);
@@ -1897,19 +1858,15 @@
 
           const nowTimeStr = getLocalTimeStr(now);
           const liveCalc = calculatePayroll(activeIn.shift, activeIn.dayType, activeIn.time, nowTimeStr, activeIn.workType);
-          let estCurrentPay = liveCalc.totalSalary;
-          if (activeIn.dayType === 'REGULAR' && activeIn.workType !== 'HALF' && liveCalc.baseSalary === 0) {
-            estCurrentPay = 400 + liveCalc.shiftAllowance + liveCalc.totalMealAllowance + liveCalc.otPay;
-          }
-          document.getElementById('liveAccruedPay').textContent = `${fmtNum(estCurrentPay)} ฿`;
+          document.getElementById('liveAccruedPay').textContent = `${fmtNum(liveCalc.totalSalary)} ฿`;
         } else {
           elapsedBar.classList.add('hidden');
           lcdTag.textContent = "STANDBY";
-          lcdTag.className = "bg-emerald-500/15 text-emerald-300 px-2.5 py-0.5 text-[9.5px] font-mono font-bold tracking-wider border border-emerald-500/30";
+          lcdTag.className = "bg-emerald-500/15 text-emerald-300 px-2.5 py-0.5 text-[9px] font-hud font-bold tracking-widest border border-emerald-500/35";
         }
       };
       update();
-      setInterval(update, 100);
+      setInterval(update, 50);
     }
 
     function saveShiftPreference() {
@@ -1918,9 +1875,15 @@
     }
 
     function loadShiftPreference() {
-      currentShift = localStorage.getItem(`pref_shift_${currentEmpId}`) || "DAY";
-      currentDayType = localStorage.getItem(`pref_daytype_${currentEmpId}`) || "REGULAR";
-      renderSwitchStates();
+      const activeIn = getActiveCheckInForCurrentEmp();
+      if (activeIn) {
+        currentShift = activeIn.shift || "DAY";
+        currentDayType = activeIn.dayType || "REGULAR";
+        currentWorkType = activeIn.workType || "FULL";
+        renderSwitchStates();
+      } else {
+        autoDetectShiftAndDayType(false);
+      }
     }
 
     function timeToMins(tStr) {
@@ -1934,6 +1897,10 @@
       const hh = String(Math.floor(normalized / 60)).padStart(2, '0');
       const mm = String(normalized % 60).padStart(2, '0');
       return `${hh}:${mm}`;
+    }
+
+    function overlapMinutes(startA, endA, startB, endB) {
+      return Math.max(0, Math.min(endA, endB) - Math.max(startA, startB));
     }
 
     function calculatePayroll(shift, dayType, checkInTime, checkOutTime, workType = 'FULL') {
@@ -1963,7 +1930,7 @@
       if (shift === 'DAY') {
         const normalOutMins = Math.min(outMins, 1010);
         const normalDuration = Math.max(0, normalOutMins - effectiveInMins);
-        const mealBreakMins = normalDuration > 300 ? 50 : 0;
+        const mealBreakMins = overlapMinutes(effectiveInMins, normalOutMins, 720, 770);
         const normalWorkedMins = Math.max(0, normalDuration - mealBreakMins);
 
         const cappedOutMins = Math.min(outMins, 1150);
@@ -1975,7 +1942,7 @@
         shiftAllowance = 180;
         const normalOutMins = Math.min(outMins, 1730);
         const normalDuration = Math.max(0, normalOutMins - effectiveInMins);
-        const mealBreakMins = normalDuration > 300 ? 50 : 0;
+        const mealBreakMins = overlapMinutes(effectiveInMins, normalOutMins, 1440, 1490);
         const normalWorkedMins = Math.max(0, normalDuration - mealBreakMins);
 
         const cappedOutMins = Math.min(outMins, 1870);
@@ -2002,7 +1969,8 @@
           if (otHours >= 4) otMeal = 50;
           salaryNote = "วันหยุดครึ่งวัน (OT 2.0)";
         } else {
-          ot20Hours = Math.round(Math.min(workedHours, 8) * 100) / 100;
+          const regularShiftHours = Math.max(0, Math.round((workedHours - afterShiftOtHours) * 100) / 100);
+          ot20Hours = Math.min(regularShiftHours, 8);
           ot20Pay = Math.round(ot20Hours * 100 * 100) / 100;
 
           ot30Hours = afterShiftOtHours;
@@ -2092,12 +2060,6 @@
       const today = getLocalDateStr(now);
       const yesterday = getYesterdayDateStr(now);
       const records = getNormalizedPayrollRecords();
-      let activeCheckins = {};
-      try {
-        activeCheckins = JSON.parse(localStorage.getItem("active_checkins") || "{}");
-      } catch (e) {
-        activeCheckins = {};
-      }
       
       const empIdStr = String(currentEmpId).trim();
       let todayRecord = records.find(r => r.id === empIdStr && r.date === today);
@@ -2109,7 +2071,8 @@
         }
       }
 
-      const activeIn = activeCheckins[currentEmpId];
+      const activeIn = getActiveCheckInForCurrentEmp();
+      renderSwitchStates();
 
       const inEl = document.getElementById('displayCheckInTime');
       const outEl = document.getElementById('displayCheckOutTime');
@@ -2118,6 +2081,8 @@
       const badge = document.getElementById('dutyBadge');
       const led = document.getElementById('statusLed');
       const ledPing = document.getElementById('statusLedPing');
+      const btnIn = document.getElementById('btnCheckIn');
+      const btnOut = document.getElementById('btnCheckOut');
 
       if (activeIn) {
         inEl.textContent = activeIn.time;
@@ -2125,28 +2090,87 @@
         inText.textContent = `กำลังทำงาน (${activeIn.time})`;
         outText.textContent = 'กดเพื่อลงเวลาออก';
         badge.textContent = "กำลังปฏิบัติงาน";
-        badge.className = "text-[10px] px-2.5 py-0.5 bg-red-500/15 text-red-600 dark:text-red-400 font-bold border border-red-500/30";
+        badge.className = "text-[10px] px-2.5 py-0.5 bg-red-500/20 text-red-600 dark:text-red-400 font-bold border border-red-500/40 shrink-0";
         led.className = "relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500";
         ledPing.className = "status-pulse absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75";
+        btnIn.disabled = true;
+        btnOut.disabled = false;
       } else if (todayRecord) {
         inEl.textContent = todayRecord.checkIn || '--:--';
         outEl.textContent = todayRecord.checkOut || '--:--';
         inText.textContent = `เข้างานแล้ว (${todayRecord.checkIn})`;
         outText.textContent = `ออกงานแล้ว (${todayRecord.checkOut})`;
         badge.textContent = "ลงเวลาครบแล้ว";
-        badge.className = "text-[10px] px-2.5 py-0.5 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-500/30";
+        badge.className = "text-[10px] px-2.5 py-0.5 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-500/35 shrink-0";
         led.className = "relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500";
         ledPing.className = "hidden";
+        btnIn.disabled = false;
+        btnOut.disabled = true;
       } else {
         inEl.textContent = '--:--';
         outEl.textContent = '--:--';
         inText.textContent = 'กดเพื่อเริ่มนับเวลา';
         outText.textContent = 'คำนวณค่าแรงวันนี้';
         badge.textContent = "พร้อมปฏิบัติงาน";
-        badge.className = "text-[10px] px-2.5 py-0.5 bg-zinc-900/10 dark:bg-white/10 font-bold text-zinc-800 dark:text-zinc-200 border border-zinc-400/30 dark:border-white/10";
+        badge.className = "text-[10px] px-2.5 py-0.5 bg-zinc-900/10 dark:bg-white/10 font-bold text-zinc-800 dark:text-zinc-200 border border-zinc-400/30 dark:border-white/10 shrink-0";
         led.className = "relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500";
         ledPing.className = "status-pulse absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75";
+        btnIn.disabled = false;
+        btnOut.disabled = true;
       }
+    }
+
+    function buildFlexBubble({ headerBg, badgeText, titleText, subtitleText, rows, highlightLabel, highlightValue }) {
+      return {
+        type: "bubble",
+        size: "kilo",
+        header: {
+          type: "box",
+          layout: "vertical",
+          backgroundColor: headerBg,
+          paddingAll: "14px",
+          contents: [
+            {
+              type: "box",
+              layout: "horizontal",
+              contents: [
+                { type: "text", text: "PROVIDE POWER HUD", color: "#FFFFFFAA", size: "xxs", weight: "bold", flex: 1 },
+                { type: "text", text: badgeText, color: "#FFFFFF", size: "xxs", weight: "bold", align: "end" }
+              ]
+            },
+            { type: "text", text: titleText, color: "#FFFFFF", size: "md", weight: "bold", margin: "xs" },
+            { type: "text", text: subtitleText, color: "#FFFFFFCC", size: "xs", margin: "xs", wrap: true }
+          ]
+        },
+        body: {
+          type: "box",
+          layout: "vertical",
+          spacing: "sm",
+          paddingAll: "14px",
+          contents: [
+            ...rows.map(r => ({
+              type: "box",
+              layout: "horizontal",
+              contents: [
+                { type: "text", text: r.label, size: "xs", color: "#71717A", flex: 4 },
+                { type: "text", text: r.value, size: "xs", color: "#18181B", weight: "bold", align: "end", flex: 6, wrap: true }
+              ]
+            })),
+            ...(highlightLabel ? [
+              { type: "separator", margin: "md" },
+              {
+                type: "box",
+                layout: "horizontal",
+                margin: "md",
+                contents: [
+                  { type: "text", text: highlightLabel, size: "sm", weight: "bold", color: "#18181B", flex: 5 },
+                  { type: "text", text: highlightValue, size: "md", weight: "bold", color: headerBg, align: "end", flex: 5 }
+                ]
+              }
+            ] : [])
+          ]
+        }
+      };
     }
 
     function handleLiveCheckIn() {
@@ -2181,9 +2205,21 @@
       playClick('confirm');
       showToast("บันทึกเวลาเข้างานสำเร็จ");
       loadTodayLiveStatus();
+      updateLiveEstimator();
 
       const lineMsg = `⏰ [CHECK IN]\nพนักงาน: ${emp.name} (${emp.id})\nวันที่: ${formatThaiBE(dateStr)} (${currentDayType})\nเวลา: ${timeStr} น.`;
-      syncToGoogleSheets([], lineMsg);
+      const flexPayload = buildFlexBubble({
+        headerBg: "#059669",
+        badgeText: "ON DUTY",
+        titleText: "บันทึกเวลาเข้างาน",
+        subtitleText: `${emp.name} (${emp.id})`,
+        rows: [
+          { label: "วันที่เข้ากะ", value: formatThaiBE(dateStr) },
+          { label: "กะ / ประเภทวัน", value: `${currentShift === 'DAY' ? 'กลางวัน' : 'กลางคืน'} • ${currentDayType === 'HOLIDAY' ? 'วันหยุด' : 'วันปกติ'}` },
+          { label: "เวลาสแกนเข้า", value: `${timeStr} น.` }
+        ]
+      });
+      syncToGoogleSheets({ payLoadPayrolls: [], lineMessage: lineMsg, flexPayload });
     }
 
     function handleLiveCheckOut() {
@@ -2219,10 +2255,25 @@
       playClick('confirm');
       showToast("ลงเวลาออก & คำนวณเงินสำเร็จ");
       loadTodayLiveStatus();
+      updateLiveEstimator();
       renderHistories();
 
-      const lineMsg = `✅ [CHECK OUT & PAYROLL]\nพนักงาน: ${emp.name} (${emp.id})\nวันที่: ${formatThaiBE(dateStr)} (${activeIn.shift} / ${activeIn.dayType})\nเวลา: ${activeIn.time} - ${timeStr} (${calc.workedHours} ชม.)\n💰 สุทธิ: ${calc.totalSalary} บาท`;
-      syncToGoogleSheets([recordObj], lineMsg);
+      const lineMsg = `✅ [CHECK OUT & PAYROLL]\nพนักงาน: ${emp.name} (${emp.id})\nวันที่: ${formatThaiBE(dateStr)} (${activeIn.shift} / ${activeIn.dayType})\nเวลา: ${activeIn.time} - ${timeStr} (${calc.workedHours} ชม.)\n💰 สุทธิ: ${fmtNum(calc.totalSalary)} บาท`;
+      const flexPayload = buildFlexBubble({
+        headerBg: "#DC2626",
+        badgeText: "COMPLETED",
+        titleText: "สรุปยอดออกงานประจำวัน",
+        subtitleText: `${emp.name} (${emp.id})`,
+        rows: [
+          { label: "วันที่ปฏิบัติงาน", value: formatThaiBE(dateStr) },
+          { label: "เวลาเข้า - ออก", value: `${activeIn.time} - ${timeStr} (${calc.workedHours} ชม.)` },
+          { label: "ชั่วโมง OT รวม", value: `${calc.otHours} ชม. (${fmtNum(calc.otPay)} ฿)` },
+          { label: "ค่ากะ + ค่าอาหาร", value: `${fmtNum(calc.shiftAllowance + calc.totalMealAllowance)} ฿` }
+        ],
+        highlightLabel: "ยอดรับสุทธิวันนี้",
+        highlightValue: `${fmtNum(calc.totalSalary)} ฿`
+      });
+      syncToGoogleSheets({ payLoadPayrolls: [recordObj], lineMessage: lineMsg, flexPayload });
     }
 
     function prefillManualByDate() {
@@ -2240,6 +2291,10 @@
         document.getElementById('manualCheckOut').value = existing.checkOut || '';
         badge.classList.remove('hidden');
       } else {
+        const dObj = new Date(dateStr + 'T00:00:00');
+        document.getElementById('manualShift').value = currentShift || 'DAY';
+        document.getElementById('manualDayType').value = (!isNaN(dObj.getTime()) && isHolidayForWorkDay(dObj)) ? 'HOLIDAY' : 'REGULAR';
+        document.getElementById('manualWorkType').value = 'FULL';
         document.getElementById('manualCheckIn').value = '';
         document.getElementById('manualCheckOut').value = '';
         badge.classList.add('hidden');
@@ -2248,6 +2303,13 @@
     }
 
     function updateManualPreview() {
+      const shift = document.getElementById('manualShift').value;
+      const nightNote = document.getElementById('manualNightShiftNote');
+      if (nightNote) {
+        if (shift === 'NIGHT') nightNote.classList.remove('hidden');
+        else nightNote.classList.add('hidden');
+      }
+
       const checkIn = document.getElementById('manualCheckIn').value;
       const checkOut = document.getElementById('manualCheckOut').value;
       const box = document.getElementById('manualPreviewBox');
@@ -2255,7 +2317,6 @@
         box.classList.add('hidden');
         return;
       }
-      const shift = document.getElementById('manualShift').value;
       const dayType = document.getElementById('manualDayType').value;
       const workType = document.getElementById('manualWorkType').value;
       const calc = calculatePayroll(shift, dayType, checkIn, checkOut, workType);
@@ -2300,8 +2361,30 @@
       loadTodayLiveStatus();
       renderHistories();
 
-      const lineMsg = `📝 [MANUAL EDIT]\nพนักงาน: ${emp.name} (${emp.id})\nวันที่: ${formatThaiBE(dateStr)} (${dayType})\nเวลา: ${checkIn} - ${checkOut} (${calc.workedHours} ชม.)\n💰 สุทธิ: ${calc.totalSalary} บาท`;
-      syncToGoogleSheets([recordObj], lineMsg);
+      const lineMsg = `📝 [MANUAL EDIT]\nพนักงาน: ${emp.name} (${emp.id})\nวันที่: ${formatThaiBE(dateStr)} (${dayType})\nเวลา: ${checkIn} - ${checkOut} (${calc.workedHours} ชม.)\n💰 สุทธิ: ${fmtNum(calc.totalSalary)} บาท`;
+      const flexPayload = buildFlexBubble({
+        headerBg: "#18181B",
+        badgeText: "MANUAL EDIT",
+        titleText: "บันทึก/แก้ไขเวลาย้อนหลัง",
+        subtitleText: `${emp.name} (${emp.id})`,
+        rows: [
+          { label: "วันที่แก้ไข", value: formatThaiBE(dateStr) },
+          { label: "กะ / ประเภทวัน", value: `${shift === 'DAY' ? 'กลางวัน' : 'กลางคืน'} • ${dayType === 'HOLIDAY' ? 'วันหยุด' : 'วันปกติ'}` },
+          { label: "เวลาเข้า - ออก", value: `${checkIn} - ${checkOut} (${calc.workedHours} ชม.)` },
+          { label: "OT รวม", value: `${calc.otHours} ชม. (${fmtNum(calc.otPay)} ฿)` }
+        ],
+        highlightLabel: "ยอดรวมใหม่",
+        highlightValue: `${fmtNum(calc.totalSalary)} ฿`
+      });
+      syncToGoogleSheets({ payLoadPayrolls: [recordObj], lineMessage: lineMsg, flexPayload });
+    }
+
+    function calculateLeaveDaysLocal(startStr, endStr) {
+      if (!startStr || !endStr) return 1;
+      const s = new Date(startStr + "T00:00:00");
+      const e = new Date(endStr + "T00:00:00");
+      if (isNaN(s.getTime()) || isNaN(e.getTime()) || e < s) return 1;
+      return Math.round((e - s) / 86400000) + 1;
     }
 
     function handleLeaveSubmit(e) {
@@ -2315,12 +2398,14 @@
         return;
       }
 
+      const totalDays = calculateLeaveDaysLocal(startDate, endDate);
       const leaveObj = {
         id: emp.id,
         employeeName: emp.name,
         leaveType: document.getElementById('leaveType').value,
         startDate,
         endDate,
+        totalDays,
         reason: document.getElementById('leaveReason').value.trim(),
         createdAt: new Date().toISOString()
       };
@@ -2328,14 +2413,26 @@
       let leaves = JSON.parse(localStorage.getItem("leave_records") || "[]");
       leaves.push(leaveObj);
       localStorage.setItem("leave_records", JSON.stringify(leaves));
+      deletedLeaveKeys.delete(`${emp.id}|${startDate}|${endDate}`);
 
       playClick('confirm');
       showToast("ยื่นใบลางานสำเร็จ");
       document.getElementById('leaveReason').value = "";
       renderHistories();
 
-      const lineMsg = `🏖️ [LEAVE REQUEST]\nพนักงาน: ${emp.name} (${emp.id})\nประเภท: ${leaveObj.leaveType}\nช่วงวัน: ${formatThaiBE(leaveObj.startDate)} ถึง ${formatThaiBE(leaveObj.endDate)}\nเหตุผล: ${leaveObj.reason || '-'}`;
-      syncToGoogleSheets([], lineMsg, [leaveObj]);
+      const lineMsg = `🏖️ [LEAVE REQUEST]\nพนักงาน: ${emp.name} (${emp.id})\nประเภท: ${leaveObj.leaveType} (${totalDays} วัน)\nช่วงวัน: ${formatThaiBE(leaveObj.startDate)} ถึง ${formatThaiBE(leaveObj.endDate)}\nเหตุผล: ${leaveObj.reason || '-'}`;
+      const flexPayload = buildFlexBubble({
+        headerBg: "#D97706",
+        badgeText: "LEAVE",
+        titleText: `แจ้ง${leaveObj.leaveType}`,
+        subtitleText: `${emp.name} (${emp.id})`,
+        rows: [
+          { label: "ตั้งแต่วันที่", value: formatThaiBE(leaveObj.startDate) },
+          { label: "ถึงวันที่", value: `${formatThaiBE(leaveObj.endDate)} (${totalDays} วัน)` },
+          { label: "เหตุผล", value: leaveObj.reason || "-" }
+        ]
+      });
+      syncToGoogleSheets({ payLoadLeaves: [leaveObj], lineMessage: lineMsg, flexPayload });
     }
 
     function deleteLeaveRecord(index) {
@@ -2351,8 +2448,20 @@
 
       allLeaves.splice(target.idx, 1);
       localStorage.setItem("leave_records", JSON.stringify(allLeaves));
+      deletedLeaveKeys.add(`${target.item.id}|${target.item.startDate}|${target.item.endDate || target.item.startDate}`);
       renderHistories();
       showToast("ลบรายการวันลาเรียบร้อย");
+
+      syncToGoogleSheets({
+        customBody: {
+          action: "deleteLeave",
+          id: target.item.id,
+          startDate: target.item.startDate,
+          endDate: target.item.endDate || target.item.startDate,
+          sendLine: true,
+          lineMessage: `🗑️ [DELETE LEAVE]\nพนักงาน ID: ${target.item.id}\nวันที่ลาที่ลบ: ${formatThaiBE(target.item.startDate)}`
+        }
+      });
     }
 
     function deleteRecord(encodedEmpId, encodedRecordDate) {
@@ -2369,28 +2478,92 @@
       loadTodayLiveStatus();
       renderHistories();
 
-      const gasUrl = localStorage.getItem("gas_url") || DEFAULT_GAS_URL;
-      if (!gasUrl || !gasUrl.startsWith('http')) return;
-
-      const payload = {
-        action: "deletePayroll",
-        id: empId,
-        date: recordDate,
-        sendLine: true,
-        channelAccessToken: localStorage.getItem("line_token") || DEFAULT_LINE_TOKEN,
-        userId: localStorage.getItem("line_user_id") || DEFAULT_LINE_USER_ID,
-        lineMessage: `🗑️ [DELETE RECORD]\nพนักงาน ID: ${empId}\nวันที่ลบ: ${formatThaiBE(recordDate)}`
-      };
-
-      fetch(gasUrl, {
-        method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload)
-      }).catch(err => console.error(err));
+      syncToGoogleSheets({
+        customBody: {
+          action: "deletePayroll",
+          id: empId,
+          date: recordDate,
+          sendLine: true,
+          lineMessage: `🗑️ [DELETE RECORD]\nพนักงาน ID: ${empId}\nวันที่ลบ: ${formatThaiBE(recordDate)}`
+        }
+      });
     }
 
-    function syncToGoogleSheets(payrolls = [], lineMessage = '', leaves = [], payslip = null) {
+    // =============================================================
+    // 🔄 Two-Way Confirmation + Offline Auto-Retry Queue
+    // =============================================================
+    function getOfflineQueue() {
+      try {
+        return JSON.parse(localStorage.getItem("gas_sync_queue") || "[]");
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveOfflineQueue(q) {
+      localStorage.setItem("gas_sync_queue", JSON.stringify(q));
+      updateQueueBadge();
+    }
+
+    function updateQueueBadge() {
+      const pill = document.getElementById('cloudSyncPill');
+      if (!pill) return;
+      const qLen = getOfflineQueue().length;
+      if (qLen > 0) {
+        pill.textContent = `QUEUE (${qLen})`;
+        pill.className = "cursor-pointer text-[8.5px] font-mono font-extrabold px-1.5 py-[1px] bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/50 tracking-wider shrink-0";
+      } else {
+        pill.textContent = "CLOUD OK";
+        pill.className = "cursor-pointer text-[8.5px] font-mono font-extrabold px-1.5 py-[1px] bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40 tracking-wider shrink-0";
+      }
+    }
+
+    async function postPayloadConfirmed(gasUrl, bodyObj) {
+      const res = await fetch(gasUrl, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(bodyObj)
+      });
+      const data = await res.json();
+      if (!data || data.status !== "success") {
+        throw new Error(data?.message || "Server rejected request");
+      }
+      return data;
+    }
+
+    async function flushOfflineQueue(silent = false) {
+      if (isFlushingQueue) return;
+      const queue = getOfflineQueue();
+      if (queue.length === 0) {
+        updateQueueBadge();
+        return;
+      }
       const gasUrl = (localStorage.getItem("gas_url") || DEFAULT_GAS_URL || "").trim();
-      const lineToken = (localStorage.getItem("line_token") || DEFAULT_LINE_TOKEN || "").trim();
-      const lineUserId = (localStorage.getItem("line_user_id") || DEFAULT_LINE_USER_ID || "").trim();
+      if (!gasUrl || !gasUrl.startsWith("https://")) return;
+
+      isFlushingQueue = true;
+      const pill = document.getElementById('cloudSyncPill');
+      if (pill) pill.textContent = `RETRY (${queue.length})`;
+
+      const remaining = [];
+      for (let i = 0; i < queue.length; i++) {
+        try {
+          await postPayloadConfirmed(gasUrl, queue[i]);
+        } catch (err) {
+          remaining.push(queue[i]);
+        }
+      }
+      saveOfflineQueue(remaining);
+      isFlushingQueue = false;
+
+      if (!silent) {
+        if (remaining.length === 0) showToast("ส่งข้อมูลค้างในคิวสำเร็จทั้งหมด");
+        else showToast(`ยังค้างในคิว ${remaining.length} รายการ (รอสัญญาณเน็ต)`);
+      }
+    }
+
+    function syncToGoogleSheets({ payLoadPayrolls = [], lineMessage = '', flexPayload = null, payLoadLeaves = [], payslip = null, customBody = null }) {
+      const gasUrl = (localStorage.getItem("gas_url") || DEFAULT_GAS_URL || "").trim();
       const pill = document.getElementById('cloudSyncPill');
 
       if (!gasUrl || !gasUrl.startsWith('https://')) {
@@ -2399,27 +2572,29 @@
         return Promise.resolve();
       }
 
-      if (pill) pill.textContent = "SYNCING...";
+      if (pill) pill.textContent = "SYNCING";
 
-      const payload = {
-        sendLine: Boolean(lineToken && lineUserId),
-        channelAccessToken: lineToken,
-        userId: lineUserId,
+      const payload = customBody || {
+        sendLine: true,
         lineMessage,
-        payrolls,
-        leaves,
+        flexPayload,
+        payrolls: payLoadPayrolls,
+        leaves: payLoadLeaves,
         payslip
       };
 
-      return fetch(gasUrl, {
-        method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload)
-      }).then(() => {
-        if (pill) pill.textContent = "CLOUD OK";
-        showToast("ซิงค์ข้อมูลเรียบร้อย");
-      }).catch(err => {
-        if (pill) pill.textContent = "OFFLINE";
-        console.error(err);
-      });
+      return postPayloadConfirmed(gasUrl, payload)
+        .then(() => {
+          updateQueueBadge();
+          showToast("ซิงค์ลง Google Sheets และ LINE สำเร็จ");
+        })
+        .catch(err => {
+          console.warn("Queued offline payload:", err);
+          const q = getOfflineQueue();
+          q.push(payload);
+          saveOfflineQueue(q);
+          showToast("บันทึกในเครื่องแล้ว (เก็บเข้าคิวรอส่งอัตโนมัติ)");
+        });
     }
 
     function pullFromGoogleSheets(silent = false) {
@@ -2434,7 +2609,7 @@
       const icon = document.getElementById('topSyncIcon');
       const pill = document.getElementById('cloudSyncPill');
       if (icon) icon.classList.add('fa-spin');
-      if (pill) pill.textContent = "SYNCING...";
+      if (pill) pill.textContent = "SYNCING";
       if (!silent) showToast("กำลังดึงข้อมูลจาก Google Sheets...");
 
       const url = `${gasUrl}${gasUrl.includes('?') ? '&' : '?'}action=getAllData`;
@@ -2442,6 +2617,12 @@
         .then(res => res.json())
         .then(data => {
           if (data && data.status === "success") {
+            if (Array.isArray(data.employees) && data.employees.length > 0) {
+              employeeList = data.employees;
+              localStorage.setItem("cached_employees", JSON.stringify(employeeList));
+              renderEmployeeDropdowns();
+            }
+
             if (Array.isArray(data.payrolls)) {
               const cloudPayrolls = data.payrolls
                 .map(normalizeRecordItem)
@@ -2465,12 +2646,14 @@
               localStorage.setItem("payroll_records", JSON.stringify(Array.from(mergedMap.values())));
             }
             if (Array.isArray(data.leaves)) {
-              const normalizedLeaves = data.leaves.map(l => ({
-                ...l,
-                id: String(l.id || '').trim(),
-                startDate: normalizeDateFromSheet(l.startDate),
-                endDate: normalizeDateFromSheet(l.endDate)
-              }));
+              const normalizedLeaves = data.leaves
+                .map(l => ({
+                  ...l,
+                  id: String(l.id || '').trim(),
+                  startDate: normalizeDateFromSheet(l.startDate),
+                  endDate: normalizeDateFromSheet(l.endDate || l.startDate)
+                }))
+                .filter(l => l.id && l.startDate && !deletedLeaveKeys.has(`${l.id}|${l.startDate}|${l.endDate}`));
               localStorage.setItem("leave_records", JSON.stringify(normalizedLeaves));
             }
             loadTodayLiveStatus();
@@ -2479,7 +2662,7 @@
             if (!document.getElementById('payslipModal').classList.contains('hidden')) {
               renderPayslipContent(true);
             }
-            if (pill) pill.textContent = "CLOUD OK";
+            updateQueueBadge();
             if (!silent) {
               playClick('confirm');
               showToast(`ซิงค์สำเร็จ (${(data.payrolls || []).length} รายการ)`);
@@ -2503,7 +2686,7 @@
       const select = document.getElementById('cutoffPeriodSelect');
       const modalSelect = document.getElementById('modalPeriodSelect');
       const now = new Date();
-      const options = [];
+      const periodOptions = [];
 
       for (let i = 0; i < 8; i++) {
         const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -2511,16 +2694,16 @@
         const monthName = d.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
         const lastDay = new Date(y, m + 1, 0).getDate();
 
-        options.push({ label: `งวด 16 - ${lastDay} ${monthName}`, start: `${y}-${String(m + 1).padStart(2, '0')}-16`, end: `${y}-${String(m + 1).padStart(2, '0')}-${lastDay}` });
-        options.push({ label: `งวด 1 - 15 ${monthName}`, start: `${y}-${String(m + 1).padStart(2, '0')}-01`, end: `${y}-${String(m + 1).padStart(2, '0')}-15` });
+        periodOptions.push({ label: `งวด 16 - ${lastDay} ${monthName}`, start: `${y}-${String(m + 1).padStart(2, '0')}-16`, end: `${y}-${String(m + 1).padStart(2, '0')}-${lastDay}` });
+        periodOptions.push({ label: `งวด 1 - 15 ${monthName}`, start: `${y}-${String(m + 1).padStart(2, '0')}-01`, end: `${y}-${String(m + 1).padStart(2, '0')}-15` });
       }
 
-      options.unshift({ label: 'แสดงทั้งหมด (All Records)', start: '2000-01-01', end: '2099-12-31' });
-      const html = options.map(o => `<option value="${o.start}|${o.end}">${o.label}</option>`).join('');
-      select.innerHTML = html;
+      const mainOptions = [{ label: 'แสดงทั้งหมด (All Records)', start: '2000-01-01', end: '2099-12-31' }, ...periodOptions];
+      select.innerHTML = mainOptions.map(o => `<option value="${o.start}|${o.end}">${o.label}</option>`).join('');
       select.selectedIndex = now.getDate() <= 15 ? 2 : 1;
+
       if (modalSelect) {
-        modalSelect.innerHTML = html;
+        modalSelect.innerHTML = periodOptions.map(o => `<option value="${o.start}|${o.end}">${o.label}</option>`).join('');
         modalSelect.value = select.value;
       }
     }
@@ -2556,8 +2739,10 @@
           totalMealsSum += (r.totalMealAllowance || 0);
 
           const isHol = r.dayType === 'HOLIDAY';
+          const h20 = r.ot20Hours > 0 ? r.ot20Hours : Math.min(r.otHours || 0, 8);
+          const h30 = r.ot30Hours > 0 ? r.ot30Hours : Math.max(0, (r.otHours || 0) - 8);
           const otSummaryText = isHol
-            ? `OT2.0: ${r.ot20Hours ?? Math.min(r.otHours || 0, 8)}h${(r.ot30Hours || 0) > 0 ? ` + OT3.0: ${r.ot30Hours}h` : ''}`
+            ? `OT2.0: ${h20}h${h30 > 0 ? ` + OT3.0: ${h30}h` : ''}`
             : `OT1.5: ${r.otHours || 0}h`;
 
           const encId = encodeURIComponent(r.id);
@@ -2715,21 +2900,32 @@
         </div>
       `;
       document.getElementById('breakdownModal').classList.remove('hidden');
-      setBodyScrollLock(true);
+      syncBodyScrollLock();
     }
 
     function closeBreakdownModal() {
       document.getElementById('breakdownModal').classList.add('hidden');
-      setBodyScrollLock(false);
+      syncBodyScrollLock();
     }
 
     function getSlipAdjKeyForPeriod(periodKey) {
       return `slip_adj_v5_${String(currentEmpId).trim()}_${periodKey}`;
     }
 
+    function getActivePayslipPeriodValue() {
+      const modalSelect = document.getElementById('modalPeriodSelect');
+      const cutoffSelect = document.getElementById('cutoffPeriodSelect');
+      if (modalSelect && modalSelect.value && !modalSelect.value.startsWith('2000-01-01')) {
+        return modalSelect.value;
+      }
+      if (cutoffSelect && cutoffSelect.value && !cutoffSelect.value.startsWith('2000-01-01')) {
+        return cutoffSelect.value;
+      }
+      return modalSelect?.options[0]?.value || '2026-11-16|2026-11-30';
+    }
+
     function getSlipAdjKey() {
-      const period = document.getElementById('cutoffPeriodSelect')?.value || 'ALL';
-      return getSlipAdjKeyForPeriod(period);
+      return getSlipAdjKeyForPeriod(getActivePayslipPeriodValue());
     }
 
     function summarizePeriodBaseMetrics(allEmpRecords, startStr, endStr) {
@@ -2763,9 +2959,13 @@
           sumOT30 += p30;
           minsOT30 += Math.round(h30 * 60);
         } else {
-          const dayUnit = r.workType === 'HALF' ? 0.5 : 1;
-          workDaysCount += dayUnit;
-          actualWorkedDays += dayUnit;
+          if (r.workType === 'HALF') {
+            workDaysCount += 0.5;
+            actualWorkedDays += 0.5;
+          } else if (isQualifiedFullRegularDay(r)) {
+            workDaysCount += 1;
+            actualWorkedDays += 1;
+          }
           sumBase += (r.baseSalary || 0);
 
           const h15 = r.ot15Hours ?? (r.otHours || 0);
@@ -2805,7 +3005,7 @@
         return {
           baseYTDEarnings: emp.anchorYtdEarnings || 0.00,
           baseYTDSocial: emp.anchorYtdSocial || 0.00,
-          sourceLabel: "แสดงทั้งหมด (ยอดสะสมตั้งต้น)"
+          sourceLabel: "ยอดสะสมตั้งต้น"
         };
       }
 
@@ -2990,23 +3190,33 @@
       const mainSelect = document.getElementById('cutoffPeriodSelect');
       const modalSelect = document.getElementById('modalPeriodSelect');
       if (mainSelect && modalSelect) {
-        modalSelect.value = mainSelect.value;
+        if (mainSelect.value.startsWith('2000-01-01')) {
+          const now = new Date();
+          const defaultIdx = now.getDate() <= 15 ? 1 : 0;
+          modalSelect.selectedIndex = defaultIdx;
+          mainSelect.value = modalSelect.value;
+          renderHistories();
+          showToast("สลับเป็นงวดปัจจุบันเพื่อออกสลิปที่ถูกต้อง");
+        } else {
+          modalSelect.value = mainSelect.value;
+        }
       }
       renderPayslipContent(true);
       document.getElementById('payslipModal').classList.remove('hidden');
-      setBodyScrollLock(true);
+      syncBodyScrollLock();
     }
 
     function renderPayslipContent(syncInputs = true) {
       const emp = getCurrentEmpObj();
       const allEmpRecords = getNormalizedPayrollRecords().filter(r => r.id === String(currentEmpId).trim());
-      const cutoffSelect = document.getElementById('cutoffPeriodSelect');
-      const periodLabelText = cutoffSelect?.options[cutoffSelect.selectedIndex]?.text || 'งวดปัจจุบัน';
-
-      let startStr = '', endStr = '';
-      if (cutoffSelect && cutoffSelect.value) {
-        [startStr, endStr] = cutoffSelect.value.split('|');
+      const modalSelect = document.getElementById('modalPeriodSelect');
+      const activePeriodVal = getActivePayslipPeriodValue();
+      if (modalSelect && modalSelect.value !== activePeriodVal) {
+        modalSelect.value = activePeriodVal;
       }
+      const periodLabelText = modalSelect?.options[modalSelect.selectedIndex]?.text || 'งวดปัจจุบัน';
+
+      const [startStr, endStr] = activePeriodVal.split('|');
 
       const metrics = summarizePeriodBaseMetrics(allEmpRecords, startStr, endStr);
       const {
@@ -3051,8 +3261,8 @@
         document.getElementById('adjStudentLoan').value = adj.studentLoan;
         document.getElementById('baseYTDEarnings').value = adj.baseYTDEarnings;
         document.getElementById('baseYTDSocial').value = adj.baseYTDSocial;
-        document.getElementById('workingSaturdaysInput').value = localStorage.getItem("working_saturdays") || "2026-11-07, 2026-11-14, 2026-11-21, 2026-11-28";
-        document.getElementById('customHolidaysInput').value = localStorage.getItem("custom_company_holidays") || "";
+        document.getElementById('workingSaturdaysInput').value = localStorage.getItem("working_saturdays") || DEFAULT_WORKING_SATURDAYS_2026;
+        document.getElementById('customHolidaysInput').value = localStorage.getItem("custom_company_holidays") || DEFAULT_CUSTOM_HOLIDAYS_2026;
       }
 
       const earnHintEl = document.getElementById('ytdEarnSourceHint');
@@ -3303,6 +3513,23 @@
         `🛡️ ประกันสังคมต่อปี: ${fmtNum(s.ytdSocialTotal)} ฿`
       ].join('\n');
 
+      const flexPayload = buildFlexBubble({
+        headerBg: "#0F172A",
+        badgeText: "E-PAYSLIP",
+        titleText: "ใบจ่ายเงินเดือนดิจิทัล",
+        subtitleText: `${s.emp.name} (${s.emp.id}) • จ่าย ${s.payDateBE}`,
+        rows: [
+          { label: "รอบตัดยอด", value: s.periodLabelText },
+          { label: "วันทำงาน / เบี้ยขยัน", value: `${s.workDaysCount} วัน • ${fmtNum(s.adj.diligence)} ฿` },
+          { label: "รวมเงินได้", value: `+${fmtNum(s.totalEarnings)} ฿` },
+          { label: "รวมรายการหัก", value: `-${fmtNum(s.totalDeductions)} ฿` },
+          { label: "เงินได้สะสมต่อปี", value: `${fmtNum(s.ytdEarningsTotal)} ฿` },
+          { label: "ประกันสังคมต่อปี", value: `${fmtNum(s.ytdSocialTotal)} ฿` }
+        ],
+        highlightLabel: "เงินรับสุทธิ",
+        highlightValue: `${fmtNum(s.netPay)} ฿`
+      });
+
       const slipRecord = {
         id: s.emp.id,
         employeeName: s.emp.name,
@@ -3317,8 +3544,7 @@
       };
 
       playClick('confirm');
-      syncToGoogleSheets([], lineMsg, [], slipRecord).finally(() => {
-        showToast("ส่งสรุปสลิปเงินเดือน & บันทึกลงชีตสำเร็จ");
+      syncToGoogleSheets({ lineMessage: lineMsg, flexPayload, payslip: slipRecord }).finally(() => {
         setTimeout(() => {
           isLineSlipSending = false;
           btn.disabled = false;
@@ -3329,49 +3555,62 @@
 
     function closePayslipModal() {
       document.getElementById('payslipModal').classList.add('hidden');
-      setBodyScrollLock(false);
+      syncBodyScrollLock();
     }
 
     function openConfigModal() {
       document.getElementById('gasUrlInput').value = localStorage.getItem("gas_url") || DEFAULT_GAS_URL;
-      document.getElementById('lineTokenInput').value = localStorage.getItem("line_token") || DEFAULT_LINE_TOKEN;
-      document.getElementById('lineUserIdInput').value = localStorage.getItem("line_user_id") || DEFAULT_LINE_USER_ID;
+      document.getElementById('lineTokenInput').value = "";
+      document.getElementById('lineUserIdInput').value = "";
       document.getElementById('configModal').classList.remove('hidden');
-      setBodyScrollLock(true);
+      syncBodyScrollLock();
     }
-
     function closeConfigModal() {
       document.getElementById('configModal').classList.add('hidden');
-      setBodyScrollLock(false);
+      syncBodyScrollLock();
     }
-
     function saveConfigSettings() {
-      localStorage.setItem("gas_url", document.getElementById('gasUrlInput').value.trim());
-      localStorage.setItem("line_token", document.getElementById('lineTokenInput').value.trim());
-      localStorage.setItem("line_user_id", document.getElementById('lineUserIdInput').value.trim());
-      closeConfigModal();
-      showToast("บันทึกการตั้งค่าเรียบร้อย");
-    }
+      const gasUrl = document.getElementById('gasUrlInput').value.trim();
+      const newToken = document.getElementById('lineTokenInput').value.trim();
+      const newUserId = document.getElementById('lineUserIdInput').value.trim();
 
-    let toastTimeout;
-    function showToast(msg) {
-      const toast = document.getElementById('toast');
-      clearTimeout(toastTimeout);
-      document.getElementById('toastMsg').textContent = msg;
-      toast.classList.remove('hidden');
-      toastTimeout = setTimeout(() => toast.classList.add('hidden'), 2500);
+      localStorage.setItem("gas_url", gasUrl);
+      closeConfigModal();
+
+      if (newToken || newUserId) {
+        syncToGoogleSheets({
+          customBody: {
+            action: "saveServerConfig",
+            channelAccessToken: newToken,
+            userId: newUserId
+          }
+        });
+      } else {
+        showToast("บันทึก URL การเชื่อมต่อเรียบร้อย");
+      }
+      pullFromGoogleSheets(false);
     }
 
     function clearLocalStorageData() {
-      if (confirm("คุณต้องการล้างประวัติบันทึกเวลาทั้งหมดในอุปกรณ์นี้ใช่หรือไม่?")) {
+      if (confirm("ต้องการล้างข้อมูลในเครื่องทั้งหมดใช่หรือไม่? (ข้อมูลใน Google Sheets จะไม่หาย)")) {
         localStorage.removeItem("payroll_records");
         localStorage.removeItem("leave_records");
         localStorage.removeItem("active_checkins");
         deletedRecordKeys.clear();
+        deletedLeaveKeys.clear();
         loadTodayLiveStatus();
         renderHistories();
         showToast("ล้างข้อมูลในเครื่องเรียบร้อย");
       }
+    }
+
+    let toastTimer = null;
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      t.classList.remove('hidden');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.add('hidden'), 3200);
     }
   </script>
 </body>
