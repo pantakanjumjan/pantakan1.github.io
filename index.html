@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Provide Power // Crimson Chronograph</title>
+  <title>Provide Power // Atelier Chronograph</title>
 
   <!-- iOS Web App Fullscreen & Native Feel Meta Tags -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -22,151 +22,169 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,500;0,600;0,700;1,600;1,700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700;800&family=Sarabun:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet">
 
-  <!-- Generate Custom High-Res App Icon & PWA Manifest Using Your Exact Red Hexagon Logo -->
+  <!-- Exact Untouched User Logo Extraction & High-Res App Icon Generator -->
   <script>
-    function drawUserHexLogoOnCanvas(ctx, cx, cy, size, fillColor = '#FF1414') {
-      ctx.save();
-      ctx.translate(cx, cy);
-      const s = size / 200;
-      ctx.scale(s, s);
-      ctx.translate(-100, -100);
-      ctx.fillStyle = fillColor;
+    // Raw Source Logo Data (Untouched Geometry & Proportions)
+    const RAW_USER_LOGO_SRC = "GEM_PHOTO_CEDFD3BF-AB6F-4C40-8178-6F0E9A571B4A_L0_001_recent_photo_14C60923-746F-4405-A6C3-DBE80BA9E180.jpg";
 
-      // Top-Right Outer Chevron
-      ctx.beginPath();
-      ctx.moveTo(64, 24);
-      ctx.lineTo(136, 24);
-      ctx.lineTo(164, 72);
-      ctx.lineTo(141, 72);
-      ctx.lineTo(123, 42);
-      ctx.lineTo(54, 42);
-      ctx.closePath();
-      ctx.fill();
+    // Build Clean Transparent PNG of the Exact User Logo Without Altering a Single Shape
+    function extractExactTransparentLogo(callback) {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = function () {
+        try {
+          const w = img.naturalWidth || 350;
+          const h = img.naturalHeight || 144;
+          const c = document.createElement('canvas');
+          c.width = w;
+          c.height = h;
+          const ctx = c.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
 
-      // Top-Left Outer Diagonal Bar
-      ctx.beginPath();
-      ctx.moveTo(47, 54);
-      ctx.lineTo(68, 54);
-      ctx.lineTo(44, 96);
-      ctx.lineTo(55, 115);
-      ctx.lineTo(44, 134);
-      ctx.lineTo(22, 96);
-      ctx.closePath();
-      ctx.fill();
+          const imgData = ctx.getImageData(0, 0, w, h);
+          const data = imgData.data;
+          let minX = w, minY = h, maxX = 0, maxY = 0;
 
-      // Inner Slanted Z-Bridge
-      ctx.beginPath();
-      ctx.moveTo(82, 54);
-      ctx.lineTo(124, 54);
-      ctx.lineTo(84, 124);
-      ctx.lineTo(141, 124);
-      ctx.lineTo(152, 106);
-      ctx.lineTo(114, 106);
-      ctx.lineTo(124, 88);
-      ctx.lineTo(175, 88);
-      ctx.lineTo(153, 142);
-      ctx.lineTo(53, 142);
-      ctx.lineTo(94, 71);
-      ctx.lineTo(72, 71);
-      ctx.closePath();
-      ctx.fill();
+          // Remove pure white background cleanly while preserving exact red pixels
+          for (let i = 0; i < data.length; i += 4) {
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+            // White background pixels have high R, G, B simultaneously
+            const whiteness = Math.min(r, g, b);
+            if (whiteness > 215) {
+              data[i + 3] = 0;
+            } else if (whiteness > 165) {
+              // Smooth anti-aliased edge transition
+              const alpha = Math.round(((215 - whiteness) / 50) * 255);
+              data[i + 3] = Math.min(data[i + 3], alpha);
+            }
 
-      // Bottom Outer U-Hexagon Frame
-      ctx.beginPath();
-      ctx.moveTo(50, 152);
-      ctx.lineTo(148, 152);
-      ctx.lineTo(136, 172);
-      ctx.lineTo(64, 172);
-      ctx.lineTo(44, 138);
-      ctx.lineTo(55, 120);
-      ctx.lineTo(72, 152);
-      ctx.closePath();
-      ctx.fill();
+            if (data[i + 3] > 20) {
+              const px = (i / 4) % w;
+              const py = Math.floor((i / 4) / w);
+              if (px < minX) minX = px;
+              if (px > maxX) maxX = px;
+              if (py < minY) minY = py;
+              if (py > maxY) maxY = py;
+            }
+          }
+          ctx.putImageData(imgData, 0, 0);
 
-      ctx.restore();
+          // Tight crop around the exact untouched logo bounds
+          if (maxX > minX && maxY > minY) {
+            const pad = 4;
+            const cx = Math.max(0, minX - pad);
+            const cy = Math.max(0, minY - pad);
+            const cw = Math.min(w - cx, (maxX - minX) + pad * 2);
+            const ch = Math.min(h - cy, (maxY - minY) + pad * 2);
+
+            const cropped = document.createElement('canvas');
+            cropped.width = cw;
+            cropped.height = ch;
+            cropped.getContext('2d').drawImage(c, cx, cy, cw, ch, 0, 0, cw, ch);
+            callback(cropped.toDataURL('image/png'), cropped);
+          } else {
+            callback(c.toDataURL('image/png'), c);
+          }
+        } catch (err) {
+          callback(RAW_USER_LOGO_SRC, img);
+        }
+      };
+      img.onerror = function () {
+        callback(RAW_USER_LOGO_SRC, null);
+      };
+      img.src = RAW_USER_LOGO_SRC;
     }
 
-    (function initSingleFilePWA() {
-      try {
-        const canvas = document.createElement('canvas');
-        canvas.width = 512;
-        canvas.height = 512;
-        const ctx = canvas.getContext('2d');
+    (function initBespokeAppIconAndBranding() {
+      extractExactTransparentLogo((cleanLogoDataUrl, logoCanvasOrImg) => {
+        // Inject exact untouched logo into all brand slots in DOM
+        window.__CLEAN_USER_LOGO_URL__ = cleanLogoDataUrl;
+        document.querySelectorAll('.exact-user-logo').forEach(el => {
+          el.src = cleanLogoDataUrl;
+        });
 
-        // Deep Brushed Obsidian Background
-        const bgGrad = ctx.createLinearGradient(0, 0, 512, 512);
-        bgGrad.addColorStop(0, '#18181D');
-        bgGrad.addColorStop(0.5, '#0D0E12');
-        bgGrad.addColorStop(1, '#070709');
-        ctx.fillStyle = bgGrad;
-        ctx.fillRect(0, 0, 512, 512);
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = 512;
+          canvas.height = 512;
+          const ctx = canvas.getContext('2d');
 
-        // Carbon diagonal micro lines
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
-        ctx.lineWidth = 2;
-        for (let i = -512; i < 1024; i += 24) {
-          ctx.beginPath();
-          ctx.moveTo(i, 0);
-          ctx.lineTo(i + 512, 512);
-          ctx.stroke();
+          // Deep Forged Obsidian Metal App Icon Base
+          const bgGrad = ctx.createLinearGradient(0, 0, 512, 512);
+          bgGrad.addColorStop(0, '#1C1D22');
+          bgGrad.addColorStop(0.5, '#0E0F13');
+          bgGrad.addColorStop(1, '#060709');
+          ctx.fillStyle = bgGrad;
+          ctx.fillRect(0, 0, 512, 512);
+
+          // Micro-machined Diagonal Brushed Texture
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.035)';
+          ctx.lineWidth = 2;
+          for (let i = -512; i < 1024; i += 20) {
+            ctx.beginPath();
+            ctx.moveTo(i, 0);
+            ctx.lineTo(i + 512, 512);
+            ctx.stroke();
+          }
+
+          // Subtle Crimson Backlight Halo Behind Untouched Logo
+          const halo = ctx.createRadialGradient(256, 238, 15, 256, 238, 225);
+          halo.addColorStop(0, 'rgba(255, 20, 20, 0.30)');
+          halo.addColorStop(0.65, 'rgba(220, 38, 38, 0.08)');
+          halo.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          ctx.fillStyle = halo;
+          ctx.fillRect(0, 0, 512, 512);
+
+          // Thin Titanium Rim Frame
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
+          ctx.lineWidth = 3;
+          ctx.strokeRect(26, 26, 460, 460);
+
+          // Draw Exact Untouched Logo Centered in App Icon
+          if (logoCanvasOrImg) {
+            const srcW = logoCanvasOrImg.width || logoCanvasOrImg.naturalWidth || 200;
+            const srcH = logoCanvasOrImg.height || logoCanvasOrImg.naturalHeight || 200;
+            const maxDim = 290;
+            const scale = Math.min(maxDim / srcW, maxDim / srcH);
+            const drawW = srcW * scale;
+            const drawH = srcH * scale;
+            ctx.shadowColor = 'rgba(255, 0, 0, 0.45)';
+            ctx.shadowBlur = 22;
+            ctx.drawImage(logoCanvasOrImg, (512 - drawW) / 2, (476 - drawH) / 2, drawW, drawH);
+            ctx.shadowBlur = 0;
+          }
+
+          // Clean Atelier Typography Strip
+          ctx.fillStyle = '#D4D4D8';
+          ctx.font = '700 28px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('PROVIDE POWER', 256, 454);
+
+          const iconDataUrl = canvas.toDataURL('image/png');
+          document.getElementById('appleTouchIconLink').href = iconDataUrl;
+          document.getElementById('faviconLink').href = iconDataUrl;
+
+          const manifestObj = {
+            name: "Provide Power Workforce & Payroll",
+            short_name: "ProvidePower",
+            start_url: window.location.href.split('#')[0],
+            display: "standalone",
+            orientation: "portrait",
+            background_color: "#09090B",
+            theme_color: "#09090B",
+            icons: [
+              { src: iconDataUrl, sizes: "192x192", type: "image/png" },
+              { src: iconDataUrl, sizes: "512x512", type: "image/png", purpose: "any maskable" }
+            ]
+          };
+          const manifestBlob = new Blob([JSON.stringify(manifestObj)], { type: 'application/manifest+json' });
+          document.getElementById('pwaManifestLink').href = URL.createObjectURL(manifestBlob);
+        } catch (e) {
+          console.warn("PWA icon setup fallback:", e);
         }
-
-        // Crimson Reactor Radial Glow
-        const glow = ctx.createRadialGradient(256, 232, 20, 256, 232, 235);
-        glow.addColorStop(0, 'rgba(255, 24, 24, 0.34)');
-        glow.addColorStop(0.6, 'rgba(220, 38, 38, 0.1)');
-        glow.addColorStop(1, 'rgba(220, 38, 38, 0)');
-        ctx.fillStyle = glow;
-        ctx.fillRect(0, 0, 512, 512);
-
-        // Outer Metallic Bezel Hexagon
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.16)';
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        for (let k = 0; k < 6; k++) {
-          const ang = (Math.PI / 3) * k;
-          const px = 256 + 188 * Math.cos(ang);
-          const py = 232 + 188 * Math.sin(ang);
-          if (k === 0) ctx.moveTo(px, py);
-          else ctx.lineTo(px, py);
-        }
-        ctx.closePath();
-        ctx.stroke();
-
-        // Draw User's Exact Red Hexagon Logo in Center
-        ctx.shadowColor = 'rgba(255, 24, 24, 0.55)';
-        ctx.shadowBlur = 24;
-        drawUserHexLogoOnCanvas(ctx, 256, 232, 265, '#FF1E1E');
-        ctx.shadowBlur = 0;
-
-        // Bottom Brand Monogram Strip
-        ctx.fillStyle = '#E4E4E7';
-        ctx.font = '800 32px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('PROVIDE POWER', 256, 462);
-
-        const iconDataUrl = canvas.toDataURL('image/png');
-        document.getElementById('appleTouchIconLink').href = iconDataUrl;
-        document.getElementById('faviconLink').href = iconDataUrl;
-
-        const manifestObj = {
-          name: "Provide Power Workforce & Payroll",
-          short_name: "ProvidePower",
-          start_url: window.location.href.split('#')[0],
-          display: "standalone",
-          orientation: "portrait",
-          background_color: "#09090B",
-          theme_color: "#09090B",
-          icons: [
-            { src: iconDataUrl, sizes: "192x192", type: "image/png" },
-            { src: iconDataUrl, sizes: "512x512", type: "image/png", purpose: "any maskable" }
-          ]
-        };
-        const manifestBlob = new Blob([JSON.stringify(manifestObj)], { type: 'application/manifest+json' });
-        document.getElementById('pwaManifestLink').href = URL.createObjectURL(manifestBlob);
-      } catch (e) {
-        console.warn("PWA setup skipped:", e);
-      }
+      });
     })();
   </script>
 
@@ -183,15 +201,14 @@
           },
           colors: {
             brand: {
-              bg: '#E8E6E1',
+              bg: '#E6E4DE',
               card: '#F7F6F2',
-              subtle: '#DFDDD6',
-              ink: '#121316',
-              accent: '#E11D48',
-              crimson: '#EF233C',
-              darkBg: '#08090C',
-              darkCard: '#111217',
-              darkSubtle: '#181A20',
+              subtle: '#DCD9D0',
+              ink: '#111215',
+              crimson: '#E11D48',
+              darkBg: '#07080A',
+              darkCard: '#101116',
+              darkSubtle: '#171920',
               emerald: '#10B981'
             }
           }
@@ -254,9 +271,9 @@
     }
 
     /* =====================================================================
-       BESPOKE HOROLOGY & BRUSHED TITANIUM AMBIENT ENVIRONMENT
+       BESPOKE HAUTE HOROLOGY & FORGED CARBON ENVIRONMENT
        ===================================================================== */
-    .titanium-stage {
+    .atelier-stage {
       position: fixed;
       inset: 0;
       z-index: 0;
@@ -264,118 +281,112 @@
       overflow: hidden;
     }
 
-    /* Micro-machined Diagonal Brushed Grain */
-    .brushed-grain-layer {
+    /* Brushed Titanium & Forged Carbon Weave */
+    .forged-metal-layer {
       position: absolute;
       inset: 0;
-      background-color: #E7E5DF;
+      background-color: #E5E3DC;
       background-image:
-        repeating-linear-gradient(135deg, rgba(0, 0, 0, 0.022) 0px, rgba(0, 0, 0, 0.022) 1px, transparent 1px, transparent 5px),
-        radial-gradient(circle at 85% 12%, rgba(239, 35, 60, 0.14) 0%, transparent 48%),
-        radial-gradient(circle at 12% 88%, rgba(24, 24, 27, 0.08) 0%, transparent 50%);
+        repeating-linear-gradient(125deg, rgba(0, 0, 0, 0.025) 0px, rgba(0, 0, 0, 0.025) 1px, transparent 1px, transparent 4px),
+        repeating-linear-gradient(35deg, rgba(255, 255, 255, 0.25) 0px, rgba(255, 255, 255, 0.25) 1px, transparent 1px, transparent 8px),
+        radial-gradient(circle at 82% 8%, rgba(225, 29, 72, 0.14) 0%, transparent 46%),
+        radial-gradient(circle at 14% 90%, rgba(17, 18, 21, 0.09) 0%, transparent 50%);
       transition: background-color 0.35s ease;
     }
-    html.dark .brushed-grain-layer {
-      background-color: #07080A;
+    html.dark .forged-metal-layer {
+      background-color: #060709;
       background-image:
-        repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.018) 0px, rgba(255, 255, 255, 0.018) 1px, transparent 1px, transparent 5px),
-        radial-gradient(circle at 85% 10%, rgba(239, 35, 60, 0.22) 0%, transparent 50%),
-        radial-gradient(circle at 10% 85%, rgba(239, 35, 60, 0.1) 0%, transparent 45%);
+        repeating-linear-gradient(125deg, rgba(255, 255, 255, 0.02) 0px, rgba(255, 255, 255, 0.02) 1px, transparent 1px, transparent 4px),
+        repeating-linear-gradient(35deg, rgba(255, 255, 255, 0.012) 0px, rgba(255, 255, 255, 0.012) 1px, transparent 1px, transparent 9px),
+        radial-gradient(circle at 84% 8%, rgba(239, 35, 60, 0.24) 0%, transparent 48%),
+        radial-gradient(circle at 10% 88%, rgba(220, 38, 38, 0.12) 0%, transparent 45%);
     }
 
-    /* Architectural Hexagonal Lattice Watermark */
-    .hex-architect-grid {
-      position: absolute;
-      inset: 0;
-      opacity: 0.35;
-      background-image: url("data:image/svg+xml,%3Csvg width='60' height='104' viewBox='0 0 60 104' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l30 17.32v34.64L30 69.28 0 51.96V17.32L30 0zm0 104l30-17.32V52L30 69.32 0 52v34.68L30 104z' fill='none' stroke='%23EF233C' stroke-opacity='0.14' stroke-width='0.8'/%3E%3C/svg%3E");
-      mask-image: radial-gradient(ellipse 80% 70% at 50% 38%, #000 30%, transparent 95%);
-      -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 38%, #000 30%, transparent 95%);
-    }
-
-    @keyframes slow-tourbillon-cw {
+    @keyframes gear-rotate-cw {
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
     }
-    @keyframes slow-tourbillon-ccw {
+    @keyframes gear-rotate-ccw {
       from { transform: rotate(360deg); }
       to { transform: rotate(0deg); }
     }
-    .spin-cw {
-      animation: slow-tourbillon-cw 55s linear infinite;
+    .gear-cw {
+      animation: gear-rotate-cw 60s linear infinite;
     }
-    .spin-ccw {
-      animation: slow-tourbillon-ccw 40s linear infinite;
+    .gear-ccw {
+      animation: gear-rotate-ccw 45s linear infinite;
+    }
+    .gear-fast-cw {
+      animation: gear-rotate-cw 24s linear infinite;
     }
 
     /* =====================================================================
-       CHAMFERED TITANIUM BEZEL CARDS (Anti-Generic AI Shape System)
+       OCTAGONAL MILLED TITANIUM BEZEL ARCHITECTURE (Signature Non-AI Look)
        ===================================================================== */
-    .chamfer-card {
-      position: relative;
-      background: linear-gradient(155deg, rgba(255, 255, 255, 0.9) 0%, rgba(244, 242, 237, 0.82) 100%);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      clip-path: polygon(
-        14px 0%, calc(100% - 14px) 0%,
-        100% 14px, 100% calc(100% - 14px),
-        calc(100% - 14px) 100%, 14px 100%,
-        0% calc(100% - 14px), 0% 14px
-      );
-      box-shadow: 0 10px 28px -6px rgba(18, 19, 22, 0.12);
-    }
-    html.dark .chamfer-card {
-      background: linear-gradient(155deg, rgba(22, 24, 30, 0.88) 0%, rgba(13, 14, 18, 0.92) 100%);
-      box-shadow: 0 14px 32px -8px rgba(0, 0, 0, 0.85);
-    }
-
-    /* Outer Border Wrapper for Chamfered Cards so crisp 1px metallic rim appears */
-    .chamfer-shell {
+    .bezel-shell {
       padding: 1px;
-      background: linear-gradient(135deg, rgba(239, 35, 60, 0.42) 0%, rgba(161, 161, 170, 0.28) 50%, rgba(239, 35, 60, 0.25) 100%);
+      background: linear-gradient(140deg, rgba(239, 35, 60, 0.48) 0%, rgba(161, 161, 170, 0.35) 45%, rgba(24, 24, 27, 0.3) 75%, rgba(239, 35, 60, 0.32) 100%);
       clip-path: polygon(
-        14px 0%, calc(100% - 14px) 0%,
-        100% 14px, 100% calc(100% - 14px),
-        calc(100% - 14px) 100%, 14px 100%,
-        0% calc(100% - 14px), 0% 14px
+        13px 0%, calc(100% - 13px) 0%,
+        100% 13px, 100% calc(100% - 13px),
+        calc(100% - 13px) 100%, 13px 100%,
+        0% calc(100% - 13px), 0% 13px
       );
     }
+    .bezel-card {
+      position: relative;
+      background: linear-gradient(160deg, rgba(255, 255, 255, 0.92) 0%, rgba(242, 240, 234, 0.85) 100%);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      clip-path: polygon(
+        12.5px 0%, calc(100% - 12.5px) 0%,
+        100% 12.5px, 100% calc(100% - 12.5px),
+        calc(100% - 12.5px) 100%, 12.5px 100%,
+        0% calc(100% - 12.5px), 0% 12.5px
+      );
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 12px 30px -8px rgba(17, 18, 21, 0.14);
+    }
+    html.dark .bezel-card {
+      background: linear-gradient(160deg, rgba(20, 22, 28, 0.90) 0%, rgba(11, 12, 16, 0.94) 100%);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 16px 36px -10px rgba(0, 0, 0, 0.9);
+    }
 
-    /* Hero Tourbillon Chronograph Deck */
-    .hero-chronograph-shell {
+    /* Tourbillon Watch Case (Main Hero Chronograph) */
+    .watch-case-shell {
       padding: 1.5px;
-      background: linear-gradient(135deg, #EF233C 0%, rgba(255, 255, 255, 0.22) 45%, #991B1B 100%);
+      background: linear-gradient(135deg, #FF1E1E 0%, rgba(255, 255, 255, 0.28) 38%, rgba(82, 82, 91, 0.4) 68%, #DC2626 100%);
       clip-path: polygon(
-        18px 0%, calc(100% - 18px) 0%,
-        100% 18px, 100% calc(100% - 18px),
-        calc(100% - 18px) 100%, 18px 100%,
-        0% calc(100% - 18px), 0% 18px
+        20px 0%, calc(100% - 20px) 0%,
+        100% 20px, 100% calc(100% - 20px),
+        calc(100% - 20px) 100%, 20px 100%,
+        0% calc(100% - 20px), 0% 20px
       );
-      box-shadow: 0 22px 46px -12px rgba(239, 35, 60, 0.25), 0 18px 36px -10px rgba(0, 0, 0, 0.7);
+      box-shadow: 0 24px 50px -12px rgba(239, 35, 60, 0.28), 0 20px 40px -10px rgba(0, 0, 0, 0.8);
     }
-    .hero-chronograph-inner {
+    .watch-case-inner {
       background:
-        radial-gradient(circle at 50% 34%, rgba(58, 12, 18, 0.94) 0%, rgba(13, 14, 18, 0.98) 64%, rgba(7, 8, 10, 1) 100%);
+        radial-gradient(circle at 50% 35%, rgba(62, 10, 16, 0.95) 0%, rgba(12, 13, 17, 0.98) 62%, rgba(6, 7, 9, 1) 100%);
       clip-path: polygon(
-        17px 0%, calc(100% - 17px) 0%,
-        100% 17px, 100% calc(100% - 17px),
-        calc(100% - 17px) 100%, 17px 100%,
-        0% calc(100% - 17px), 0% 17px
+        19px 0%, calc(100% - 19px) 0%,
+        100% 19px, 100% calc(100% - 19px),
+        calc(100% - 19px) 100%, 19px 100%,
+        0% calc(100% - 19px), 0% 19px
       );
     }
 
-    /* Chamfered Tactile Action Buttons */
-    .chamfer-btn {
+    /* Tactile Chronograph Pusher Button */
+    .chrono-pusher {
+      position: relative;
       clip-path: polygon(
         10px 0%, calc(100% - 10px) 0%,
         100% 10px, 100% calc(100% - 10px),
         calc(100% - 10px) 100%, 10px 100%,
         0% calc(100% - 10px), 0% 10px
       );
-      transition: transform 0.12s cubic-bezier(0.22, 1, 0.36, 1), filter 0.15s ease;
+      transition: transform 0.1s cubic-bezier(0.22, 1, 0.36, 1), filter 0.15s ease;
     }
-    .chamfer-btn:active {
-      transform: scale(0.97);
+    .chrono-pusher:active {
+      transform: scale(0.968) translateY(1px);
     }
 
     .custom-select {
@@ -390,7 +401,7 @@
 
     @keyframes pulse-ring {
       0% { transform: scale(0.9); opacity: 0.9; }
-      50% { transform: scale(1.25); opacity: 0.3; }
+      50% { transform: scale(1.28); opacity: 0.3; }
       100% { transform: scale(0.9); opacity: 0.9; }
     }
     .status-pulse {
@@ -459,61 +470,42 @@
 </head>
 <body class="min-h-screen flex flex-col bg-brand-bg dark:bg-brand-darkBg text-brand-ink dark:text-zinc-100 transition-colors duration-300">
 
-  <!-- Reusable SVG Symbol for Your Exact Red Hexagon Logo -->
-  <svg width="0" height="0" class="hidden" aria-hidden="true">
-    <defs>
-      <symbol id="userHexBrandLogo" viewBox="0 0 200 200">
-        <!-- Top-Right Outer Chevron -->
-        <polygon points="64,24 136,24 164,72 141,72 123,42 54,42" />
-        <!-- Top-Left Outer Diagonal Bar -->
-        <polygon points="47,54 68,54 44,96 55,115 44,134 22,96" />
-        <!-- Inner Slanted Z-Bridge -->
-        <polygon points="82,54 124,54 84,124 141,124 152,106 114,106 124,88 175,88 153,142 53,142 94,71 72,71" />
-        <!-- Bottom Outer U-Hexagon Frame -->
-        <polygon points="50,152 148,152 136,172 64,172 44,138 55,120 72,152" />
-      </symbol>
-    </defs>
-  </svg>
-
   <!-- =====================================================================
-       BESPOKE TITANIUM & CRIMSON CHRONOGRAPH WALLPAPER STAGE
+       BESPOKE HAUTE HOROLOGY & SKELETON MOVEMENT WALLPAPER STAGE
        ===================================================================== -->
-  <div class="titanium-stage no-print" aria-hidden="true">
-    <div class="brushed-grain-layer"></div>
-    <div class="hex-architect-grid"></div>
-    <canvas id="crimsonFlowCanvas" class="absolute inset-0 w-full h-full"></canvas>
+  <div class="atelier-stage no-print" aria-hidden="true">
+    <div class="forged-metal-layer"></div>
+    <canvas id="atelierKineticCanvas" class="absolute inset-0 w-full h-full"></canvas>
 
-    <!-- Oversized Mechanical Escapement & Brand Emblem Watermark -->
-    <svg id="parallaxBezelSvg" class="absolute inset-0 w-full h-full opacity-20 dark:opacity-30 transition-transform duration-200 ease-out" viewBox="0 0 430 932" preserveAspectRatio="xMidYMid slice" fill="none">
-      <!-- Top-Right Precision Horology Dial -->
-      <g class="spin-cw" style="transform-origin: 385px 115px;">
-        <circle cx="385" cy="115" r="145" stroke="#EF233C" stroke-width="1.2" stroke-dasharray="2 8"/>
-        <circle cx="385" cy="115" r="118" stroke="currentColor" stroke-width="0.9" stroke-dasharray="28 10 4 10"/>
-        <polygon points="385,15 471,65 471,165 385,215 299,165 299,65" stroke="#EF233C" stroke-width="1" opacity="0.7"/>
+    <!-- Skeleton Mechanical Escapement & Caliper Architecture -->
+    <svg id="parallaxMovementSvg" class="absolute inset-0 w-full h-full opacity-20 dark:opacity-30 transition-transform duration-200 ease-out" viewBox="0 0 430 932" preserveAspectRatio="xMidYMid slice" fill="none">
+      <!-- Top-Right Skeleton Balance Wheel -->
+      <g class="gear-cw" style="transform-origin: 388px 112px;">
+        <circle cx="388" cy="112" r="142" stroke="#EF233C" stroke-width="1.2" stroke-dasharray="2 7"/>
+        <circle cx="388" cy="112" r="115" stroke="currentColor" stroke-width="0.9" stroke-dasharray="24 8 3 8"/>
+        <line x1="273" y1="112" x2="503" y2="112" stroke="currentColor" stroke-width="0.6" opacity="0.5"/>
+        <line x1="388" y1="-3" x2="388" y2="227" stroke="currentColor" stroke-width="0.6" opacity="0.5"/>
       </g>
 
-      <!-- Bottom-Left Counter-Rotating Gear -->
-      <g class="spin-ccw" style="transform-origin: 45px 810px;">
-        <circle cx="45" cy="810" r="155" stroke="#EF233C" stroke-width="1.2" stroke-dasharray="3 9"/>
-        <circle cx="45" cy="810" r="120" stroke="currentColor" stroke-width="0.9" stroke-dasharray="18 12"/>
+      <!-- Bottom-Left Counter-Rotating Tourbillon Cage -->
+      <g class="gear-ccw" style="transform-origin: 42px 815px;">
+        <circle cx="42" cy="815" r="158" stroke="#EF233C" stroke-width="1.2" stroke-dasharray="3 9"/>
+        <circle cx="42" cy="815" r="122" stroke="currentColor" stroke-width="0.9" stroke-dasharray="18 10"/>
       </g>
 
-      <!-- Precision Caliper Hairlines -->
-      <line x1="20" y1="0" x2="20" y2="932" stroke="#EF233C" stroke-width="0.6" opacity="0.45"/>
-      <line x1="410" y1="0" x2="410" y2="932" stroke="#EF233C" stroke-width="0.6" opacity="0.45"/>
+      <!-- Vertical Atelier Vernier Guide Rails -->
+      <line x1="16" y1="0" x2="16" y2="932" stroke="#EF233C" stroke-width="0.65" opacity="0.4"/>
+      <line x1="414" y1="0" x2="414" y2="932" stroke="#EF233C" stroke-width="0.65" opacity="0.4"/>
     </svg>
   </div>
 
-  <!-- Top Navigation Bar (Machined Titanium Header) -->
+  <!-- Top Navigation Bar (Machined Titanium Header with Exact Untouched Logo) -->
   <header class="sticky top-0 z-30 bg-brand-bg/80 dark:bg-brand-darkBg/80 backdrop-blur-xl border-b border-zinc-400/35 dark:border-red-500/20 px-4 pb-3 safe-top-header no-print">
     <div class="max-w-md mx-auto flex justify-between items-center">
       <div class="flex items-center gap-2.5">
-        <!-- Custom Red Hexagon Logo Emblem Badge -->
-        <div class="w-10 h-10 bg-zinc-950 border border-red-500/45 flex items-center justify-center shadow-md shadow-red-600/20 relative overflow-hidden" style="clip-path: polygon(8px 0%, calc(100% - 8px) 0%, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0% calc(100% - 8px), 0% 8px);">
-          <div class="absolute inset-0 bg-radial from-red-600/25 to-transparent"></div>
-          <svg class="w-7 h-7 text-[#FF1E1E] fill-current drop-shadow-[0_0_8px_rgba(255,30,30,0.65)]">
-            <use href="#userHexBrandLogo"/>
-          </svg>
+        <!-- Exact Untouched User Logo Frame -->
+        <div class="w-11 h-10 bg-zinc-950 border border-red-500/45 flex items-center justify-center shadow-md shadow-red-600/25 relative overflow-hidden p-1" style="clip-path: polygon(8px 0%, calc(100% - 8px) 0%, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0% calc(100% - 8px), 0% 8px);">
+          <img src="GEM_PHOTO_CEDFD3BF-AB6F-4C40-8178-6F0E9A571B4A_L0_001_recent_photo_14C60923-746F-4405-A6C3-DBE80BA9E180.jpg" alt="Brand Logo" class="exact-user-logo w-full h-full object-contain drop-shadow-[0_0_6px_rgba(255,20,20,0.65)]">
         </div>
         <div>
           <div class="flex items-center gap-1.5">
@@ -525,17 +517,17 @@
       </div>
 
       <div class="flex items-center gap-1.5">
-        <button onclick="pullFromGoogleSheets(false)" id="btnTopSync" title="ซิงค์ข้อมูล" aria-label="ซิงค์ข้อมูล" class="chamfer-btn w-8 h-8 bg-white/85 dark:bg-zinc-900/90 border border-zinc-300 dark:border-zinc-700 flex items-center justify-center text-zinc-700 dark:text-zinc-300">
+        <button onclick="pullFromGoogleSheets(false)" id="btnTopSync" title="ซิงค์ข้อมูล" aria-label="ซิงค์ข้อมูล" class="chrono-pusher w-8 h-8 bg-white/85 dark:bg-zinc-900/90 border border-zinc-300 dark:border-zinc-700 flex items-center justify-center text-zinc-700 dark:text-zinc-300">
           <i class="fa-solid fa-arrows-rotate text-xs text-red-600 dark:text-red-400" id="topSyncIcon"></i>
         </button>
-        <button onclick="toggleAudio()" id="audioToggleBtn" aria-label="สลับเสียง" class="chamfer-btn w-8 h-8 bg-white/85 dark:bg-zinc-900/90 border border-zinc-300 dark:border-zinc-700 flex items-center justify-center text-zinc-700 dark:text-zinc-300">
+        <button onclick="toggleAudio()" id="audioToggleBtn" aria-label="สลับเสียง" class="chrono-pusher w-8 h-8 bg-white/85 dark:bg-zinc-900/90 border border-zinc-300 dark:border-zinc-700 flex items-center justify-center text-zinc-700 dark:text-zinc-300">
           <i class="fa-solid fa-volume-high text-xs" id="audioIcon"></i>
         </button>
-        <button onclick="cycleThemeMode()" id="themeToggleBtn" title="สลับโหมดธีม (อัตโนมัติตามเวลา / กลางวัน / กลางคืน)" aria-label="สลับโหมดธีม" class="chamfer-btn h-8 px-2 bg-white/85 dark:bg-zinc-900/90 border border-zinc-300 dark:border-zinc-700 flex items-center justify-center gap-1 text-zinc-800 dark:text-zinc-200">
+        <button onclick="cycleThemeMode()" id="themeToggleBtn" title="สลับโหมดธีม (อัตโนมัติตามเวลา / กลางวัน / กลางคืน)" aria-label="สลับโหมดธีม" class="chrono-pusher h-8 px-2 bg-white/85 dark:bg-zinc-900/90 border border-zinc-300 dark:border-zinc-700 flex items-center justify-center gap-1 text-zinc-800 dark:text-zinc-200">
           <i class="fa-solid fa-clock text-[11px] text-red-600 dark:text-red-400" id="themeIcon"></i>
           <span class="text-[9.5px] font-mono font-bold" id="themeLabel">AUTO</span>
         </button>
-        <button onclick="openConfigModal()" aria-label="ตั้งค่า" class="chamfer-btn w-8 h-8 bg-white/85 dark:bg-zinc-900/90 border border-zinc-300 dark:border-zinc-700 flex items-center justify-center text-zinc-700 dark:text-zinc-300">
+        <button onclick="openConfigModal()" aria-label="ตั้งค่า" class="chrono-pusher w-8 h-8 bg-white/85 dark:bg-zinc-900/90 border border-zinc-300 dark:border-zinc-700 flex items-center justify-center text-zinc-700 dark:text-zinc-300">
           <i class="fa-solid fa-gear text-xs"></i>
         </button>
       </div>
@@ -546,18 +538,16 @@
   <main class="relative z-10 flex-1 max-w-md w-full mx-auto px-4 py-3.5 space-y-3.5 pb-28 no-print">
 
     <!-- Bespoke Metallic Employee ID Pass -->
-    <div class="chamfer-shell">
-      <div class="chamfer-card p-3.5 relative overflow-hidden">
-        <!-- Corner Torx Screws -->
-        <span class="absolute top-1.5 left-3.5 w-1 h-1 rounded-full bg-zinc-400/60 dark:bg-zinc-600"></span>
-        <span class="absolute top-1.5 right-3.5 w-1 h-1 rounded-full bg-zinc-400/60 dark:bg-zinc-600"></span>
-        <span class="absolute bottom-1.5 left-3.5 w-1 h-1 rounded-full bg-zinc-400/60 dark:bg-zinc-600"></span>
-        <span class="absolute bottom-1.5 right-3.5 w-1 h-1 rounded-full bg-zinc-400/60 dark:bg-zinc-600"></span>
+    <div class="bezel-shell">
+      <div class="bezel-card p-3.5 relative overflow-hidden">
+        <!-- Milled Titanium Corner Screws -->
+        <span class="absolute top-1.5 left-3.5 w-1 h-1 rounded-full bg-zinc-400/70 dark:bg-zinc-600"></span>
+        <span class="absolute top-1.5 right-3.5 w-1 h-1 rounded-full bg-zinc-400/70 dark:bg-zinc-600"></span>
+        <span class="absolute bottom-1.5 left-3.5 w-1 h-1 rounded-full bg-zinc-400/70 dark:bg-zinc-600"></span>
+        <span class="absolute bottom-1.5 right-3.5 w-1 h-1 rounded-full bg-zinc-400/70 dark:bg-zinc-600"></span>
 
-        <!-- Watermark Logo Right -->
-        <svg class="absolute -right-3 -bottom-4 w-28 h-28 text-red-600/10 dark:text-red-500/12 fill-current pointer-events-none">
-          <use href="#userHexBrandLogo"/>
-        </svg>
+        <!-- Subtle Exact User Logo Watermark on Right -->
+        <img src="GEM_PHOTO_CEDFD3BF-AB6F-4C40-8178-6F0E9A571B4A_L0_001_recent_photo_14C60923-746F-4405-A6C3-DBE80BA9E180.jpg" alt="" aria-hidden="true" class="exact-user-logo absolute -right-2 -bottom-2 w-28 h-16 object-contain opacity-12 dark:opacity-18 pointer-events-none">
 
         <div class="relative flex items-center justify-between mb-2">
           <div class="flex items-center gap-2">
@@ -565,18 +555,16 @@
               <span id="statusLedPing" class="status-pulse absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span id="statusLed" class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
             </span>
-            <span class="font-display text-[10.5px] font-bold uppercase tracking-widest text-zinc-600 dark:text-zinc-400">OPERATOR ID // บัตรพนักงาน</span>
+            <span class="font-display text-[10.5px] font-bold uppercase tracking-widest text-zinc-600 dark:text-zinc-400">OPERATOR PASS // บัตรพนักงาน</span>
           </div>
           <span id="dutyBadge" class="text-[10px] font-bold px-2.5 py-0.5 bg-zinc-900/10 dark:bg-white/10 text-zinc-800 dark:text-zinc-200 border border-zinc-400/30 dark:border-white/10">พร้อมปฏิบัติงาน</span>
         </div>
 
         <div class="relative flex items-center gap-2.5">
-          <div class="w-10 h-10 bg-zinc-950 border border-red-500/35 flex items-center justify-center shrink-0" style="clip-path: polygon(6px 0%, calc(100% - 6px) 0%, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0% calc(100% - 6px), 0% 6px);">
-            <svg class="w-6 h-6 text-[#FF1E1E] fill-current">
-              <use href="#userHexBrandLogo"/>
-            </svg>
+          <div class="w-11 h-10 bg-zinc-950 border border-red-500/40 flex items-center justify-center shrink-0 p-1" style="clip-path: polygon(6px 0%, calc(100% - 6px) 0%, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0% calc(100% - 6px), 0% 6px);">
+            <img src="GEM_PHOTO_CEDFD3BF-AB6F-4C40-8178-6F0E9A571B4A_L0_001_recent_photo_14C60923-746F-4405-A6C3-DBE80BA9E180.jpg" alt="Logo" class="exact-user-logo w-full h-full object-contain">
           </div>
-          <select id="globalEmployeeSelect" onchange="onEmployeeChange(this.value)" class="custom-select w-full bg-white/80 dark:bg-zinc-900/90 border border-zinc-300 dark:border-zinc-700 text-xs font-bold py-2.5 px-3 outline-none cursor-pointer text-zinc-900 dark:text-white" style="clip-path: polygon(8px 0%, calc(100% - 8px) 0%, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0% calc(100% - 8px), 0% 8px);">
+          <select id="globalEmployeeSelect" onchange="onEmployeeChange(this.value)" class="custom-select w-full bg-white/85 dark:bg-zinc-900/95 border border-zinc-300 dark:border-zinc-700 text-xs font-bold py-2.5 px-3 outline-none cursor-pointer text-zinc-900 dark:text-white" style="clip-path: polygon(8px 0%, calc(100% - 8px) 0%, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0% calc(100% - 8px), 0% 8px);">
           </select>
         </div>
       </div>
@@ -585,37 +573,39 @@
     <!-- TAB 1: Live Punch Chronograph -->
     <section id="tab-1" class="tab-content space-y-3.5">
       
-      <!-- Tourbillon Chronograph Deck -->
-      <div class="hero-chronograph-shell">
-        <div class="hero-chronograph-inner p-4 text-white relative overflow-hidden">
-          <!-- Mechanical Chronograph Dial & User Logo Core -->
+      <!-- Skeleton Tourbillon Chronograph Watch Case -->
+      <div class="watch-case-shell">
+        <div class="watch-case-inner p-4 text-white relative overflow-hidden">
+          <!-- Skeleton Mechanical Gear Train & Chronometer Ring -->
           <svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 400 280" preserveAspectRatio="xMidYMid slice" fill="none">
             <defs>
-              <pattern id="microCarbon" width="12" height="12" patternUnits="userSpaceOnUse">
-                <path d="M 12 0 L 0 0 0 12" fill="none" stroke="#ffffff" stroke-width="0.4" opacity="0.08"/>
+              <pattern id="atelierGrid" width="14" height="14" patternUnits="userSpaceOnUse">
+                <path d="M 14 0 L 0 0 0 14" fill="none" stroke="#ffffff" stroke-width="0.35" opacity="0.07"/>
               </pattern>
             </defs>
-            <rect width="400" height="280" fill="url(#microCarbon)"/>
+            <rect width="400" height="280" fill="url(#atelierGrid)"/>
 
-            <!-- Rotating Outer Chronometer Degree Ring -->
-            <g class="spin-cw" style="transform-origin: 200px 106px;" opacity="0.38">
-              <circle cx="200" cy="106" r="96" stroke="#EF233C" stroke-width="1.2" stroke-dasharray="2 6"/>
-              <circle cx="200" cy="106" r="82" stroke="#ffffff" stroke-width="0.7" stroke-dasharray="16 8 2 8"/>
+            <!-- Outer Chronometer Minute Track -->
+            <g class="gear-cw" style="transform-origin: 200px 108px;" opacity="0.42">
+              <circle cx="200" cy="108" r="98" stroke="#EF233C" stroke-width="1.3" stroke-dasharray="2 6"/>
+              <circle cx="200" cy="108" r="84" stroke="#ffffff" stroke-width="0.75" stroke-dasharray="18 8 2 8"/>
             </g>
 
-            <!-- Counter-Rotating Inner Hexagon Frame -->
-            <g class="spin-ccw" style="transform-origin: 200px 106px;" opacity="0.22">
-              <polygon points="200,42 255,74 255,138 200,170 145,138 145,74" stroke="#EF233C" stroke-width="1.5"/>
+            <!-- Inner Skeleton Escapement Wheel -->
+            <g class="gear-ccw" style="transform-origin: 200px 108px;" opacity="0.25">
+              <circle cx="200" cy="108" r="64" stroke="#EF233C" stroke-width="1.2" stroke-dasharray="8 4"/>
+              <line x1="136" y1="108" x2="264" y2="108" stroke="#EF233C" stroke-width="0.8"/>
+              <line x1="200" y1="44" x2="200" y2="172" stroke="#EF233C" stroke-width="0.8"/>
             </g>
 
-            <!-- User's Exact Red Hexagon Logo Embossed Behind Digital Time -->
-            <g transform="translate(148, 54) scale(0.52)" opacity="0.14" class="fill-[#FF1E1E]">
-              <use href="#userHexBrandLogo"/>
-            </g>
-
-            <!-- Horizontal Precision Reference Hairline -->
-            <path d="M0 106 H 52 M 348 106 H 400" stroke="#EF233C" stroke-width="1.2" opacity="0.55"/>
+            <!-- Horizontal Reference Crosshair -->
+            <path d="M0 108 H 48 M 352 108 H 400" stroke="#EF233C" stroke-width="1.2" opacity="0.5"/>
           </svg>
+
+          <!-- Exact Untouched User Logo Centered in Skeleton Dial -->
+          <div class="absolute inset-x-0 top-[54px] flex justify-center pointer-events-none opacity-22">
+            <img src="GEM_PHOTO_CEDFD3BF-AB6F-4C40-8178-6F0E9A571B4A_L0_001_recent_photo_14C60923-746F-4405-A6C3-DBE80BA9E180.jpg" alt="" class="exact-user-logo w-36 h-20 object-contain drop-shadow-[0_0_12px_rgba(255,30,30,0.7)]">
+          </div>
 
           <!-- Top Telemetry Strip -->
           <div class="relative flex justify-between items-center text-[11px] text-zinc-400 pb-2.5 border-b border-white/10">
@@ -625,7 +615,7 @@
 
           <!-- Center Chronograph Time Readout -->
           <div class="relative text-center py-3.5">
-            <div class="font-mono text-[45px] font-extrabold tracking-tight leading-none text-white drop-shadow-[0_0_20px_rgba(239,35,60,0.45)]" id="liveClock">
+            <div class="font-mono text-[45px] font-extrabold tracking-tight leading-none text-white drop-shadow-[0_0_22px_rgba(239,35,60,0.5)]" id="liveClock">
               00:00:00<span class="text-xl text-[#FF2A2A] font-bold">.0</span>
             </div>
 
@@ -643,14 +633,14 @@
             <div class="grid grid-cols-2 gap-2">
               <div class="min-w-0">
                 <span class="block text-zinc-400 text-[9.5px] mb-1 font-semibold uppercase tracking-wider">กะการทำงาน</span>
-                <div class="grid grid-cols-2 bg-black/70 p-1 border border-white/10" style="clip-path: polygon(6px 0%, calc(100% - 6px) 0%, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0% calc(100% - 6px), 0% 6px);">
+                <div class="grid grid-cols-2 bg-black/75 p-1 border border-white/12" style="clip-path: polygon(6px 0%, calc(100% - 6px) 0%, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0% calc(100% - 6px), 0% 6px);">
                   <button type="button" id="swShiftDay" onclick="setSwitchValue('shift', 'DAY')" class="py-1.5 font-bold text-[10.5px] transition">กลางวัน</button>
                   <button type="button" id="swShiftNight" onclick="setSwitchValue('shift', 'NIGHT')" class="py-1.5 font-bold text-[10.5px] transition">กลางคืน</button>
                 </div>
               </div>
               <div class="min-w-0">
                 <span class="block text-zinc-400 text-[9.5px] mb-1 font-semibold uppercase tracking-wider">ประเภทวัน</span>
-                <div class="grid grid-cols-2 bg-black/70 p-1 border border-white/10" style="clip-path: polygon(6px 0%, calc(100% - 6px) 0%, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0% calc(100% - 6px), 0% 6px);">
+                <div class="grid grid-cols-2 bg-black/75 p-1 border border-white/12" style="clip-path: polygon(6px 0%, calc(100% - 6px) 0%, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0% calc(100% - 6px), 0% 6px);">
                   <button type="button" id="swDayReg" onclick="setSwitchValue('dayType', 'REGULAR')" class="py-1.5 font-bold text-[10.5px] transition">ปกติ 1.5</button>
                   <button type="button" id="swDayHol" onclick="setSwitchValue('dayType', 'HOLIDAY')" class="py-1.5 font-bold text-[10.5px] transition">หยุด 2/3</button>
                 </div>
@@ -659,7 +649,7 @@
 
             <div>
               <span class="block text-zinc-400 text-[9.5px] mb-1 font-semibold uppercase tracking-wider">รูปแบบเวลา</span>
-              <div class="grid grid-cols-2 bg-black/70 p-1 border border-white/10" style="clip-path: polygon(6px 0%, calc(100% - 6px) 0%, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0% calc(100% - 6px), 0% 6px);">
+              <div class="grid grid-cols-2 bg-black/75 p-1 border border-white/12" style="clip-path: polygon(6px 0%, calc(100% - 6px) 0%, 100% 6px, 100% calc(100% - 6px), calc(100% - 6px) 100%, 6px 100%, 0% calc(100% - 6px), 0% 6px);">
                 <button type="button" id="swModeFull" onclick="setSwitchValue('workType', 'FULL')" class="py-1.5 font-bold text-[10.5px] transition">เต็มวัน (8 ชม.)</button>
                 <button type="button" id="swModeHalf" onclick="setSwitchValue('workType', 'HALF')" class="py-1.5 font-bold text-[10.5px] transition">ลาครึ่งวัน (200฿)</button>
               </div>
@@ -669,8 +659,8 @@
       </div>
 
       <!-- Daily Rate Telemetry Strip -->
-      <div class="chamfer-shell">
-        <div class="chamfer-card p-3.5 space-y-2.5">
+      <div class="bezel-shell">
+        <div class="bezel-card p-3.5 space-y-2.5">
           <div class="flex justify-between items-center text-[10.5px] font-semibold text-zinc-600 dark:text-zinc-400">
             <span id="shiftScheduleHint" class="flex items-center gap-1.5">
               <i class="fa-regular fa-clock text-red-600"></i> กะปกติ 08:00 - 16:50
@@ -696,8 +686,8 @@
 
       <!-- Check In / Check Out Time Stamps -->
       <div class="grid grid-cols-2 gap-2.5">
-        <div class="chamfer-shell">
-          <div class="chamfer-card p-3.5 flex items-center justify-between">
+        <div class="bezel-shell">
+          <div class="bezel-card p-3.5 flex items-center justify-between">
             <div>
               <span class="text-[10px] text-zinc-500 dark:text-zinc-400 font-semibold block">เวลาเข้างาน</span>
               <span class="font-mono text-xl font-extrabold tracking-tight text-zinc-900 dark:text-white" id="displayCheckInTime">--:--</span>
@@ -707,8 +697,8 @@
             </div>
           </div>
         </div>
-        <div class="chamfer-shell">
-          <div class="chamfer-card p-3.5 flex items-center justify-between">
+        <div class="bezel-shell">
+          <div class="bezel-card p-3.5 flex items-center justify-between">
             <div>
               <span class="text-[10px] text-zinc-500 dark:text-zinc-400 font-semibold block">เวลาออกงาน</span>
               <span class="font-mono text-xl font-extrabold tracking-tight text-zinc-900 dark:text-white" id="displayCheckOutTime">--:--</span>
@@ -720,9 +710,9 @@
         </div>
       </div>
 
-      <!-- Primary Chamfered Chronograph Triggers -->
+      <!-- Primary Chronograph Pushers -->
       <div class="grid grid-cols-2 gap-3 pt-0.5">
-        <button id="btnCheckIn" onclick="handleLiveCheckIn()" class="chamfer-btn py-3.5 px-3 bg-gradient-to-br from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white font-bold text-xs shadow-lg shadow-emerald-600/25 flex flex-col items-center justify-center gap-0.5">
+        <button id="btnCheckIn" onclick="handleLiveCheckIn()" class="chrono-pusher py-3.5 px-3 bg-gradient-to-br from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white font-bold text-xs shadow-lg shadow-emerald-600/25 flex flex-col items-center justify-center gap-0.5">
           <div class="flex items-center gap-1.5">
             <i class="fa-solid fa-fingerprint text-sm"></i>
             <span>ลงเวลาเข้างาน</span>
@@ -730,7 +720,7 @@
           <span class="text-[10px] font-normal opacity-90" id="checkInStatusText">กดเพื่อเริ่มนับเวลา</span>
         </button>
 
-        <button id="btnCheckOut" onclick="handleLiveCheckOut()" class="chamfer-btn py-3.5 px-3 bg-gradient-to-br from-[#EF233C] to-[#B91C1C] hover:from-[#FF2E47] hover:to-[#DC2626] text-white font-bold text-xs shadow-lg shadow-red-600/30 flex flex-col items-center justify-center gap-0.5">
+        <button id="btnCheckOut" onclick="handleLiveCheckOut()" class="chrono-pusher py-3.5 px-3 bg-gradient-to-br from-[#EF233C] to-[#B91C1C] hover:from-[#FF2E47] hover:to-[#DC2626] text-white font-bold text-xs shadow-lg shadow-red-600/30 flex flex-col items-center justify-center gap-0.5">
           <div class="flex items-center gap-1.5">
             <i class="fa-solid fa-check-circle text-sm"></i>
             <span>ลงเวลาออกงาน</span>
@@ -742,8 +732,8 @@
 
     <!-- TAB 2: Manual Edit -->
     <section id="tab-2" class="tab-content hidden space-y-3">
-      <div class="chamfer-shell">
-        <div class="chamfer-card overflow-hidden">
+      <div class="bezel-shell">
+        <div class="bezel-card overflow-hidden">
           <div class="bg-gradient-to-r from-zinc-950 via-zinc-900 to-red-950 px-4 py-3 text-white flex items-center justify-between relative overflow-hidden border-b border-red-500/25">
             <div class="relative z-10 flex items-center gap-3">
               <div class="w-10 h-10 bg-red-600/20 border border-red-500/35 flex items-center justify-center shrink-0">
@@ -765,11 +755,11 @@
             <div class="grid grid-cols-2 gap-2.5">
               <div class="min-w-0">
                 <label class="block text-[10.5px] font-semibold text-zinc-600 dark:text-zinc-400 mb-1 truncate">วันที่ต้องการบันทึก</label>
-                <input type="date" id="manualDate" onchange="prefillManualByDate()" required class="w-full min-w-0 max-w-full bg-white/80 dark:bg-zinc-900/90 border border-zinc-300 dark:border-zinc-700 px-2.5 py-1.5 font-mono text-[11px] outline-none">
+                <input type="date" id="manualDate" onchange="prefillManualByDate()" required class="w-full min-w-0 max-w-full bg-white/85 dark:bg-zinc-900/95 border border-zinc-300 dark:border-zinc-700 px-2.5 py-1.5 font-mono text-[11px] outline-none">
               </div>
               <div class="min-w-0">
                 <label class="block text-[10.5px] font-semibold text-zinc-600 dark:text-zinc-400 mb-1 truncate">สถานะการทำงาน</label>
-                <select id="manualWorkType" onchange="updateManualPreview()" class="custom-select w-full min-w-0 max-w-full bg-white/80 dark:bg-zinc-900/90 border border-zinc-300 dark:border-zinc-700 px-2.5 py-2 text-[11px] font-medium outline-none">
+                <select id="manualWorkType" onchange="updateManualPreview()" class="custom-select w-full min-w-0 max-w-full bg-white/85 dark:bg-zinc-900/95 border border-zinc-300 dark:border-zinc-700 px-2.5 py-2 text-[11px] font-medium outline-none">
                   <option value="FULL">เต็มวัน (8 ชม.)</option>
                   <option value="HALF">ลาครึ่งวัน (200฿)</option>
                 </select>
@@ -779,14 +769,14 @@
             <div class="grid grid-cols-2 gap-2.5">
               <div class="min-w-0">
                 <label class="block text-[10.5px] font-semibold text-zinc-600 dark:text-zinc-400 mb-1 truncate">กะการทำงาน</label>
-                <select id="manualShift" onchange="updateManualPreview()" class="custom-select w-full min-w-0 max-w-full bg-white/80 dark:bg-zinc-900/90 border border-zinc-300 dark:border-zinc-700 px-2.5 py-2 text-[11px] font-medium outline-none">
+                <select id="manualShift" onchange="updateManualPreview()" class="custom-select w-full min-w-0 max-w-full bg-white/85 dark:bg-zinc-900/95 border border-zinc-300 dark:border-zinc-700 px-2.5 py-2 text-[11px] font-medium outline-none">
                   <option value="DAY">กลางวัน (08:00)</option>
                   <option value="NIGHT">กลางคืน (20:00)</option>
                 </select>
               </div>
               <div class="min-w-0">
                 <label class="block text-[10.5px] font-semibold text-zinc-600 dark:text-zinc-400 mb-1 truncate">ประเภทวัน</label>
-                <select id="manualDayType" onchange="updateManualPreview()" class="custom-select w-full min-w-0 max-w-full bg-white/80 dark:bg-zinc-900/90 border border-zinc-300 dark:border-zinc-700 px-2.5 py-2 text-[11px] font-medium outline-none">
+                <select id="manualDayType" onchange="updateManualPreview()" class="custom-select w-full min-w-0 max-w-full bg-white/85 dark:bg-zinc-900/95 border border-zinc-300 dark:border-zinc-700 px-2.5 py-2 text-[11px] font-medium outline-none">
                   <option value="REGULAR">วันปกติ (OT 1.5)</option>
                   <option value="HOLIDAY">วันหยุด (OT 2.0/3.0)</option>
                 </select>
@@ -796,11 +786,11 @@
             <div class="grid grid-cols-2 gap-2.5">
               <div class="min-w-0">
                 <label class="block text-[10.5px] font-semibold text-zinc-600 dark:text-zinc-400 mb-1 truncate">เวลาเข้า</label>
-                <input type="time" id="manualCheckIn" oninput="updateManualPreview()" required class="w-full min-w-0 max-w-full bg-white/80 dark:bg-zinc-900/90 border border-zinc-300 dark:border-zinc-700 px-2.5 py-1.5 font-mono text-[11px] outline-none">
+                <input type="time" id="manualCheckIn" oninput="updateManualPreview()" required class="w-full min-w-0 max-w-full bg-white/85 dark:bg-zinc-900/95 border border-zinc-300 dark:border-zinc-700 px-2.5 py-1.5 font-mono text-[11px] outline-none">
               </div>
               <div class="min-w-0">
                 <label class="block text-[10.5px] font-semibold text-zinc-600 dark:text-zinc-400 mb-1 truncate">เวลาออก</label>
-                <input type="time" id="manualCheckOut" oninput="updateManualPreview()" required class="w-full min-w-0 max-w-full bg-white/80 dark:bg-zinc-900/90 border border-zinc-300 dark:border-zinc-700 px-2.5 py-1.5 font-mono text-[11px] outline-none">
+                <input type="time" id="manualCheckOut" oninput="updateManualPreview()" required class="w-full min-w-0 max-w-full bg-white/85 dark:bg-zinc-900/95 border border-zinc-300 dark:border-zinc-700 px-2.5 py-1.5 font-mono text-[11px] outline-none">
               </div>
             </div>
 
@@ -809,7 +799,7 @@
               <span class="font-extrabold text-xs text-white">สุทธิ <span id="manPrevTotal" class="text-red-400">0</span> ฿</span>
             </div>
 
-            <button type="submit" class="chamfer-btn w-full py-3 bg-gradient-to-r from-[#EF233C] to-[#B91C1C] hover:from-[#FF2E47] hover:to-[#DC2626] text-white font-bold text-xs shadow-md shadow-red-600/25 mt-1">
+            <button type="submit" class="chrono-pusher w-full py-3 bg-gradient-to-r from-[#EF233C] to-[#B91C1C] hover:from-[#FF2E47] hover:to-[#DC2626] text-white font-bold text-xs shadow-md shadow-red-600/25 mt-1">
               คำนวณ & บันทึกย้อนหลัง
             </button>
           </form>
@@ -819,8 +809,8 @@
 
     <!-- TAB 3: Leave Form -->
     <section id="tab-3" class="tab-content hidden space-y-4">
-      <div class="chamfer-shell">
-        <div class="chamfer-card overflow-hidden">
+      <div class="bezel-shell">
+        <div class="bezel-card overflow-hidden">
           <div class="bg-gradient-to-r from-red-700 via-red-600 to-zinc-900 px-4 py-3 text-white flex items-center justify-between relative overflow-hidden">
             <div class="relative z-10 flex items-center gap-3">
               <div class="w-10 h-10 bg-white/15 flex items-center justify-center shrink-0">
@@ -842,7 +832,7 @@
           <form id="leaveForm" onsubmit="handleLeaveSubmit(event)" class="p-4 space-y-3 text-xs">
             <div>
               <label class="block text-[10.5px] font-semibold text-zinc-600 dark:text-zinc-400 mb-1">ประเภทการลา</label>
-              <select id="leaveType" required class="custom-select w-full min-w-0 max-w-full bg-white/80 dark:bg-zinc-900/90 border border-zinc-300 dark:border-zinc-700 p-2.5 font-medium outline-none">
+              <select id="leaveType" required class="custom-select w-full min-w-0 max-w-full bg-white/85 dark:bg-zinc-900/95 border border-zinc-300 dark:border-zinc-700 p-2.5 font-medium outline-none">
                 <option value="ลากิจ">ลากิจ (Personal Leave)</option>
                 <option value="ลาป่วย">ลาป่วย (Sick Leave)</option>
                 <option value="ลาพักร้อน">ลาพักร้อน (Annual Leave)</option>
@@ -852,18 +842,18 @@
             <div class="grid grid-cols-2 gap-2.5">
               <div class="min-w-0">
                 <label class="block text-[10.5px] font-semibold text-zinc-600 dark:text-zinc-400 mb-1 truncate">ตั้งแต่วันที่</label>
-                <input type="date" id="leaveStartDate" required class="w-full min-w-0 max-w-full bg-white/80 dark:bg-zinc-900/90 border border-zinc-300 dark:border-zinc-700 px-2.5 py-1.5 font-mono text-[11px] outline-none">
+                <input type="date" id="leaveStartDate" required class="w-full min-w-0 max-w-full bg-white/85 dark:bg-zinc-900/95 border border-zinc-300 dark:border-zinc-700 px-2.5 py-1.5 font-mono text-[11px] outline-none">
               </div>
               <div class="min-w-0">
                 <label class="block text-[10.5px] font-semibold text-zinc-600 dark:text-zinc-400 mb-1 truncate">ถึงวันที่</label>
-                <input type="date" id="leaveEndDate" required class="w-full min-w-0 max-w-full bg-white/80 dark:bg-zinc-900/90 border border-zinc-300 dark:border-zinc-700 px-2.5 py-1.5 font-mono text-[11px] outline-none">
+                <input type="date" id="leaveEndDate" required class="w-full min-w-0 max-w-full bg-white/85 dark:bg-zinc-900/95 border border-zinc-300 dark:border-zinc-700 px-2.5 py-1.5 font-mono text-[11px] outline-none">
               </div>
             </div>
             <div>
               <label class="block text-[10.5px] font-semibold text-zinc-600 dark:text-zinc-400 mb-1">เหตุผลการลา</label>
-              <textarea id="leaveReason" rows="2" placeholder="ระบุเหตุผลสั้น ๆ..." class="w-full min-w-0 max-w-full bg-white/80 dark:bg-zinc-900/90 border border-zinc-300 dark:border-zinc-700 p-2.5 outline-none resize-none"></textarea>
+              <textarea id="leaveReason" rows="2" placeholder="ระบุเหตุผลสั้น ๆ..." class="w-full min-w-0 max-w-full bg-white/85 dark:bg-zinc-900/95 border border-zinc-300 dark:border-zinc-700 p-2.5 outline-none resize-none"></textarea>
             </div>
-            <button type="submit" class="chamfer-btn w-full py-3 bg-zinc-950 dark:bg-red-600 hover:opacity-95 text-white font-bold text-xs shadow-md mt-1">
+            <button type="submit" class="chrono-pusher w-full py-3 bg-zinc-950 dark:bg-red-600 hover:opacity-95 text-white font-bold text-xs shadow-md mt-1">
               ส่งใบลางาน
             </button>
           </form>
@@ -878,35 +868,33 @@
 
     <!-- TAB 4: Dashboard & Summary -->
     <section id="tab-4" class="tab-content hidden space-y-3.5">
-      <div class="chamfer-shell">
-        <div class="chamfer-card p-3.5 space-y-2.5">
+      <div class="bezel-shell">
+        <div class="bezel-card p-3.5 space-y-2.5">
           <div class="flex flex-wrap justify-between items-center gap-1.5">
             <label class="text-[11px] font-bold text-zinc-600 dark:text-zinc-400 flex items-center gap-1.5">
               <i class="fa-solid fa-calendar-check text-red-600"></i> รอบตัดยอด
             </label>
             <div class="flex gap-1.5">
-              <button onclick="pullFromGoogleSheets(false)" class="chamfer-btn bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1.5 text-[11px] font-bold flex items-center gap-1">
+              <button onclick="pullFromGoogleSheets(false)" class="chrono-pusher bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1.5 text-[11px] font-bold flex items-center gap-1">
                 <i class="fa-solid fa-cloud-arrow-down"></i> ดึงข้อมูล
               </button>
-              <button onclick="exportCSV()" class="chamfer-btn bg-zinc-900 text-white px-2.5 py-1.5 text-[11px] font-mono font-bold flex items-center gap-1">
+              <button onclick="exportCSV()" class="chrono-pusher bg-zinc-900 text-white px-2.5 py-1.5 text-[11px] font-mono font-bold flex items-center gap-1">
                 <i class="fa-solid fa-file-csv text-red-400"></i> CSV
               </button>
-              <button onclick="openPayslipModal()" class="chamfer-btn bg-red-600 hover:bg-red-500 text-white px-2.5 py-1.5 text-[11px] font-bold flex items-center gap-1 shadow-xs">
+              <button onclick="openPayslipModal()" class="chrono-pusher bg-red-600 hover:bg-red-500 text-white px-2.5 py-1.5 text-[11px] font-bold flex items-center gap-1 shadow-xs">
                 <i class="fa-solid fa-file-invoice-dollar"></i> ออกสลิป
               </button>
             </div>
           </div>
-          <select id="cutoffPeriodSelect" onchange="renderHistories()" class="custom-select w-full bg-white/80 dark:bg-zinc-900/90 border border-zinc-300 dark:border-zinc-700 text-xs font-bold p-2.5 outline-none">
+          <select id="cutoffPeriodSelect" onchange="renderHistories()" class="custom-select w-full bg-white/85 dark:bg-zinc-900/95 border border-zinc-300 dark:border-zinc-700 text-xs font-bold p-2.5 outline-none">
           </select>
         </div>
       </div>
 
       <div class="grid grid-cols-2 gap-2.5">
-        <div class="col-span-2 hero-chronograph-shell">
-          <div class="hero-chronograph-inner text-white p-4 relative overflow-hidden">
-            <svg class="absolute right-2 -bottom-3 w-28 h-28 text-red-500/15 fill-current pointer-events-none">
-              <use href="#userHexBrandLogo"/>
-            </svg>
+        <div class="col-span-2 watch-case-shell">
+          <div class="watch-case-inner text-white p-4 relative overflow-hidden">
+            <img src="GEM_PHOTO_CEDFD3BF-AB6F-4C40-8178-6F0E9A571B4A_L0_001_recent_photo_14C60923-746F-4405-A6C3-DBE80BA9E180.jpg" alt="" aria-hidden="true" class="exact-user-logo absolute right-3 bottom-2 w-28 h-16 object-contain opacity-20 pointer-events-none">
             <span class="text-[11px] text-zinc-400 font-medium">ยอดรวมค่าแรง + OT ในรอบนี้</span>
             <div class="flex justify-between items-baseline mt-1.5 relative z-10">
               <div class="font-mono text-3xl font-extrabold text-red-400 tracking-tight" id="summaryTotalSalary">0.00 ฿</div>
@@ -915,22 +903,22 @@
           </div>
         </div>
 
-        <div class="chamfer-shell">
-          <div class="chamfer-card p-3.5">
+        <div class="bezel-shell">
+          <div class="bezel-card p-3.5">
             <span class="text-[10.5px] text-zinc-500 dark:text-zinc-400 block font-semibold">ชั่วโมง OT รวม</span>
             <span class="font-mono text-lg font-extrabold text-zinc-900 dark:text-white mt-0.5 block" id="summaryTotalOT">0.0 ชม.</span>
           </div>
         </div>
-        <div class="chamfer-shell">
-          <div class="chamfer-card p-3.5">
+        <div class="bezel-shell">
+          <div class="bezel-card p-3.5">
             <span class="text-[10.5px] text-zinc-500 dark:text-zinc-400 block font-semibold">ค่าอาหารรวม</span>
             <span class="font-mono text-lg font-extrabold text-zinc-900 dark:text-white mt-0.5 block" id="summaryTotalMeals">0.00 ฿</span>
           </div>
         </div>
       </div>
 
-      <div class="chamfer-shell">
-        <div class="chamfer-card p-4 space-y-3">
+      <div class="bezel-shell">
+        <div class="bezel-card p-4 space-y-3">
           <div class="flex justify-between items-center">
             <h3 class="text-xs font-bold text-zinc-700 dark:text-zinc-300">ประวัติบันทึกเวลา</h3>
             <button onclick="clearLocalStorageData()" class="text-[11px] text-rose-600 hover:underline font-semibold">ล้างประวัติในเครื่อง</button>
@@ -942,22 +930,22 @@
 
   </main>
 
-  <!-- Floating Chamfered Bottom Control Dock -->
+  <!-- Floating Milled Titanium Bottom Control Dock -->
   <nav class="fixed left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-sm z-40 safe-bottom-nav no-print">
     <div class="bg-zinc-950/92 backdrop-blur-xl border border-red-500/30 p-1.5 flex justify-between shadow-2xl" style="clip-path: polygon(12px 0%, calc(100% - 12px) 0%, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0% calc(100% - 12px), 0% 12px);">
-      <button onclick="switchTab(1)" id="nav-1" class="chamfer-btn flex-1 flex flex-col items-center justify-center py-2 text-white bg-red-600 font-bold transition-all">
+      <button onclick="switchTab(1)" id="nav-1" class="chrono-pusher flex-1 flex flex-col items-center justify-center py-2 text-white bg-red-600 font-bold transition-all">
         <i class="fa-solid fa-clock text-xs"></i>
         <span class="text-[10px] mt-0.5">บันทึกสด</span>
       </button>
-      <button onclick="switchTab(2)" id="nav-2" class="chamfer-btn flex-1 flex flex-col items-center justify-center py-2 text-zinc-400 hover:text-white transition-all">
+      <button onclick="switchTab(2)" id="nav-2" class="chrono-pusher flex-1 flex flex-col items-center justify-center py-2 text-zinc-400 hover:text-white transition-all">
         <i class="fa-solid fa-pen-to-square text-xs"></i>
         <span class="text-[10px] mt-0.5">ย้อนหลัง</span>
       </button>
-      <button onclick="switchTab(3)" id="nav-3" class="chamfer-btn flex-1 flex flex-col items-center justify-center py-2 text-zinc-400 hover:text-white transition-all">
+      <button onclick="switchTab(3)" id="nav-3" class="chrono-pusher flex-1 flex flex-col items-center justify-center py-2 text-zinc-400 hover:text-white transition-all">
         <i class="fa-solid fa-calendar-minus text-xs"></i>
         <span class="text-[10px] mt-0.5">วันลา</span>
       </button>
-      <button onclick="switchTab(4)" id="nav-4" class="chamfer-btn flex-1 flex flex-col items-center justify-center py-2 text-zinc-400 hover:text-white transition-all">
+      <button onclick="switchTab(4)" id="nav-4" class="chrono-pusher flex-1 flex flex-col items-center justify-center py-2 text-zinc-400 hover:text-white transition-all">
         <i class="fa-solid fa-chart-pie text-xs"></i>
         <span class="text-[10px] mt-0.5">สรุปผล</span>
       </button>
@@ -966,14 +954,14 @@
 
   <!-- Breakdown Modal -->
   <div id="breakdownModal" onclick="if(event.target===this) closeBreakdownModal()" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs hidden flex items-center justify-center p-4 no-print">
-    <div class="chamfer-shell w-full max-w-xs">
-      <div class="chamfer-card p-5 space-y-3">
+    <div class="bezel-shell w-full max-w-xs">
+      <div class="bezel-card p-5 space-y-3">
         <div class="flex justify-between items-center border-b border-zinc-200 dark:border-zinc-800 pb-2.5">
           <h3 class="font-bold text-xs">รายละเอียดคำนวณเชิงลึก</h3>
           <button onclick="closeBreakdownModal()" class="text-zinc-400 hover:text-red-600 p-1"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <div id="modalContent" class="space-y-1.5 text-xs"></div>
-        <button onclick="closeBreakdownModal()" class="chamfer-btn w-full bg-zinc-950 dark:bg-red-600 text-white font-bold py-2.5 text-xs">ปิดหน้าต่าง</button>
+        <button onclick="closeBreakdownModal()" class="chrono-pusher w-full bg-zinc-950 dark:bg-red-600 text-white font-bold py-2.5 text-xs">ปิดหน้าต่าง</button>
       </div>
     </div>
   </div>
@@ -1191,8 +1179,8 @@
 
   <!-- Settings Config Modal -->
   <div id="configModal" onclick="if(event.target===this) closeConfigModal()" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs hidden flex items-center justify-center p-4 no-print">
-    <div class="chamfer-shell w-full max-w-xs">
-      <div class="chamfer-card p-5 space-y-3">
+    <div class="bezel-shell w-full max-w-xs">
+      <div class="bezel-card p-5 space-y-3">
         <div class="flex justify-between items-center border-b border-zinc-200 dark:border-zinc-800 pb-2.5">
           <h3 class="font-bold text-xs">ตั้งค่าการเชื่อมต่อ</h3>
           <button onclick="closeConfigModal()" class="text-zinc-400 hover:text-red-600 p-1"><i class="fa-solid fa-xmark"></i></button>
@@ -1200,18 +1188,18 @@
         <div class="space-y-2.5 text-xs">
           <div>
             <label class="block text-[10px] font-bold text-zinc-500 mb-1">Google Apps Script URL</label>
-            <input type="text" id="gasUrlInput" class="w-full bg-white/80 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 p-2 text-[10px] font-mono outline-none">
+            <input type="text" id="gasUrlInput" class="w-full bg-white/85 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 p-2 text-[10px] font-mono outline-none">
           </div>
           <div>
             <label class="block text-[10px] font-bold text-zinc-500 mb-1">LINE Channel Token</label>
-            <input type="text" id="lineTokenInput" class="w-full bg-white/80 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 p-2 text-[10px] font-mono outline-none">
+            <input type="text" id="lineTokenInput" class="w-full bg-white/85 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 p-2 text-[10px] font-mono outline-none">
           </div>
           <div>
             <label class="block text-[10px] font-bold text-zinc-500 mb-1">LINE User ID</label>
-            <input type="text" id="lineUserIdInput" class="w-full bg-white/80 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 p-2 text-[10px] font-mono outline-none">
+            <input type="text" id="lineUserIdInput" class="w-full bg-white/85 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 p-2 text-[10px] font-mono outline-none">
           </div>
         </div>
-        <button onclick="saveConfigSettings()" class="chamfer-btn w-full bg-red-600 text-white font-bold py-2.5 text-xs">
+        <button onclick="saveConfigSettings()" class="chrono-pusher w-full bg-red-600 text-white font-bold py-2.5 text-xs">
           บันทึกการตั้งค่า
         </button>
       </div>
@@ -1223,10 +1211,10 @@
     <span id="toastMsg">แจ้งเตือนระบบ</span>
   </div>
 
-  <!-- Crimson Kinetic Stream & Interactive Shockwave Engine -->
+  <!-- Kinetic Precision Canvas Engine -->
   <script>
-    (function initCrimsonKineticCanvas() {
-      const canvas = document.getElementById('crimsonFlowCanvas');
+    (function initAtelierKineticCanvas() {
+      const canvas = document.getElementById('atelierKineticCanvas');
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
       let w = 0, h = 0;
@@ -1245,15 +1233,15 @@
       window.addEventListener('resize', resize, { passive: true });
       resize();
 
-      const count = Math.min(34, Math.max(20, Math.floor((w * h) / 18000)));
+      const count = Math.min(30, Math.max(18, Math.floor((w * h) / 20000)));
       for (let i = 0; i < count; i++) {
         nodes.push({
           x: Math.random() * w,
           y: Math.random() * h,
-          vx: (Math.random() - 0.5) * 0.55,
-          vy: (Math.random() - 0.5) * 0.55,
-          r: Math.random() * 1.6 + 1.1,
-          isWhite: i % 4 === 0
+          vx: (Math.random() - 0.5) * 0.45,
+          vy: (Math.random() - 0.5) * 0.45,
+          r: Math.random() * 1.4 + 1.0,
+          isSilver: i % 3 === 0
         });
       }
 
@@ -1267,15 +1255,15 @@
         pointer.x = e.clientX;
         pointer.y = e.clientY;
         pointer.active = true;
-        shockwaves.push({ x: e.clientX, y: e.clientY, r: 6, alpha: 0.75 });
+        shockwaves.push({ x: e.clientX, y: e.clientY, r: 6, alpha: 0.72 });
       }, { passive: true });
 
-      const bezelSvg = document.getElementById('parallaxBezelSvg');
+      const moveSvg = document.getElementById('parallaxMovementSvg');
       window.addEventListener('deviceorientation', (e) => {
-        if (!bezelSvg || e.gamma === null || e.beta === null) return;
+        if (!moveSvg || e.gamma === null || e.beta === null) return;
         const tx = Math.max(-14, Math.min(14, e.gamma * 0.35));
         const ty = Math.max(-14, Math.min(14, (e.beta - 45) * 0.25));
-        bezelSvg.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
+        moveSvg.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
       }, { passive: true });
 
       function tick() {
@@ -1292,10 +1280,10 @@
           for (let j = i + 1; j < nodes.length; j++) {
             const n2 = nodes[j];
             const dist = Math.hypot(n.x - n2.x, n.y - n2.y);
-            if (dist < 110) {
-              const a = (1 - dist / 110) * (isDark ? 0.32 : 0.18);
+            if (dist < 105) {
+              const a = (1 - dist / 105) * (isDark ? 0.28 : 0.16);
               ctx.strokeStyle = `rgba(239, 35, 60, ${a})`;
-              ctx.lineWidth = 0.85;
+              ctx.lineWidth = 0.8;
               ctx.beginPath();
               ctx.moveTo(n.x, n.y);
               ctx.lineTo(n2.x, n2.y);
@@ -1305,10 +1293,10 @@
 
           if (pointer.active) {
             const pd = Math.hypot(n.x - pointer.x, n.y - pointer.y);
-            if (pd < 140) {
-              const a = (1 - pd / 140) * (isDark ? 0.5 : 0.3);
-              ctx.strokeStyle = `rgba(255, 42, 42, ${a})`;
-              ctx.lineWidth = 1;
+            if (pd < 135) {
+              const a = (1 - pd / 135) * (isDark ? 0.48 : 0.28);
+              ctx.strokeStyle = `rgba(255, 30, 30, ${a})`;
+              ctx.lineWidth = 0.95;
               ctx.beginPath();
               ctx.moveTo(n.x, n.y);
               ctx.lineTo(pointer.x, pointer.y);
@@ -1316,24 +1304,23 @@
             }
           }
 
-          ctx.fillStyle = n.isWhite
-            ? (isDark ? 'rgba(255,255,255,0.6)' : 'rgba(24,24,27,0.45)')
+          ctx.fillStyle = n.isSilver
+            ? (isDark ? 'rgba(228,228,231,0.55)' : 'rgba(24,24,27,0.4)')
             : (isDark ? 'rgba(239,35,60,0.85)' : 'rgba(220,38,38,0.65)');
           ctx.beginPath();
           ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
           ctx.fill();
         }
 
-        // Hexagonal Shockwave on Tap
         for (let i = shockwaves.length - 1; i >= 0; i--) {
           const sw = shockwaves[i];
-          sw.r += 4;
+          sw.r += 3.8;
           sw.alpha *= 0.93;
           ctx.strokeStyle = `rgba(239, 35, 60, ${sw.alpha})`;
-          ctx.lineWidth = 1.5;
+          ctx.lineWidth = 1.4;
           ctx.beginPath();
-          for (let k = 0; k < 6; k++) {
-            const ang = (Math.PI / 3) * k;
+          for (let k = 0; k < 8; k++) {
+            const ang = (Math.PI / 4) * k;
             const px = sw.x + sw.r * Math.cos(ang);
             const py = sw.y + sw.r * Math.sin(ang);
             if (k === 0) ctx.moveTo(px, py);
@@ -1453,10 +1440,10 @@
       const metaThemeColor = document.querySelector('meta[name="theme-color"]');
       if (shouldBeDark) {
         html.classList.add('dark');
-        if (metaThemeColor) metaThemeColor.setAttribute('content', '#08090C');
+        if (metaThemeColor) metaThemeColor.setAttribute('content', '#07080A');
       } else {
         html.classList.remove('dark');
-        if (metaThemeColor) metaThemeColor.setAttribute('content', '#E8E6E1');
+        if (metaThemeColor) metaThemeColor.setAttribute('content', '#E6E4DE');
       }
 
       const iconEl = document.getElementById('themeIcon');
@@ -1854,9 +1841,9 @@
       for (let i = 1; i <= 4; i++) {
         const navBtn = document.getElementById(`nav-${i}`);
         if (i === tabNum) {
-          navBtn.className = "chamfer-btn flex-1 flex flex-col items-center justify-center py-2 text-white bg-red-600 font-bold transition-all";
+          navBtn.className = "chrono-pusher flex-1 flex flex-col items-center justify-center py-2 text-white bg-red-600 font-bold transition-all";
         } else {
-          navBtn.className = "chamfer-btn flex-1 flex flex-col items-center justify-center py-2 text-zinc-400 hover:text-white transition-all";
+          navBtn.className = "chrono-pusher flex-1 flex flex-col items-center justify-center py-2 text-zinc-400 hover:text-white transition-all";
         }
       }
       if (tabNum === 2) prefillManualByDate();
@@ -2577,7 +2564,7 @@
           const encDate = encodeURIComponent(r.date);
 
           return `
-            <div class="bg-white/75 dark:bg-zinc-900/90 p-3 border border-zinc-300/80 dark:border-zinc-800 flex justify-between items-center text-xs" style="clip-path: polygon(8px 0%, calc(100% - 8px) 0%, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0% calc(100% - 8px), 0% 8px);">
+            <div class="bg-white/80 dark:bg-zinc-900/95 p-3 border border-zinc-300/80 dark:border-zinc-800 flex justify-between items-center text-xs" style="clip-path: polygon(8px 0%, calc(100% - 8px) 0%, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0% calc(100% - 8px), 0% 8px);">
               <div onclick="openBreakdownByDate('${encId}', '${encDate}')" class="cursor-pointer flex-1">
                 <div class="font-bold flex items-center gap-1.5 flex-wrap">
                   <span>${formatThaiBE(r.date)}</span>
@@ -2615,8 +2602,8 @@
 
       const leaveListEl = document.getElementById('leaveHistoryList');
       leaveListEl.innerHTML = leaves.length ? leaves.map((l, idx) => `
-        <div class="chamfer-shell">
-          <div class="chamfer-card p-3 text-xs flex justify-between items-start gap-2">
+        <div class="bezel-shell">
+          <div class="bezel-card p-3 text-xs flex justify-between items-start gap-2">
             <div class="flex-1">
               <div class="flex justify-between font-bold">
                 <span>${escapeHTML(l.leaveType)}</span>
